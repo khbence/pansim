@@ -1,0 +1,6 @@
+[submodule "thrust"]
+	path = thrust
+	url = https://github.com/NVIDIA/thrust.git
+[submodule "cub"]
+	path = cub
+	url = https://github.com/NVlabs/cub

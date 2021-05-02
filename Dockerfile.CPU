@@ -1,0 +1,17 @@
+FROM khbence/covid_ppcu:base_cpu as builder
+
+RUN mkdir -p workdir
+COPY thrust workdir/thrust
+RUN ls /workdir/thrust
+COPY cmake workdir/cmake
+COPY include workdir/include
+COPY src workdir/src
+COPY Makefile workdir/
+COPY CMakeLists.txt workdir/
+
+WORKDIR /workdir
+RUN make buildCPU
+
+FROM archlinux/base
+COPY --from=builder /workdir/build/covid .
+ENTRYPOINT [ "./covid" ]
