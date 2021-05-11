@@ -67,6 +67,7 @@ function(set_project_warnings project_name)
   endif()
 
   set(GCC_WARNINGS ${CLANG_WARNINGS} -fvisibility=hidden)
+  set(NVCC_WARNINGS ${GCC_WARNINGS})
 
   if(MSVC)
     set(PROJECT_WARNINGS ${MSVC_WARNINGS})

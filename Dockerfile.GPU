@@ -6,10 +6,16 @@ RUN apt-get update
 RUN apt-get -y install cmake
 RUN apt-get -y install libthrust-dev
 
+#RUN ls /usr/local/cuda-11.2/lib64
+#RUN export LD_LIBRARY_PATH=/usr/local/cuda-11.2/
+#RUN export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
+#RUN export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
 RUN mkdir -p workdir
 COPY cxxopts workdir/cxxopts
 COPY rapidjson workdir/rapidjson
 COPY thrust workdir/thrust
+COPY cub workdir/cub
 COPY cmake workdir/cmake
 COPY include workdir/include
 COPY src workdir/src

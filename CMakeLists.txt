@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Set the project name to your project name, my project isn't very descriptive
-project(myproject CXX)
+project(pansim CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SRC_LIBRARY "panSimLibrary")
 set(MAIN_BINARY "panSim")
 set(TEST_BINARY "testPanSim")
+#set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
@@ -46,7 +47,7 @@ enable_doxygen()
 include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
-option(ENABLE_TESTING "Enable Test Builds" ON)
+option(ENABLE_TESTING "Enable Test Builds" OFF)
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
 # Very basic PCH example
@@ -70,10 +71,69 @@ if(ENABLE_UNITY)
     set_target_properties(intro PROPERTIES UNITY_BUILD ON)
 endif()
 
+# find_package(OpenMP)
+# if(OPENMP_FOUND)
+#   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+#   set(THRUST_DEVICE_SYSTEM THRUST_DEVICE_SYSTEM_OMP)
+# endif()
+
+option(USE_GPU, "Using CUDA-GPU if available" ON)
+
+if(USE_GPU)
+    find_package(CUDA)    
+endif(USE_GPU)
+
+#add_subdirectory(cub)
+#add_subdirectory(thrust)
+
+find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
+find_package(CUB REQUIRED PATHS "cub/cub/cmake/")
+
 add_library(${SRC_LIBRARY})
-add_subdirectory(thrust)
-thrust_create_target(Thrust)
-target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings Thrust)
+
+if(CUDA_FOUND AND USE_GPU)
+    function(CUDA_CONVERT_FLAGS EXISTING_TARGET)
+        get_property(old_flags TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS)
+        if(NOT "${old_flags}" STREQUAL "")
+            string(REPLACE ";" "," CUDA_flags "${old_flags}")
+            set_property(TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS
+                "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
+                )
+        endif()
+    endfunction()
+
+    message(STATUS "Using CUDA-GPU")
+    enable_language(CUDA)
+    thrust_create_target(Thrust HOST CPP DEVICE CUDA)
+    CUDA_CONVERT_FLAGS(project_warnings)
+
+    #get_target_property(some_flag project_warnings COMPILE_DEFINITIONS)
+    #message(${some_flag})
+    #target_compile_options(${SRC_LIBRARY} PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:${some_flag}>)
+else()
+    if(USE_GPU AND NOT CUDA_FOUND)
+        message(WARNING "CUDA does not exists")
+    endif()
+    message(STATUS "Using CPU only")
+    thrust_create_target(Thrust HOST CPP DEVICE OMP)
+endif()
+
+function(target_link_libraries_system target)
+  set(libs ${ARGN})
+  foreach(lib ${libs})
+    get_target_property(lib_include_dirs ${lib} INTERFACE_INCLUDE_DIRECTORIES)
+    message(${lib_include_dirs})
+    target_include_directories(${target} SYSTEM PRIVATE ${lib_include_dirs})
+    target_link_libraries(${target} ${lib})
+  endforeach(lib)
+endfunction(target_link_libraries_system)
+
+#get_target_property(lib_include_dirs Thrust INTERFACE_INCLUDE_DIRECTORIES)
+#message(${lib_include_dirs})
+#target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings Thrust)
+set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust ${CUDA_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include(src/CMakeLists.txt)
 

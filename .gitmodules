@@ -4,3 +4,9 @@
 [submodule "cub"]
 	path = cub
 	url = https://github.com/NVlabs/cub
+[submodule "cxxopts"]
+	path = cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/Tencent/rapidjson.git

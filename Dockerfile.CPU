@@ -1,8 +1,10 @@
 FROM khbence/covid_ppcu:base_cpu as builder
 
 RUN mkdir -p workdir
+COPY cxxopts workdir/cxxopts
+COPY rapidjson workdir/rapidjson
 COPY thrust workdir/thrust
-RUN ls /workdir/thrust
+COPY cub workdir/cub
 COPY cmake workdir/cmake
 COPY include workdir/include
 COPY src workdir/src

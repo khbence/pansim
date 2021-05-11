@@ -2,12 +2,12 @@
 
 buildCPU:
 	mkdir -p build;
-	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DThrust_DIR=$(shell pwd)/thrust/cmake/
+	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=OFF
 	cd build; make -j
 
 buildGPU:
 	mkdir -p build;
-	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=ON -DARCHITECTURE=61 -DTHRUST_INCLUDE_CUB_CMAKE=ON
+	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=ON -DTHRUST_INCLUDE_CUB_CMAKE=ON
 	cd build; make -j
 
 buildBaseCPU:
