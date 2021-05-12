@@ -48,43 +48,61 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" OFF)
-option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
-# Very basic PCH example
-option(ENABLE_PCH "Enable Precompiled Headers" OFF)
-if(ENABLE_PCH)
-    # This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's
-    # change
-    #
-    # consider breaking this out per project as necessary
-    target_precompile_headers(project_options INTERFACE <iostream>)
+# Git version information (build time)
+set(GIT_VERSION "unknown")
+find_package(Git QUIET)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe
+    OUTPUT_VARIABLE GIT_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  message(STATUS "Current program version is ${GIT_VERSION}")
 endif()
 
-if(ENABLE_FUZZING)
-    message("Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
-    add_subdirectory(fuzz_test)
-endif()
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/version.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/version.h @ONLY)
 
-option(ENABLE_UNITY "Enable Unity builds of projects" OFF)
-if(ENABLE_UNITY)
-    # Add for any project you want to apply unity builds for
-    set_target_properties(intro PROPERTIES UNITY_BUILD ON)
-endif()
+# Preset simulation template types
+set(MovementPolicy
+    "RealMovement"
+    CACHE STRING "Type of the movement policy.")
+set_property(
+  CACHE MovementPolicy
+  PROPERTY STRINGS
+           RealMovement
+           DummyMovement
+           NoMovement)
+set(TestingPolicy
+    "DetailedTesting"
+    CACHE STRING "Type of the testing policy.")
+set_property(
+  CACHE TestingPolicy
+  PROPERTY STRINGS
+           NoTesting
+           DetailedTesting)
 
-# find_package(OpenMP)
-# if(OPENMP_FOUND)
-#   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
-#   set(THRUST_DEVICE_SYSTEM THRUST_DEVICE_SYSTEM_OMP)
-# endif()
+set(ClosurePolicy
+    "RuleClosure"
+    CACHE STRING "Type of the closure policy.")
+set_property(
+  CACHE ClosurePolicy
+  PROPERTY STRINGS
+           NoClosure
+           RuleClosure)
+
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/configTypes.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/configTypes.h @ONLY)
+
+
 
 option(USE_GPU, "Using CUDA-GPU if available" ON)
 
 if(USE_GPU)
     find_package(CUDAToolkit)    
 endif(USE_GPU)
-
-#add_subdirectory(cub)
-#add_subdirectory(thrust)
 
 find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
 find_package(CUB REQUIRED PATHS "cub/cub/cmake/")
@@ -106,6 +124,7 @@ if(CUDA_FOUND AND USE_GPU)
     enable_language(CUDA)
     thrust_create_target(Thrust HOST CPP DEVICE CUDA)
     CUDA_CONVERT_FLAGS(project_warnings)
+    set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     target_link_libraries(${SRC_LIBRARY} PUBLIC CUDA::cudart)
 else()
     if(USE_GPU AND NOT CUDA_FOUND)
@@ -115,17 +134,7 @@ else()
     thrust_create_target(Thrust HOST CPP DEVICE OMP)
 endif()
 
-function(target_link_libraries_system target)
-  set(libs ${ARGN})
-  foreach(lib ${libs})
-    get_target_property(lib_include_dirs ${lib} INTERFACE_INCLUDE_DIRECTORIES)
-    message(${lib_include_dirs})
-    target_include_directories(${target} SYSTEM PRIVATE ${lib_include_dirs})
-    target_link_libraries(${target} ${lib})
-  endforeach(lib)
-endfunction(target_link_libraries_system)
-
-set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_include_directories(${SRC_LIBRARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
 target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust ${CMAKE_THREAD_LIBS_INIT})
 #target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
