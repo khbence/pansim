@@ -15,5 +15,5 @@ WORKDIR /workdir
 RUN make buildCPU
 
 FROM archlinux/base
-COPY --from=builder /workdir/build/covid .
-ENTRYPOINT [ "./covid" ]
+COPY --from=builder /workdir/build/pansim .
+ENTRYPOINT [ "./pansim" ]

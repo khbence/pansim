@@ -80,7 +80,7 @@ endif()
 option(USE_GPU, "Using CUDA-GPU if available" ON)
 
 if(USE_GPU)
-    find_package(CUDA)    
+    find_package(CUDAToolkit)    
 endif(USE_GPU)
 
 #add_subdirectory(cub)
@@ -132,8 +132,8 @@ endfunction(target_link_libraries_system)
 #message(${lib_include_dirs})
 #target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings Thrust)
 set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust ${CUDA_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
+target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust CUDA::cudart ${CMAKE_THREAD_LIBS_INIT})
+#target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include(src/CMakeLists.txt)
 
