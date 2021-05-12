@@ -25,7 +25,7 @@ class Immunization {
     thrust::device_vector<uint8_t> immunizationRound;
     unsigned currentCategory = 0;
 #define numberOfCategories 9
-    std::vector<uint8_t> vaccinationOrder;
+    std::vector<int8_t> vaccinationOrder;
     unsigned startAfterDay = 0;
     unsigned dailyDoses = 0;
     unsigned diagnosticLevel = 0;
@@ -33,13 +33,13 @@ class Immunization {
     unsigned numberOfVaccinesToday(Timehandler& simTime) {
         //float availPerWeek[] = {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 4943.59527, 8544.33033, 8563.97919, 9160.88972, 9612.38930, 10252.4613, 10276.0211, 9361.10071, 9553.48985, 9977.56585, 9722.31922, 8823.13674, 8823.13674, 8756.36833, 8783.88615, 8799.57697, 5717.15701, 5705.37712, 5670.0374, 5662.16849, 5799.61623, 5795.70531, 5772.14553, 3852.02365, 3043.12224, 3031.34235, 934.522142};
         //float availPerWeek[] = {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 2471.797635, 4272.165165, 4281.989595, 4580.44486, 4806.19465, 5126.23065, 5138.01055, 4680.550355, 4776.744925, 4988.782925, 4861.15961, 4411.56837, 4411.56837, 4378.184165, 4391.943075, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485};
-        // float availPerWeek[] = {1260.0, 1260.0,1260.0, 1260.0, 1260.0, 1260.0, 1260.0, 1260.0, //8 weeks of 0.1%
-        //                         921*7.0*1.0,  1126*7.0*1.0, 768*7.0*1.0, 1060*7.0*1.0, 821*7.0*1.0,  1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1973*7.0, 1973*7.0, 1973*7.0, 1973*7.0}; //latest prediction
+        //float availPerWeek[] = {1260.0, 1260.0,1260.0, 1260.0, 1260.0, 1260.0, 1260.0, 1260.0, //8 weeks of 0.1%
+        //                        921*7.0*1.0,  1126*7.0*1.0, 768*7.0*1.0, 1060*7.0*1.0, 821*7.0*1.0,  1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1973*7.0, 1973*7.0, 1973*7.0, 1973*7.0}; //latest prediction
                                 //3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780}; //then 
         if (simTime.getTimestamp()/(24*60/simTime.getTimeStep()) >= startAfterDay) {
-            // unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
-            // unsigned week = day/7;
-            // return availPerWeek[week>21?21:week]/7.0;
+            //unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
+            //unsigned week = day/7;
+            //return availPerWeek[week>21?21:week]/7.0;
             return dailyDoses;
         }
         else return 0;
@@ -176,12 +176,15 @@ class Immunization {
         uint8_t lorder[numberOfCategories];
         for (unsigned i = 0; i < numberOfCategories; i++) lorder[i] = vaccinationOrder[i];
 
-        for (unsigned currentCategory = 0; currentCategory < numberOfCategories; currentCategory++) {
-            auto it = std::find(vaccinationOrder.begin(), vaccinationOrder.end(), currentCategory+1);
-            if (it == vaccinationOrder.end()) continue;
-            unsigned groupIdx = std::distance(vaccinationOrder.begin(),it);
-            //Figure out which round of immunizations agent belongs to, and decide if agent wants to get it.
-            thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(immunizationRound.begin(), thrust::make_counting_iterator(0))),
+        for (unsigned i = 0; i < numberOfCategories; i++) {
+            auto it = std::find(vaccinationOrder.begin(), vaccinationOrder.end(), i+1);
+            while (it != vaccinationOrder.end()) {
+                auto it = std::find(vaccinationOrder.begin(), vaccinationOrder.end(), i+1);
+                if (it == vaccinationOrder.end()) break;
+                *it = -1*(*it);
+                unsigned groupIdx = std::distance(vaccinationOrder.begin(),it);
+                //Figure out which round of immunizations agent belongs to, and decide if agent wants to get it.
+                thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(immunizationRound.begin(), thrust::make_counting_iterator(0))),
                              thrust::make_zip_iterator(thrust::make_tuple(immunizationRound.end()  , thrust::make_counting_iterator((int)immunizationRound.size()))),
                             [cat_healthworker,cat_nursery,cat_elderly,cat_underlying,cat_essential,cat_adult,cat_elderly_underlying,cat_school,cat_child,lorder,groupIdx] HD (thrust::tuple<uint8_t&, int> tup) {
                                 uint8_t& round = thrust::get<0>(tup);
@@ -251,7 +254,9 @@ class Immunization {
                                 }
                             }
                         );
+            }
         }
+        for (unsigned i = 0; i < numberOfCategories; i++) vaccinationOrder[i] = -1*vaccinationOrder[i];
     }
     void update(Timehandler& simTime, unsigned timeStep) {
         unsigned timestamp = simTime.getTimestamp();

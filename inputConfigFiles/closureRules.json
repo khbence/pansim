@@ -1,0 +1,118 @@
+{
+  "rules": [
+    {
+      "name": "sept_23_nov_11",
+      "conditionType": "afterDays",
+      "threshold": 0,
+      "openAfter": 49,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        6,
+        22
+      ]
+    },
+    {
+      "name": "nov_11_",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "openAfter": 400,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        5,
+        6,
+        22,
+        44
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "threshold": 110,
+      "parameter": 10e-5,
+      "conditionType": "afterDays",
+      "openAfter": 6,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "openAfter": 400,
+      "closeAfter": -1,
+      "parameter": 14,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "Curfew",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "openAfter": 400,
+      "parameter": "2000-0500",
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "HolidayMode",
+      "conditionType": "afterDays",
+      "threshold": 92,
+      "openAfter": 4,
+      "parameter": 1.0,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "HolidayMode",
+      "conditionType": "afterDays",
+      "threshold": 100,
+      "openAfter": 3,
+      "parameter": 1.0,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "Masks",
+      "parameter": 1.0,
+      "conditionType": "afterDays",
+      "threshold": 0,
+      "openAfter": 400,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "ReduceMovement",
+      "parameter": 0.094929,
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "openAfter": 52,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    },
+    {
+      "name": "ReduceMovement",
+      "parameter": 0.094929,
+      "conditionType": "afterDays",
+      "threshold": 166,
+      "openAfter": 15,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+
+      ]
+    }
+  ]
+}

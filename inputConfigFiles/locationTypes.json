@@ -1,0 +1,80 @@
+{
+    "publicSpace": 1,
+    "home": 2,
+    "hospital": 12,
+    "doctor": 14,
+    "school": 3,
+    "classroom": 33,
+    "work": 4,
+    "nurseryhome": 22,
+    "types": [
+        {
+            "ID": 1,
+            "name": "Public space"
+        },
+        {
+            "ID": 2,
+            "name": "Residence (in the wider sense, where people sleep)"
+        },
+        {
+            "ID": 3,
+            "name": "8-14(15,16) stay site (kindergarten, elementary school, high school)"
+        },
+        {
+            "ID": 4,
+            "name": "standard-schedule full time workplace: office, university, pharmacy, factory"
+        },
+        {
+            "ID": 5,
+            "name": "evening-schedule social acitvity site for 20-100 people (restaurant, pub)"
+        },
+        {
+            "ID": 6,
+            "name": "evening-schedule social acitvity site for 100-1000 people (cinema, theather, concert hall)"
+        },
+        {
+            "ID": 7,
+            "name": "activity site for short (10-30 min) visiting activity (shop, front office, pharmacy)"
+        },
+        {
+            "ID": 8,
+            "name": "activity site for longer (30-120 min) visiting activity (shop, front office, playground, gym)"
+        },
+        {
+            "ID": 9,
+            "name": "weekend-schedule social acitvity site for 50-500 people (church)"
+        },
+        {
+            "ID": 10,
+            "name": "recreational site (daytime) for long stay (hours) - city park, outdoor"
+        },
+        {
+            "ID": 11,
+            "name": "closed facility (e.g. prison)"
+        },
+        {
+            "ID": 12,
+            "name": "Hospital"
+        },
+        {
+            "ID": 13,
+            "name": "worplace with non-standard schedule (e.g. night-shift)"
+        },
+        {
+            "ID": 14,
+            "name": "Health Centre"
+        },
+        {
+            "ID": 22,
+            "name": "Nursing home"
+        },
+        {
+            "ID": 33,
+            "name": "Classroom"
+        },
+        {
+            "ID": 44,
+            "name": "University"
+        }
+    ]
+}

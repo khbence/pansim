@@ -5,6 +5,8 @@ Pansim is a pandemic simulation framework of PPCU university. It uses agent-base
 The simulation can be run on CPU only using OpenMP to accelerate or it can also use CUDA capable GPU. On a larger 16 GB RAM GPU we can simulate up to 50 million agents, but even on a smaller regular GPU a few million agent can be simulated safely.
 
 ## Usage
+Don't forget to clone with *--recursive* or run:
+> git submodule update --init
 
 ### **Input options**
 Details about the format and contents in input json files are discussed [here](inputFiles/README.md)

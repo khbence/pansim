@@ -1,0 +1,170 @@
+{
+    "irregulalLocationChance": 0.05,
+    "locationTypeDistibution": [
+        {
+            "value": 1,
+            "chance": 0.1
+        },
+        {
+            "value": 2,
+            "chance": 0.4
+        },
+        {
+            "value": 3,
+            "chance": 0.02
+        },
+        {
+            "value": 4,
+            "chance": 0.2
+        },
+        {
+            "value": 5,
+            "chance": 0.03
+        },
+        {
+            "value": 6,
+            "chance": 0.03
+        },
+        {
+            "value": 7,
+            "chance": 0.03
+        },
+        {
+            "value": 8,
+            "chance": 0.03
+        },
+        {
+            "value": 9,
+            "chance": 0.03
+        },
+        {
+            "value": 10,
+            "chance": 0.03
+        },
+        {
+            "value": 11,
+            "chance": 0.03
+        },
+        {
+            "value": 12,
+            "chance": 0.03
+        },
+        {
+            "value": 13,
+            "chance": 0.02
+        },
+        {
+            "value": 14,
+            "chance": 0.02
+        }
+    ],
+    "preCondDistibution": [
+        {
+            "value": "3",
+            "chance": 1
+        }
+    ],
+    "stateDistibution": [
+        {
+            "ageStart": 0,
+            "ageEnd": 200,
+            "distribution": [
+               {
+                    "value": "S",
+                    "chance": 0.99648201,
+                    "diagnosedChance": 0.0
+                },
+                {
+                    "value": "E",
+                    "chance": 0.000617435,
+                    "diagnosedChance": 0.0
+                },
+                {
+                    "value": "I1",
+                    "chance": 0.000673502,
+                    "diagnosedChance": 0.05
+                },
+                {
+                    "value": "I2",
+                    "chance": 0.000290786,
+                    "diagnosedChance": 0.1
+                },
+                {
+                    "value": "I3",
+                    "chance": 0.000236411,
+                    "diagnosedChance": 0.2
+                },
+                {
+                    "value": "I4",
+                    "chance": 0.000236411
+                    ,
+                    "diagnosedChance": 0.7
+                },
+                {
+                    "value": "I5_h",
+                    "chance": 4.01841E-05,
+                    "diagnosedChance": 1.0
+                },
+                {
+                    "value": "I6_h",
+                    "chance": 1.67339E-05,
+                    "diagnosedChance": 1.0
+                },
+                {
+                    "value": "R_h",
+                    "chance": 0,
+                    "diagnosedChance": 0.0
+                },
+                {
+                    "value": "R",
+                    "chance": 0.001400236,
+                    "diagnosedChance": 0.0
+                },
+                {
+                    "value": "D1",
+                    "chance": 6.29069E-06,
+                    "diagnosedChance": 0.0
+                },
+                {
+                    "value": "D2",
+                    "chance": 0,
+                    "diagnosedChance": 0.0
+                }
+            ]
+        }
+    ],
+    "agentTypeDistribution": [
+        {
+            "value": 1,
+            "chance": 0.125
+        },
+        {
+            "value": 2,
+            "chance": 0.125
+        },
+        {
+            "value": 3,
+            "chance": 0.125
+        },
+        {
+            "value": 4,
+            "chance": 0.125
+        },
+        {
+            "value": 5,
+            "chance": 0.125
+        },
+        {
+            "value": 6,
+            "chance": 0.125
+        },
+        {
+            "value": 7,
+            "chance": 0.125
+        },
+        {
+            "value": 8,
+            "chance": 0.125
+        }
+    ]
+}

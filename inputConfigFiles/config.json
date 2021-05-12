@@ -1,0 +1,40 @@
+{
+    "stateInformation":
+    {
+        "stateNames": [
+            
+        ],
+        "firstInfectedState": "E",
+        "nonCOVIDDeadState": "D2",
+        "susceptibleStates": [
+            "S"
+        ],
+        "infectedStates": [
+            "E", "I1", "I2", "I3", "I4", "I5"
+        ]
+    },
+    "transitionMatrices": [
+        {
+            "fileName": "name1.json",
+            "age": [10, 20],
+            "preCond": "kecske"
+        },
+        {
+            "fileName": "name2.json",
+            "age": [10, 20],
+            "preCond": "beka"
+        }
+    ],
+    "states": [
+        {
+            "name": "E1",
+            "WB": "W",
+            "infectious": 0.5
+        },
+        {
+            "name": "E2",
+            "WB": "W",
+            "infectious": 0.5
+        }
+    ]
+}

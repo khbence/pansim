@@ -18,3 +18,6 @@ dbuildCPU:
 
 dbuildGPU:
 	docker build . -f Dockerfile.GPU -t khbence/covid_ppcu:gpu
+
+drunCPU: dbuildCPU
+	docker run khbence/covid_ppcu:cpu

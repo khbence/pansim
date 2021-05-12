@@ -1,0 +1,47 @@
+{
+    "sex": [
+        {
+            "name": "M",
+            "symptoms": 1
+        },
+        {
+            "name": "F",
+            "symptoms": 1
+        }
+    ],
+    "age": [
+        {
+            "from": 0,
+            "to": -1,
+            "symptoms": 1,
+            "transmission": 1
+        }
+    ],
+    "preCondition": [
+        {
+            "ID": "0",
+            "condition": "healthy",
+            "symptoms": 1
+        },
+        {
+            "ID": "1",
+            "condition": "diabetes",
+            "symptoms": 1
+        },
+        {
+            "ID": "2",
+            "condition": "cardiovascular",
+            "symptoms": 1
+        },
+        {
+            "ID": "3",
+            "condition": "chronickidney",
+            "symptoms": 1
+        },
+        {
+            "ID": "4",
+            "condition": "chronicobstructivepulmonary",
+            "symptoms": 1
+        }
+    ]
+}
