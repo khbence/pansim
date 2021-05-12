@@ -3,3 +3,10 @@ FROM ubuntu
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 RUN apt-get install -y g++ cmake make git
+RUN apt -y install build-essential libssl-dev wget
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2.tar.gz
+RUN tar -zxvf cmake-3.20.2.tar.gz
+WORKDIR /cmake-3.20.2
+RUN ./bootstrap
+RUN make
+RUN make install

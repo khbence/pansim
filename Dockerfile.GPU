@@ -10,12 +10,6 @@ WORKDIR /cmake-3.20.2
 RUN ./bootstrap
 RUN make
 RUN make install
-# RUN apt-get -y install libthrust-dev
-
-#RUN ls /usr/local/cuda-11.2/lib64
-#RUN export LD_LIBRARY_PATH=/usr/local/cuda-11.2/
-#RUN export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
-#RUN export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 RUN mkdir -p /workdir
 COPY cxxopts /workdir/cxxopts
@@ -27,7 +21,6 @@ COPY include /workdir/include
 COPY src /workdir/src
 COPY Makefile /workdir/
 COPY CMakeLists.txt /workdir/
-RUN cmake --version
 
 WORKDIR /workdir
 RUN make buildGPU

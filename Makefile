@@ -19,11 +19,14 @@ pushBaseCPU: buildBaseCPU
 dbuildCPU:
 	docker build . -f Dockerfile.CPU -t khbence/covid_ppcu:cpu
 
-dRunCPU: dbuildCPU
+drunCPU: dbuildCPU
 	docker run khbence/covid_ppcu:cpu
 
 dbuildGPU:
 	docker build . -f Dockerfile.GPU -t khbence/covid_ppcu:gpu
 
-drunGPU: dockerGPU
+drunGPU: dbuildGPU
 	docker run khbence/covid_ppcu:gpu
+
+pushGPU: dbuildGPU
+	docker push khbence/covid_ppcu:gpu

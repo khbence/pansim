@@ -1,5 +1,6 @@
 #include "example.hpp"
 #include <thrust/host_vector.h>
+#include <thrust/reduce.h>
 
 Example::Example(const std::vector<double>& dataP) {
     thrust::host_vector<double> tmp{dataP};
@@ -7,5 +8,5 @@ Example::Example(const std::vector<double>& dataP) {
 }
 
 double Example::getSum() const {
-    return data[0];
+    return thrust::reduce(data.begin(), data.end(), 0, thrust::plus<int>());
 }
