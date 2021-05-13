@@ -73,7 +73,7 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
             agentLocationsPtr, fullInfectedCountsPtr, PPValuesPtr, numAgents, lam);
 #else
         //#error "util.cpp's locationListOffsets computation CUDA pathway relies on atomics version, as this one needs
-        //locationListOffsets to already exist"
+        // locationListOffsets to already exist"
         reduce_by_location_kernel<<<(numLocations - 1) / 256 + 1, 256>>>(
             locationListOffsetsPtr, locationAgentListPtr, fullInfectedCountsPtr, PPValuesPtr, numLocations, lam);
 #endif
