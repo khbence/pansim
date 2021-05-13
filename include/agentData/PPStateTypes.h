@@ -58,7 +58,5 @@ public:
     static void initTransitionMatrix(const std::string& inputFile);
     void HD update(float scalingSymptons) override;
     [[nodiscard]] char HD getStateIdx() const override;
-    [[nodiscard]] bool HD isInfectious() const override {
-        return (state == states::SIRD::S) && (subState > 0);
-    }
+    [[nodiscard]] bool HD isInfectious() const override { return (state == states::SIRD::S) && (subState > 0); }
 };

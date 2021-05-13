@@ -1,8 +1,7 @@
 #include "agentType.h"
 #include "customExceptions.h"
 
-AgentTypeList::Event::Event()
-    : locationType(0), chance(-1.0), start(0.0), end(0.0), duration(0.0) {}
+AgentTypeList::Event::Event() : locationType(0), chance(-1.0), start(0.0), end(0.0), duration(0.0) {}
 
 AgentTypeList::Event::Event(const parser::AgentTypes::Type::ScheduleUnique::Event& in)
     : locationType(in.type),
@@ -30,36 +29,33 @@ void AgentTypeList::unsetStayHome(double probability, unsigned homeType) {
     thrust::host_vector<unsigned> hoffsets(this->eventOffset);
     thrust::host_vector<AgentTypeList::Event> hevents(this->events);
 
-    //Go through each schedule one by one
-    for (unsigned s = 0; s < hoffsets.size()-1; s++) {
+    // Go through each schedule one by one
+    for (unsigned s = 0; s < hoffsets.size() - 1; s++) {
         unsigned window_start = hoffsets[s];
         unsigned window_end = window_start;
-        while (window_start < hoffsets[s+1]) {
-            //see how many events in this window
-            while (hevents[window_end].start == hevents[window_start].start && window_end < hevents.size())
-                window_end++;
-            //Increase probability of all non-home events
+        while (window_start < hoffsets[s + 1]) {
+            // see how many events in this window
+            while (hevents[window_end].start == hevents[window_start].start && window_end < hevents.size()) window_end++;
+            // Increase probability of all non-home events
             for (unsigned i = window_start; i < window_end; i++)
-                if (hevents[i].locationType != homeType) 
-                    hevents[i].chance /= (1.0-probability);
-            //Do home
+                if (hevents[i].locationType != homeType) hevents[i].chance /= (1.0 - probability);
+            // Do home
             for (unsigned i = window_start; i < window_end; i++) {
                 if (hevents[i].locationType == homeType) {
-                    //Decrease probability
-                    hevents[i].chance = (hevents[i].chance - probability)/(1.0-probability);
-                    if (std::abs(hevents[i].chance)<1e-10) {
-                        hevents.erase(hevents.begin()+i);
-                        for (int i = s+1; i < hoffsets.size(); i++)
-                            hoffsets[i]--;
+                    // Decrease probability
+                    hevents[i].chance = (hevents[i].chance - probability) / (1.0 - probability);
+                    if (std::abs(hevents[i].chance) < 1e-10) {
+                        hevents.erase(hevents.begin() + i);
+                        for (int i = s + 1; i < hoffsets.size(); i++) hoffsets[i]--;
                     }
                     break;
                 }
             }
-            window_start=window_end;
+            window_start = window_end;
         }
     }
 
-    //upload
+    // upload
     this->eventOffset = hoffsets;
     this->events = hevents;
 }
@@ -68,47 +64,47 @@ void AgentTypeList::setStayHome(double probability, unsigned homeType) {
     thrust::host_vector<unsigned> hoffsets(this->eventOffset);
     thrust::host_vector<AgentTypeList::Event> hevents(this->events);
 
-    //Go through each schedule one by one
-    for (unsigned s = 0; s < hoffsets.size()-1; s++) {
+    // Go through each schedule one by one
+    for (unsigned s = 0; s < hoffsets.size() - 1; s++) {
         unsigned window_start = hoffsets[s];
         unsigned window_end = window_start;
-        while (window_start < hoffsets[s+1]) {
-            //see how many events in this window
-            while (hevents[window_end].start == hevents[window_start].start && window_end < hevents.size())
-                window_end++;
-            //check if home is in list
+        while (window_start < hoffsets[s + 1]) {
+            // see how many events in this window
+            while (hevents[window_end].start == hevents[window_start].start && window_end < hevents.size()) window_end++;
+            // check if home is in list
             bool home_present = false;
             for (unsigned i = window_start; i < window_end; i++)
                 if (hevents[i].locationType == homeType) {
                     home_present = true;
-                    //Increase probability by all others decreased
-                    hevents[i].chance = hevents[i].chance + (1.0-hevents[i].chance)*probability;
+                    // Increase probability by all others decreased
+                    hevents[i].chance = hevents[i].chance + (1.0 - hevents[i].chance) * probability;
                     break;
                 }
-            //if home in list, and only one, step to next window
-            if (home_present && window_end-window_start == 1) {window_start = window_end; continue;}
-            //if no home in list, insert event
+            // if home in list, and only one, step to next window
+            if (home_present && window_end - window_start == 1) {
+                window_start = window_end;
+                continue;
+            }
+            // if no home in list, insert event
             if (!home_present) {
                 AgentTypeList::Event homeEvent;
                 homeEvent.start = hevents[window_start].start;
                 homeEvent.end = hevents[window_start].end;
                 homeEvent.locationType = homeType;
                 homeEvent.chance = probability;
-                homeEvent.duration = hevents[window_start].duration;  //TODO: what should this be?
-                hevents.insert(hevents.begin()+window_start, homeEvent);
+                homeEvent.duration = hevents[window_start].duration;// TODO: what should this be?
+                hevents.insert(hevents.begin() + window_start, homeEvent);
                 window_end++;
-                for (int i = s+1; i < hoffsets.size(); i++)
-                    hoffsets[i]++;
+                for (int i = s + 1; i < hoffsets.size(); i++) hoffsets[i]++;
             }
-            //Decrease probability of all other events
+            // Decrease probability of all other events
             for (unsigned i = window_start; i < window_end; i++)
-                if (hevents[i].locationType != homeType) 
-                    hevents[i].chance *= (1.0-probability);
-            window_start=window_end;
+                if (hevents[i].locationType != homeType) hevents[i].chance *= (1.0 - probability);
+            window_start = window_end;
         }
     }
 
-    //upload
+    // upload
     this->eventOffset = hoffsets;
     this->events = hevents;
 }

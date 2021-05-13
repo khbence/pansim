@@ -30,9 +30,7 @@ void BasicAgentMeta::initData(const parser::Parameters& inputData) {
     // init the scaling based in sex
     if (inputData.sex.size() != 2) { throw IOParameters::NotBinary(); }
     for (unsigned i = 0; i < sexScaling.size(); ++i) {
-        if (!(inputData.sex[0].name == "F" || inputData.sex[0].name == "M")) {
-            throw IOParameters::WrongGenderName();
-        }
+        if (!(inputData.sex[0].name == "F" || inputData.sex[0].name == "M")) { throw IOParameters::WrongGenderName(); }
         sexScaling[i] = std::make_pair(inputData.sex[i].name[0], inputData.sex[i].symptoms);
     }
     if (sexScaling[0].first == sexScaling[1].first) { throw IOParameters::WrongGenderName(); }
@@ -44,9 +42,7 @@ void BasicAgentMeta::initData(const parser::Parameters& inputData) {
     // TODO check intervals
 
     // init the scaling that coming from pre-conditions
-    for (const auto& cond : inputData.preCondition) {
-        preConditionScaling.emplace(std::make_pair(cond.ID, cond.symptoms));
-    }
+    for (const auto& cond : inputData.preCondition) { preConditionScaling.emplace(std::make_pair(cond.ID, cond.symptoms)); }
 }
 
 BasicAgentMeta::BasicAgentMeta() {}

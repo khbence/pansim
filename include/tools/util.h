@@ -13,15 +13,14 @@ public:
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 template<typename UnaryFunction, typename Count_t, typename PPState_t>
 __global__ void reduce_by_location_kernel(unsigned* locationListOffsetsPtr,
-    unsigned *locationAgentListPtr,
+    unsigned* locationAgentListPtr,
     Count_t* fullInfectedCountsPtr,
     PPState_t* PPValuesPtr,
     unsigned numLocations,
     UnaryFunction lam) {
     unsigned l = threadIdx.x + blockIdx.x * blockDim.x;
     if (l < numLocations) {
-        for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1];
-             agent++) {
+        for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1]; agent++) {
             fullInfectedCountsPtr[l] += lam(PPValuesPtr[locationAgentListPtr[agent]]);
         }
     }
@@ -33,9 +32,7 @@ __global__ void reduce_by_location_kernel_atomics(const unsigned* agentLocations
     unsigned numAgents,
     UnaryFunction lam) {
     unsigned agent = threadIdx.x + blockIdx.x * blockDim.x;
-    if (agent < numAgents) {
-        atomicAdd(&fullInfectedCountsPtr[agentLocationsPtr[agent]], lam(PPValuesPtr[agent]));
-    }
+    if (agent < numAgents) { atomicAdd(&fullInfectedCountsPtr[agentLocationsPtr[agent]], lam(PPValuesPtr[agent])); }
 }
 
 #endif
@@ -54,20 +51,18 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
     unsigned* locationAgentListPtr = thrust::raw_pointer_cast(locationAgentList.data());
     unsigned numAgents = PPValues.size();
 
-    //PROFILE_FUNCTION();
+    // PROFILE_FUNCTION();
 
     if (numLocations == 1) {
-        fullInfectedCounts[0] =
-            thrust::reduce(thrust::make_transform_iterator(PPValues.begin(), lam),
-                thrust::make_transform_iterator(PPValues.end(), lam),
-                (Count_t)0.0f);
+        fullInfectedCounts[0] = thrust::reduce(thrust::make_transform_iterator(PPValues.begin(), lam),
+            thrust::make_transform_iterator(PPValues.end(), lam),
+            (Count_t)0.0f);
     } else {
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
 #pragma omp parallel for
         for (unsigned l = 0; l < numLocations; l++) {
-            for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1];
-                 agent++) {
+            for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1]; agent++) {
                 fullInfectedCountsPtr[l] += lam(PPValuesPtr[locationAgentListPtr[agent]]);
             }
         }
@@ -77,7 +72,8 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
         reduce_by_location_kernel_atomics<<<(numAgents - 1) / 256 + 1, 256>>>(
             agentLocationsPtr, fullInfectedCountsPtr, PPValuesPtr, numAgents, lam);
 #else
-//#error "util.cpp's locationListOffsets computation CUDA pathway relies on atomics version, as this one needs locationListOffsets to already exist"
+        //#error "util.cpp's locationListOffsets computation CUDA pathway relies on atomics version, as this one needs
+        //locationListOffsets to already exist"
         reduce_by_location_kernel<<<(numLocations - 1) / 256 + 1, 256>>>(
             locationListOffsetsPtr, locationAgentListPtr, fullInfectedCountsPtr, PPValuesPtr, numLocations, lam);
 #endif

@@ -24,8 +24,7 @@ class DataProvider {
     parser::LocationTypes locationTypes;
     parser::Parameters parameters;
     parser::ClosureRules rules;
-    std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>
-        progressionDirectory;
+    std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>> progressionDirectory;
     parser::ProgressionDirectory progressionConfig;
 
     // only for random generations and checking
@@ -80,8 +79,7 @@ public:
     [[nodiscard]] parser::LocationTypes& acquireLocationTypes();
     [[nodiscard]] parser::Parameters& acquireParameters();
     [[nodiscard]] parser::ClosureRules& acquireClosureRules();
-    [[nodiscard]] std::
-        map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>&
+    [[nodiscard]] std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>&
         acquireProgressionMatrices();
     [[nodiscard]] parser::ProgressionDirectory& acquireProgressionConfig();
 

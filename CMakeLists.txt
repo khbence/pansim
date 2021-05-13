@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SRC_LIBRARY "panSimLibrary")
 set(MAIN_BINARY "panSim")
 set(TEST_BINARY "testPanSim")
-#set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
+# set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
@@ -53,55 +53,39 @@ option(ENABLE_TESTING "Enable Test Builds" OFF)
 set(GIT_VERSION "unknown")
 find_package(Git QUIET)
 if(GIT_FOUND)
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} describe
-    OUTPUT_VARIABLE GIT_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-  message(STATUS "Current program version is ${GIT_VERSION}")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe
+        OUTPUT_VARIABLE GIT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    message(STATUS "Current program version is ${GIT_VERSION}")
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/version.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/version.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/version.h
+               @ONLY)
 
 # Preset simulation template types
 set(MovementPolicy
     "RealMovement"
     CACHE STRING "Type of the movement policy.")
-set_property(
-  CACHE MovementPolicy
-  PROPERTY STRINGS
-           RealMovement
-           DummyMovement
-           NoMovement)
+set_property(CACHE MovementPolicy PROPERTY STRINGS RealMovement DummyMovement NoMovement)
 set(TestingPolicy
     "DetailedTesting"
     CACHE STRING "Type of the testing policy.")
-set_property(
-  CACHE TestingPolicy
-  PROPERTY STRINGS
-           NoTesting
-           DetailedTesting)
+set_property(CACHE TestingPolicy PROPERTY STRINGS NoTesting DetailedTesting)
 
 set(ClosurePolicy
     "RuleClosure"
     CACHE STRING "Type of the closure policy.")
-set_property(
-  CACHE ClosurePolicy
-  PROPERTY STRINGS
-           NoClosure
-           RuleClosure)
-
+set_property(CACHE ClosurePolicy PROPERTY STRINGS NoClosure RuleClosure)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/configTypes.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/configTypes.h @ONLY)
 
-
-
 option(USE_GPU, "Using CUDA-GPU if available" ON)
 
 if(USE_GPU)
-    find_package(CUDAToolkit)    
+    find_package(CUDAToolkit)
 endif(USE_GPU)
 
 find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
@@ -111,19 +95,25 @@ add_library(${SRC_LIBRARY})
 
 if(CUDA_FOUND AND USE_GPU)
     function(CUDA_CONVERT_FLAGS EXISTING_TARGET)
-        get_property(old_flags TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS)
+        get_property(
+            old_flags
+            TARGET ${EXISTING_TARGET}
+            PROPERTY INTERFACE_COMPILE_OPTIONS)
         if(NOT "${old_flags}" STREQUAL "")
             string(REPLACE ";" "," CUDA_flags "${old_flags}")
-            set_property(TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS
-                "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
-                )
+            set_property(
+                TARGET ${EXISTING_TARGET}
+                PROPERTY
+                    INTERFACE_COMPILE_OPTIONS
+                    "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
+            )
         endif()
     endfunction()
 
     message(STATUS "Using CUDA-GPU")
     enable_language(CUDA)
     thrust_create_target(Thrust HOST CPP DEVICE CUDA)
-    CUDA_CONVERT_FLAGS(project_warnings)
+    cuda_convert_flags(project_warnings)
     set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     target_link_libraries(${SRC_LIBRARY} PUBLIC CUDA::cudart)
 else()
@@ -136,7 +126,7 @@ endif()
 
 target_include_directories(${SRC_LIBRARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
 target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust ${CMAKE_THREAD_LIBS_INIT})
-#target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
+# target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include(src/CMakeLists.txt)
 

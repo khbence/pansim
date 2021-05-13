@@ -1,4 +1,4 @@
-.PHONY: buildCPU buildGPU dbuildBaseCPU dbuildCPU dbuildGPU
+.PHONY: buildCPU buildGPU dbuildBaseCPU dbuildCPU dbuildGPU format
 
 buildCPU:
 	mkdir -p build;
@@ -21,3 +21,6 @@ dbuildGPU:
 
 drunCPU: dbuildCPU
 	docker run khbence/covid_ppcu:cpu
+
+format:
+	docker run --mount src=`pwd`,target=/app,type=bind khbence/format
