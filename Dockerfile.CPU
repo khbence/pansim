@@ -17,7 +17,9 @@ RUN make buildCPU
 FROM ubuntu
 RUN apt update
 RUN apt-get install -y g++
+RUN mkdir -p ./inputRealExample
+ADD inputRealExample/agents.tar ./inputRealExample/ 
+ADD inputRealExample/locations.tar ./inputRealExample/ 
 COPY inputConfigFiles ./inputConfigFiles
-COPY inputRealExample ./inputRealExample
 COPY --from=builder /workdir/build/panSim .
 ENTRYPOINT [ "./panSim" ]

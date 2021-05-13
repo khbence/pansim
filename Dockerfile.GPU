@@ -26,5 +26,9 @@ WORKDIR /workdir
 RUN make buildGPU
 
 FROM nvidia/cuda:11.2.1-runtime
+RUN mkdir -p ./inputRealExample
+ADD inputRealExample/agents.tar ./inputRealExample/ 
+ADD inputRealExample/locations.tar ./inputRealExample/ 
+COPY inputConfigFiles ./inputConfigFiles
 COPY --from=builder /workdir/build/panSim .
 ENTRYPOINT [ "./panSim" ]
