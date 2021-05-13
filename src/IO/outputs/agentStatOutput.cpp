@@ -7,7 +7,8 @@ AgentStatOutput::AgentStatOutput(const thrust::host_vector<AgentStats>& data) {
     const auto& names = DynamicPPState::getStateNames();
     unsigned idx = 0;
     for (const auto& e : data) {
-        if (e.infectedTimestamp != std::numeric_limits<decltype(e.infectedTimestamp)>::max() || e.worstState != 0) {
+        if (e.infectedTimestamp != std::numeric_limits<decltype(e.infectedTimestamp)>::max()
+            || e.worstState != 0) {
             rapidjson::Value currentAgent(rapidjson::kObjectType);
             currentAgent.AddMember("ID", idx, allocator);
             currentAgent.AddMember("infectionTime", e.infectedTimestamp, allocator);

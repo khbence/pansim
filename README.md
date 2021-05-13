@@ -73,7 +73,9 @@ Use the [Makefile](Makefile) to build it for GPU or CPU, run the buildCPU or bui
 > make buildGPU
 
 ## Input files
+The inputConfigFiles directory contains good COVID-19 specific defaults and general location and agent types. There are a simplified locations and agents example files for the town of Szeged (Southern Hungary), uncompress it before use. If you use local or downloaded Docker image, then it will already contain it or uncompress it automatically.
 
+If you want to generate random amount of 
 
 # License
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]

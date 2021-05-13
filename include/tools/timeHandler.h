@@ -83,7 +83,7 @@ public:
     Timehandler getNextMidnight() const;
     unsigned HD getMinutes() const;
     unsigned HD getTimestamp() const;
-    unsigned HD getTimeStep() const { return (unsigned)timeStep.count(); };
+    unsigned HD getTimeStep() const {return (unsigned)timeStep.count();};
 
     [[nodiscard]] bool isMidnight() const { return (counter % stepsPerDay) == 0; }
 

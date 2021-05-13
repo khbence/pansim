@@ -24,13 +24,15 @@ class DataProvider {
     parser::LocationTypes locationTypes;
     parser::Parameters parameters;
     parser::ClosureRules rules;
-    std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>> progressionDirectory;
+    std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>
+        progressionDirectory;
     parser::ProgressionDirectory progressionConfig;
 
     // only for random generations and checking
     parser::ConfigRandom configRandom;
     std::map<unsigned, std::vector<unsigned>> aTypeToLocationTypes;
     std::map<unsigned, std::vector<std::string>> typeToLocationMapping;
+    std::map<std::string, parser::ConfigRandom::IrregularChances::Detail> typesIrregularChancesMap;
 
     void readParameters(const std::string& fileName);
     std::map<ProgressionType, std::string> readProgressionConfig(const std::string& fileName);
@@ -79,7 +81,8 @@ public:
     [[nodiscard]] parser::LocationTypes& acquireLocationTypes();
     [[nodiscard]] parser::Parameters& acquireParameters();
     [[nodiscard]] parser::ClosureRules& acquireClosureRules();
-    [[nodiscard]] std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>&
+    [[nodiscard]] std::
+        map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>&
         acquireProgressionMatrices();
     [[nodiscard]] parser::ProgressionDirectory& acquireProgressionConfig();
 
