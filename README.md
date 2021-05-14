@@ -52,7 +52,7 @@ There are many ways to run this simulation. There are ready to use docker images
 To run on CPU and accelerate it using OpenMP use the following command:
 > docker run khbence/covid_ppcu:cpu *args...*
 
-To utilise CUDA capable GPU:
+To utilise CUDA capable GPU: *(this version will be available soon, now you have to build from source for GPU)*
 > docker run khbence/covid_ppcu:gpu *args...*
 
 The images contain the inputFiles directory with the default config files, but be aware that a docker container not going to see the directories of the host system by default (for example for input and output). For that you need to [mount](https://docs.docker.com/storage/bind-mounts/) the needed directories.
@@ -75,7 +75,7 @@ Use the [Makefile](Makefile) to build it for GPU or CPU, run the buildCPU or bui
 ## Input files
 The inputConfigFiles directory contains good COVID-19 specific defaults and general location and agent types. There are a simplified locations and agents example files for the town of Szeged (Southern Hungary), uncompress it before use. If you use local or downloaded Docker image, then it will already contain it or uncompress it automatically.
 
-If you want to generate random amount of 
+If you want to generate random amount of agents and locations use the -n and -N flags described above.
 
 # License
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
