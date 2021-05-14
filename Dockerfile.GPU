@@ -26,9 +26,12 @@ WORKDIR /workdir
 RUN make buildGPU
 
 FROM nvidia/cuda:11.2.1-runtime
+RUN apt update
+RUN apt-get install -y g++
 RUN mkdir -p ./inputRealExample
 ADD inputRealExample/agents.tar ./inputRealExample/ 
 ADD inputRealExample/locations.tar ./inputRealExample/ 
 COPY inputConfigFiles ./inputConfigFiles
 COPY --from=builder /workdir/build/panSim .
+RUN echo $LD_LIBRARY_PATH
 ENTRYPOINT [ "./panSim" ]

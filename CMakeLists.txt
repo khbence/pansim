@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Set the project name to your project name, my project isn't very descriptive
-project(pansim CXX)
+project(pansimProject CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SRC_LIBRARY "panSimLibrary")
 set(MAIN_BINARY "panSim")
 set(TEST_BINARY "testPanSim")
 # set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
@@ -91,9 +91,9 @@ endif(USE_GPU)
 find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
 find_package(CUB REQUIRED PATHS "cub/cub/cmake/")
 
-add_library(${SRC_LIBRARY})
+add_executable(${MAIN_BINARY} src/main.cpp)
 
-if(CUDA_FOUND AND USE_GPU)
+if(CUDAToolkit_FOUND AND USE_GPU)
     function(CUDA_CONVERT_FLAGS EXISTING_TARGET)
         get_property(
             old_flags
@@ -114,8 +114,9 @@ if(CUDA_FOUND AND USE_GPU)
     enable_language(CUDA)
     thrust_create_target(Thrust HOST CPP DEVICE CUDA)
     cuda_convert_flags(project_warnings)
-    set_target_properties(${SRC_LIBRARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    target_link_libraries(${SRC_LIBRARY} PUBLIC CUDA::cudart)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --expt-extended-lambda")
+    set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_link_libraries(${MAIN_BINARY} PUBLIC CUDA::cudart)
 else()
     if(USE_GPU AND NOT CUDA_FOUND)
         message(WARNING "CUDA does not exists")
@@ -124,9 +125,10 @@ else()
     thrust_create_target(Thrust HOST CPP DEVICE OMP)
 endif()
 
-target_include_directories(${SRC_LIBRARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
-target_link_libraries(${SRC_LIBRARY} PUBLIC project_options Thrust ${CMAKE_THREAD_LIBS_INIT})
-# target_include_directories(${SRC_LIBRARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
+find_package(OpenMP)
+target_include_directories(${MAIN_BINARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
+target_link_libraries(${MAIN_BINARY} PUBLIC project_options Thrust ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
+# target_include_directories(${MAIN_BINARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include(src/CMakeLists.txt)
 

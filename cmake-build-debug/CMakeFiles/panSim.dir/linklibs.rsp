@@ -1,0 +1,1 @@
+ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/10.2.0/libgomp.dll.a C:/msys64/mingw64/x86_64-w64-mingw32/lib/libmingwthrd.a -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

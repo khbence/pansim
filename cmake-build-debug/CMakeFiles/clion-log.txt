@@ -1,0 +1,6 @@
+C:\msys64\mingw64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" C:\Users\user\source\repos\github\pansim
+-- Current program version is 
+-- Using CPU only
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/user/source/repos/github/pansim/cmake-build-debug

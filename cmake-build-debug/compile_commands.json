@@ -1,0 +1,107 @@
+[
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\main.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\main.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/main.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\agentMeta.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\agentMeta.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/agentMeta.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\agentStat.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\agentStat.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/agentStat.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\agentType.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\agentType.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/agentType.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\dynamicPPState.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\dynamicPPState.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/dynamicPPState.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\globalStates.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\globalStates.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/globalStates.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\agentData\\PPStateTypes.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\agentData\\PPStateTypes.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/agentData/PPStateTypes.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\IO\\dataProviders\\dataProvider.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\IO\\dataProviders\\dataProvider.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/IO/dataProviders/dataProvider.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\IO\\dataProviders\\progressionType.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\IO\\dataProviders\\progressionType.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/IO/dataProviders/progressionType.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\IO\\outputs\\agentStatOutput.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\IO\\outputs\\agentStatOutput.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/IO/outputs/agentStatOutput.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\IO\\outputs\\JSONWriter.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\IO\\outputs\\JSONWriter.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/IO/outputs/JSONWriter.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\progressionMatrices\\basicLengthAbstract.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\progressionMatrices\\basicLengthAbstract.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/progressionMatrices/basicLengthAbstract.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\progressionMatrices\\multiBadMatrix.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\progressionMatrices\\multiBadMatrix.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/progressionMatrices/multiBadMatrix.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\progressionMatrices\\singleBadMatrix.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\progressionMatrices\\singleBadMatrix.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/progressionMatrices/singleBadMatrix.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\operators.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\operators.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/operators.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\randomGenerator.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\randomGenerator.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/randomGenerator.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\smallTools.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\smallTools.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/smallTools.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\timeDay.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\timeDay.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/timeDay.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\timeHandler.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\timeHandler.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/timeHandler.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\timing.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\timing.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/timing.cpp"
+},
+{
+  "directory": "C:/Users/user/source/repos/github/pansim/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe  -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP -DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP @CMakeFiles/panSim.dir/includes_CXX.rsp -g   -fopenmp -std=c++17 -o CMakeFiles\\panSim.dir\\src\\tools\\util.cpp.obj -c C:\\Users\\user\\source\\repos\\github\\pansim\\src\\tools\\util.cpp",
+  "file": "C:/Users/user/source/repos/github/pansim/src/tools/util.cpp"
+}
+]

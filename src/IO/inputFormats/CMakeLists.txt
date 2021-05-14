@@ -1,1 +1,1 @@
-target_include_directories(${SRC_LIBRARY} PUBLIC include/IO/inputFormats)
+target_include_directories(${MAIN_BINARY} PUBLIC include/IO/inputFormats)

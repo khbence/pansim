@@ -1,1 +1,1 @@
-target_include_directories(${SRC_LIBRARY} PUBLIC include/policies)
+target_include_directories(${MAIN_BINARY} PUBLIC include/policies)

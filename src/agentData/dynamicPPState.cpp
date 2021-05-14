@@ -274,10 +274,10 @@ bool HD DynamicPPState::update(float scalingSymptons,
                     "Agent %d bad progression %d->%d WBState: %d->%d for %d "
                     "days\n",
                     agentID,
-                    oldState,
-                    state,
-                    oldWBState,
-                    this->getWBState(),
+                    static_cast<int>(oldState),
+                    static_cast<int>(state),
+                    static_cast<int>(oldWBState),
+                    static_cast<int>(this->getWBState()),
                     daysBeforeNextState);
             }
         } else if (oldState != state) {// if (oldWBState != states::WBStates::W) this will record any
@@ -286,10 +286,10 @@ bool HD DynamicPPState::update(float scalingSymptons,
             if (agentID == tracked) {
                 printf("Agent %d good progression %d->%d WBState: %d->%d\n",
                     agentID,
-                    oldState,
-                    state,
-                    oldWBState,
-                    this->getWBState());
+                    static_cast<int>(oldState),
+                    static_cast<int>(state),
+                    static_cast<int>(oldWBState),
+                    static_cast<int>(this->getWBState()));
             }
             if (!this->isInfected()) {
                 return true;// recovered

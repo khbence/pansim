@@ -1,5 +1,5 @@
-target_sources(${SRC_LIBRARY}
+target_sources(${MAIN_BINARY}
                PRIVATE ${CMAKE_CURRENT_LIST_DIR}/agentStatOutput.cpp)
-target_sources(${SRC_LIBRARY} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/JSONWriter.cpp)
+target_sources(${MAIN_BINARY} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/JSONWriter.cpp)
 
-target_include_directories(${SRC_LIBRARY} PUBLIC include/IO/outputs)
+target_include_directories(${MAIN_BINARY} PUBLIC include/IO/outputs)
