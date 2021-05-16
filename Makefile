@@ -20,10 +20,10 @@ dbuildGPU:
 	docker build . -f Dockerfile.GPU -t khbence/covid_ppcu:gpu
 
 drunCPU: dbuildCPU
-	docker run khbence/covid_ppcu:cpu
+	docker run --rm khbence/covid_ppcu:cpu
 
 drunGPU: dbuildGPU
-	docker run khbence/covid_ppcu:gpu
+	docker run --rm khbence/covid_ppcu:gpu
 
 format:
-	docker run --mount src=`pwd`,target=/app,type=bind khbence/format
+	docker run --rm --mount src=${CURDIR},target=/app,type=bind khbence/format

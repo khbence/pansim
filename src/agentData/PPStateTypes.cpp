@@ -98,8 +98,7 @@ HD PPStateSIRextended::PPStateSIRextended(states::SIRD s) : PPStateSIRAbstract(s
     daysBeforeNextState = getTransition().calculateJustDays(idx);
 }
 
-HD PPStateSIRextended::PPStateSIRextended(char idx_p)
-    : PPStateSIRAbstract(states::SIRD::S), idx(idx_p) {
+HD PPStateSIRextended::PPStateSIRextended(char idx_p) : PPStateSIRAbstract(states::SIRD::S), idx(idx_p) {
     applyNewIdx();
     daysBeforeNextState = getTransition().calculateJustDays(idx);
 }
@@ -129,8 +128,7 @@ void PPStateSIRextended::initTransitionMatrix(const std::string& inputFile) {
     detail::PPStateSIRextended::transition = new SingleBadTransitionMatrix(inputFile);
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     SingleBadTransitionMatrix* tmp = detail::PPStateSIRextended::transition->upload();
-    cudaMemcpyToSymbol(
-        detail::PPStateSIRextended::transition_gpu, &tmp, sizeof(SingleBadTransitionMatrix*));
+    cudaMemcpyToSymbol(detail::PPStateSIRextended::transition_gpu, &tmp, sizeof(SingleBadTransitionMatrix*));
 #endif
     printHeader();
 }

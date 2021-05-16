@@ -45,6 +45,5 @@ public:
     MultiBadMatrix* upload() const;
 #endif
 
-    [[nodiscard]] thrust::tuple<unsigned, int, bool> HD calculateNextState(unsigned currentState,
-        float scalingSymptons) const;
+    [[nodiscard]] thrust::tuple<unsigned, int, bool> HD calculateNextState(unsigned currentState, float scalingSymptons) const;
 };

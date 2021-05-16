@@ -9,12 +9,9 @@ void DataProvider::readParameters(const std::string& fileName) {
     parameters = DECODE_JSON_FILE(fileName, decltype(parameters));
 }
 
-void DataProvider::readClosureRules(const std::string& fileName) {
-    rules = DECODE_JSON_FILE(fileName, decltype(rules));
-}
+void DataProvider::readClosureRules(const std::string& fileName) { rules = DECODE_JSON_FILE(fileName, decltype(rules)); }
 
-std::map<ProgressionType, std::string> DataProvider::readProgressionConfig(
-    const std::string& fileName) {
+std::map<ProgressionType, std::string> DataProvider::readProgressionConfig(const std::string& fileName) {
     progressionConfig = DECODE_JSON_FILE(fileName, parser::ProgressionDirectory);
     std::map<ProgressionType, std::string> progressions;
     auto path = fileName.substr(0, fileName.find_last_of(separator()));
@@ -46,18 +43,17 @@ void DataProvider::readProgressionMatrices(const std::string& fileName) {
         auto currentAgeBegin = kv.first.ageBegin;
         auto currentPreCond = kv.first.preCond;
         auto ageIndex = std::distance(ageInters.begin(),
-            std::find_if(ageInters.begin(), ageInters.end(), [currentAgeBegin](const auto& e) {
-                return e.first == currentAgeBegin;
-            }));
+            std::find_if(
+                ageInters.begin(), ageInters.end(), [currentAgeBegin](const auto& e) { return e.first == currentAgeBegin; }));
 
         auto condIndex = std::distance(parameters.preCondition.begin(),
-            std::find_if(parameters.preCondition.begin(),
-                parameters.preCondition.end(),
-                [currentPreCond](const auto& e) { return e.ID == currentPreCond; }));
+            std::find_if(parameters.preCondition.begin(), parameters.preCondition.end(), [currentPreCond](const auto& e) {
+                return e.ID == currentPreCond;
+            }));
         unsigned index = ageIndex * numberCond + condIndex;
 
-        progressionDirectory.emplace(std::make_pair(kv.first,
-            std::make_pair(DECODE_JSON_FILE(kv.second, parser::TransitionFormat), index)));
+        progressionDirectory.emplace(
+            std::make_pair(kv.first, std::make_pair(DECODE_JSON_FILE(kv.second, parser::TransitionFormat), index)));
     }
 }
 
@@ -71,16 +67,14 @@ void DataProvider::readConfigRandom(const std::string& fileName) {
 void DataProvider::readAgentTypes(const std::string& fileName) {
     agentTypes = DECODE_JSON_FILE(fileName, decltype(agentTypes));
     for (const auto& aType : agentTypes.types) {
-        std::set<unsigned> locs{ locationTypes.hospital,
-            locationTypes.publicSpace,
-            locationTypes.home,
-            locationTypes.doctor };//, locationTypes.school, locationTypes.work };
+        std::set<unsigned> locs{
+            locationTypes.hospital, locationTypes.publicSpace, locationTypes.home, locationTypes.doctor
+        };//, locationTypes.school, locationTypes.work };
         for (const auto& sch : aType.schedulesUnique) {
             for (const auto& event : sch.schedule) { locs.insert(event.type); }
         }
-        aTypeToLocationTypes.emplace(std::piecewise_construct,
-            std::forward_as_tuple(aType.ID),
-            std::forward_as_tuple(locs.begin(), locs.end()));
+        aTypeToLocationTypes.emplace(
+            std::piecewise_construct, std::forward_as_tuple(aType.ID), std::forward_as_tuple(locs.begin(), locs.end()));
     }
 }
 
@@ -95,14 +89,12 @@ void DataProvider::readLocations(const std::string& fileName, bool randomAgents)
     }
 }
 
-void DataProvider::readAgents(const std::string& fileName) {
-    agents = DECODE_JSON_FILE(fileName, decltype(agents));
-}
+void DataProvider::readAgents(const std::string& fileName) { agents = DECODE_JSON_FILE(fileName, decltype(agents)); }
 
 std::pair<std::string, double> DataProvider::calculateSingleRandomState(unsigned age) const {
-    auto it = std::find_if(configRandom.stateDistribution.begin(),
-        configRandom.stateDistribution.end(),
-        [age](const auto& e) { return (e.ageStart <= age) && (age < e.ageEnd); });
+    auto it = std::find_if(configRandom.stateDistribution.begin(), configRandom.stateDistribution.end(), [age](const auto& e) {
+        return (e.ageStart <= age) && (age < e.ageEnd);
+    });
     return randomSelectPair(it->distribution.begin());
 }
 
@@ -114,8 +106,8 @@ void DataProvider::randomLocations(unsigned N) {
         parser::Locations::Place current{};
         current.ID = std::to_string(i);
         current.type = std::stoi(randomSelect(configRandom.locationTypeDistribution.begin()));
-        if(current.type == 33) {
-            if(typeToLocationMapping.find(3) != typeToLocationMapping.end()) {
+        if (current.type == 33) {
+            if (typeToLocationMapping.find(3) != typeToLocationMapping.end()) {
                 auto& schools = typeToLocationMapping[3];
                 auto schoolName = schools[RandomGenerator::randomUnsigned(schools.size())];
                 current.ID += "_" + schoolName;
@@ -134,7 +126,7 @@ void DataProvider::randomLocations(unsigned N) {
             current.essential = RandomGenerator::randomUnit() < 0.1;
         else if (current.type == 12 || current.type == 14)
             current.essential = 1;
-        else 
+        else
             current.essential = 0;
         locations.places.emplace_back(std::move(current));
     }
@@ -158,33 +150,32 @@ void DataProvider::randomAgents(unsigned N) {
             currentLoc.typeID = l;
             const auto& irregularLocationChance = typesIrregularChancesMap[std::to_string(currentLoc.typeID)];
             bool foundLocation = false;
-            if(RandomGenerator::randomUnit() < irregularLocationChance.chanceForType){
+            if (RandomGenerator::randomUnit() < irregularLocationChance.chanceForType) {
                 auto irregularTypeID = randomSelect(irregularLocationChance.switchedToWhat.begin());
                 auto& newPossibleLocations = typeToLocationMapping[std::stoi(irregularTypeID)];
-                if(newPossibleLocations.empty()) {
-                    for(const auto& switcher : irregularLocationChance.switchedToWhat) {
+                if (newPossibleLocations.empty()) {
+                    for (const auto& switcher : irregularLocationChance.switchedToWhat) {
                         newPossibleLocations = typeToLocationMapping[std::stoi(switcher.value)];
-                        if(!newPossibleLocations.empty()) {
+                        if (!newPossibleLocations.empty()) {
                             foundLocation = true;
                             break;
                         }
                     }
                 }
-                if(foundLocation) {
+                if (foundLocation) {
                     auto r = RandomGenerator::randomUnsigned(newPossibleLocations.size());
                     currentLoc.locID = newPossibleLocations[r];
                 }
             } else {
                 const auto& possibleLocations = typeToLocationMapping[currentLoc.typeID];
-                if(!possibleLocations.empty()) {
+                if (!possibleLocations.empty()) {
                     auto r = RandomGenerator::randomUnsigned(possibleLocations.size());
                     currentLoc.locID = possibleLocations[r];
                     foundLocation = true;
                 }
             }
-            if(!foundLocation) {
-                currentLoc.locID =
-                    locations.places[RandomGenerator::randomUnsigned(locations.places.size())].ID;
+            if (!foundLocation) {
+                currentLoc.locID = locations.places[RandomGenerator::randomUnsigned(locations.places.size())].ID;
             }
             current.locations.push_back(currentLoc);
         }
@@ -193,7 +184,7 @@ void DataProvider::randomAgents(unsigned N) {
 }
 
 void DataProvider::randomStates() {
-    for (auto& a : agents.people) { 
+    for (auto& a : agents.people) {
         auto statediag = calculateSingleRandomState(a.age);
         a.state = statediag.first;
         a.diagnosed = RandomGenerator::randomUnit() < statediag.second;
@@ -201,7 +192,7 @@ void DataProvider::randomStates() {
 }
 
 DataProvider::DataProvider(const cxxopts::ParseResult& result) {
-//    PROFILE_FUNCTION();
+    //    PROFILE_FUNCTION();
     readParameters(result["parameters"].as<std::string>());
     readProgressionMatrices(result["progression"].as<std::string>());
     readClosureRules(result["closures"].as<std::string>());
@@ -241,11 +232,8 @@ DataProvider::DataProvider(const cxxopts::ParseResult& result) {
     return progressionDirectory;
 }
 
-[[nodiscard]] parser::ProgressionDirectory& DataProvider::acquireProgressionConfig() {
-    return progressionConfig;
-}
+[[nodiscard]] parser::ProgressionDirectory& DataProvider::acquireProgressionConfig() { return progressionConfig; }
 
-[[nodiscard]] const std::map<unsigned, std::vector<unsigned>>&
-    DataProvider::getAgentTypeLocTypes() const {
+[[nodiscard]] const std::map<unsigned, std::vector<unsigned>>& DataProvider::getAgentTypeLocTypes() const {
     return aTypeToLocationTypes;
 }

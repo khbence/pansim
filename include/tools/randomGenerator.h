@@ -84,9 +84,7 @@ public:
         const double __thr = __INT_MAX__ + __naf;
         double __cand;
         do
-            __cand = floor(
-                log(1.0 - curand_uniform_double(&dstates[threadIdx.x + blockIdx.x * blockDim.x]))
-                / _M_log_1_p);
+            __cand = floor(log(1.0 - curand_uniform_double(&dstates[threadIdx.x + blockIdx.x * blockDim.x])) / _M_log_1_p);
         while (__cand >= __thr);
         return int(__cand + __naf);
 #else
