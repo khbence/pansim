@@ -1,5 +1,5 @@
 # Pansim
-Pansim is a pandemic simulation framework of PPCU university. It uses agent-based modelling to simulate the spread of the disease. Every agent represents a human, which has movement depending on its schedule and locations. Infectiousness is spreading between agents in the same locations in a stochastic way. The main goal and the default parameters are specialized for the current COVID-19 pandemic, but with correct parameters it can be applied for many epidemic situations.
+Pansim is a pandemic simulation framework of PPCU university. It uses agent-based modelling to simulate the spread of the disease. Every agent represents a person, which has movement depending on its schedule and locations. Infectiousness is spreading between agents in the same locations in a stochastic way. The main goal and the default parameters are specialized for the current COVID-19 pandemic, but with correct parameters it can be applied for many epidemic situations.
 
 ## Technical parameters
 The simulation can be run on CPU only using OpenMP to accelerate or it can also use CUDA capable GPU. On a larger 16 GB RAM GPU we can simulate up to 50 million agents, but even on a smaller regular GPU a few million agent can be simulated safely.
@@ -17,7 +17,7 @@ Details about the format and contents in input json files are discussed [here](i
 |  -n| --numagents               | Number of agents (default: -1)
 |  -N| --numlocs                 | Number of dummy locations (default: -1)
 |  -P| --progression             | Path to the config file for the progression matrices. (default: inputConfigFiles/progressions/transition_config.json)
-|  -a| --agents                  | Agents file, for all human being in the experiment. (default: inputRealExample/agents.json)
+|  -a| --agents                  | Agents file, for all person in the experiment. (default: inputRealExample/agents.json)
 |  -A| --agentTypes              | List and schedule of all type fo agents. (default: inputConfigFiles/agentTypes.json)
 |  -l| --locations               | List of all locations in the simulation. (default: inputRealExample/locations.json)
 |  -L| --locationTypes           | List of all type of locations (default: inputConfigFiles/locationTypes.json)
