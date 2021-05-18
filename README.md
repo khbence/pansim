@@ -35,7 +35,7 @@ Details about the format and contents in input json files are discussed [here](i
 |    | --trace                   | Trace movements of agent (default: 4294967295)
 |    | --quarantinePolicy        | Quarantine policy: 0 - None, 1 - Agent only, 2 - Agent and household, 3 - + classroom/work, 4 - + school (default: 3)
 |    | --quarantineLength        | Length of quarantine in days (default: 10)
-|    | --testingProbabilities    | Testing probabilities for random, if someone else was diagnosed at home/work/school, and random for hospital workers: comma-delimited string random,home,work,school,hospital,nurseryHome (default: 0.0001,0.02,0.001,0.001,0.01,0.1)
+|    | --testingProbabilities    | Testing probabilities for random, if someone else was diagnosed at home/work/school, and random for hospital workers: comma-delimited string random,home,work,school,hospital,nurseryHome (default: 0.00005,0.01,0.0005,0.0005,0.005,0.05)
 |    | --testingRepeatDelay      | Minimum number of days between taking tests (default: 5)
 |    | --testingMethod           | default method for testing. Can be PCR (default) on antigen. Accuracies are provided in progression json input (default: PCR)
 |    | --enableClosures          | Enable(1)/disable(0) closure rules defined in closureRules.json (default: 1)
