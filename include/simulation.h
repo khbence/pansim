@@ -361,7 +361,7 @@ public:
         //        PROFILE_FUNCTION();
         // COVID
         auto result = locs->refreshAndGetStatistic();
-        // for (auto val : result) { std::cout << val << "\t"; }
+        for (auto val : result) { std::cout << val << "\t"; }
         // non-COVID hospitalization
         auto& ppstates = agents->PPValues;
         auto& diagnosed = agents->diagnosed;
@@ -384,18 +384,18 @@ public:
         unsigned stayedHome = thrust::count(agents->stayedHome.begin(), agents->stayedHome.end(), true);
         std::vector<unsigned> stats(result);
         stats.push_back(hospitalized);
-        // std::cout << hospitalized << "\t";
+        std::cout << hospitalized << "\t";
         // Testing
         auto tests = TestingPolicy<Simulation>::getStats();
-        // std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t"
-        //          << thrust::get<2>(tests) << "\t";
+        std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t"
+                 << thrust::get<2>(tests) << "\t";
         stats.push_back(thrust::get<0>(tests));
         stats.push_back(thrust::get<1>(tests));
         stats.push_back(thrust::get<2>(tests));
         // Quarantine stats
         auto quarant = agents->getQuarantineStats(timestamp);
-        // std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t"
-        //          << thrust::get<2>(quarant) << "\t";
+        std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t"
+                 << thrust::get<2>(quarant) << "\t";
         stats.push_back(thrust::get<0>(quarant));
         stats.push_back(thrust::get<1>(quarant));
         stats.push_back(thrust::get<2>(quarant));
@@ -407,21 +407,21 @@ public:
                 return state.isInfected() && state.getVariant() == 1;
             });
             unsigned percentage = unsigned(double(variant1) / double(allInfected) * 100.0);
-            // std::cout << percentage << "\t";
+            std::cout << percentage << "\t";
             stats.push_back(percentage);
         } else {
-            // std::cout << unsigned(0) << "\t";
+            std::cout << unsigned(0) << "\t";
             stats.push_back(unsigned(0));
         }
 
         // Stayed home count
         stayedHome = stayedHome - stats[10] - stats[11];// Subtract dead
-        // std::cout << stayedHome << "\t";
+        std::cout << stayedHome << "\t";
         stats.push_back(stayedHome);
 
         // Number of immunized
         stats.push_back(immunization->immunizedToday);
-        // std::cout << immunization->immunizedToday << "\t";
+        std::cout << immunization->immunizedToday << "\t";
 
         // Number of new infections
         unsigned timeStepL = timeStep;
@@ -431,9 +431,9 @@ public:
                     agentStat.infectedTimestamp > timestamp - 24 * 60 / timeStepL && agentStat.infectedTimestamp <= timestamp);
             });
         stats.push_back(newInfected);
-        // std::cout << newInfected;
+        std::cout << newInfected;
 
-        // std::cout << '\n';
+        std::cout << '\n';
         return stats;
     }
 

@@ -31,6 +31,7 @@ Details about the format and contents in input json files are discussed [here](i
 |    | --mutationMultiplier      | infectiousness multiplier for mutated virus (default: 1.0)
 |  -k| --infectionCoefficient    | Infection: >0 :infectiousness coefficient (default: 0.000374395)
 |    | --dumpLocationInfections  | Dump per-location statistics every N timestep  (default: 0)
+|    | --mutationProgressionScaling  | disease progression scaling for mutated virus  (default: 1.0)
 |    | --dumpLocationInfectiousList | Dump per-location list of infectious people (default: "")
 |    | --trace                   | Trace movements of agent (default: 4294967295)
 |    | --quarantinePolicy        | Quarantine policy: 0 - None, 1 - Agent only, 2 - Agent and household, 3 - + classroom/work, 4 - + school (default: 3)
@@ -71,6 +72,11 @@ Use the [Makefile](Makefile) to build it for GPU or CPU, run the buildCPU or bui
 *or*
 
 > make buildGPU
+
+### **Parameters for Szeged simulation**
+To run a simplified Szeged simulation with a default scenario, use the following arguments:
+
+> ./pansim -w 52 --mutationMultiplier 1.66 --immunizationStart 100 --immunizationsPerDay 360 --mutationProgressionScaling 1.2 -r
 
 ## Input files
 The inputConfigFiles directory contains good COVID-19 specific defaults and general location and agent types. There are a simplified locations and agents example files for the town of Szeged (Southern Hungary), uncompress it before use. If you use local or downloaded Docker image, then it will already contain it or uncompress it automatically.
