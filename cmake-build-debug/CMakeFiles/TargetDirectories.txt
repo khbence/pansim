@@ -1,3 +1,0 @@
-C:/Users/user/source/repos/github/pansim/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/user/source/repos/github/pansim/cmake-build-debug/CMakeFiles/panSim.dir
-C:/Users/user/source/repos/github/pansim/cmake-build-debug/CMakeFiles/edit_cache.dir

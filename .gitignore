@@ -1,3 +1,4 @@
 .idea
 cmake/config/out/*h
 build
+cmake-build*

@@ -1,3 +1,0 @@
-C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\panSim.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe cr CMakeFiles\panSim.dir/objects.a @CMakeFiles\panSim.dir\objects1.rsp
-C:\msys64\mingw64\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\panSim.dir/objects.a -Wl,--no-whole-archive  -o panSim.exe -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\panSim.dir\linklibs.rsp
