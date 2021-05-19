@@ -17,12 +17,12 @@ This file stores information about the general behaviour of the different agent 
 ## closureRules
 Describes the different events that can change the general state of the simulation.
 * name: human readable ID (won't be used in simulation)
-* conditionType: *to be filled*
-* threshold: *to be filled*
-* openAfter: *to be filled*
-* closeAfter: *to be filled*
-* parameter: *to be filled*
-* locationTypesToClose: *to be filled*
+* conditionType: afterDays (enable after *threshold* days, for *openAfter* days), newDeadFraction (enable once the fraction of daily deaths w.r.t. total population exceeds *threshold* for *closeAfter* subsequent days. Disable once it goes below for *closeAfter* subsequent days), hospitalizedFraction (as with *newDeadFraction*, just with the fraction of people hospitalized w.r.t. total population).
+* threshold: parameter in condition for enabling rule
+* openAfter: see above
+* closeAfter: see above. Has to be -1 for *openAfter*
+* parameter: rule-specific parameter
+* locationTypesToClose: if the rule affects locations, the list of location types
 
 ## configRandom
 Defines different distributions for random data generation, which is used whne the agents and the locations files are not given, instead the agent number (*-n*) and the location number (*-N*) are given. If the *-r* flag is set, then the stateDistribution part will be used to set the agents' state randomly with this distribution. in all cases where we list chances the sum of those should be 1 (or empty list). *The current file is calculated from the realistic data town of Szeged (Hungary).*
@@ -39,16 +39,16 @@ Defines different distributions for random data generation, which is used whne t
 * agentTypeDistribution: Distribution of the agent types between agents.
 
 ## locationTypes
-Information about location types.
-* publicSpace: *to be filled*
-* home: *to be filled*
-* hospital: *to be filled*
-* doctor: *to be filled*
-* school: *to be filled*
-* classroom: *to be filled*
-* work: *to be filled*
-* nurseryhome: *to be filled*
-* types: It's not used in simulation, it just describes the location types in human readable form.
+Indices of location types as used in the locations input
+* publicSpace: outdoor public spaces
+* home: residences
+* hospital:
+* doctor: doctors' offices
+* school:
+* classroom:
+* work: offices, factories and similar, whose primary function is work as opposed to directly servicing visiting customers/visitors
+* nurseryhome: elderly home
+* types: It's not used in simulation, it just describes the location types in human readable form. Type indices have to match the above and the ones in the locations input
 
 ## parameters
 Defines how the different agent states modifies the symptons and the transmission rate of an agent. Symptons will modifies the chance of a bad state progression for the agent, therefore lower number if increase the agent's survivalibility. The transmission rate will modify what infectiousness number would an infected agent to be considered. The sex and age part is self-explanatory. The possible preConditions are defined here and the ID are being used in agents file. The condition name is just a human readable description.
