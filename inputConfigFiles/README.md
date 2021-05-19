@@ -55,4 +55,4 @@ Defines how the different agent states modifies the symptons and the transmissio
 
 ## Side notes
 We will not expect the locations and agentType IDs to run from 0 to n in a monoton way without any gap. We will map it during initialization.
-We will only expect it for the schedules of the AgentTypes to make continously through typic and common schedules
+We will only expect it for the schedules of the AgentTypes to make continously through typic and common schedules.

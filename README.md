@@ -79,7 +79,7 @@ To run a simplified Szeged simulation with a default scenario, use the following
 > ./pansim -w 52 --mutationMultiplier 1.66 --immunizationStart 100 --immunizationsPerDay 360 --mutationProgressionScaling 1.2 -r
 
 ## Input files
-The inputConfigFiles directory contains good COVID-19 specific defaults and general location and agent types. There are a simplified locations and agents example files for the town of Szeged (Southern Hungary), uncompress it before use. If you use local or downloaded Docker image, then it will already contain it or uncompress it automatically.
+The inputConfigFiles directory contains good COVID-19 specific defaults and general location and agent types. There are simplified locations and agents example files for the town of Szeged (Southern Hungary), uncompress it before use. If you use local or downloaded Docker image, then it will already contain it or uncompress it automatically during docker build.
 
 If you want to generate random amount of agents and locations use the -n and -N flags described above.
 
