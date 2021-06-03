@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
         s.runSimulation();
         END_PROFILING("runSimulation");
         Timing::report();
-    } catch(const init::ProgramInit& e) {
+    } catch (const init::ProgramInit& e) {
         std::cerr << e.what();
         return EXIT_FAILURE;
     }

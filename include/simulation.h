@@ -387,15 +387,13 @@ public:
         std::cout << hospitalized << "\t";
         // Testing
         auto tests = TestingPolicy<Simulation>::getStats();
-        std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t"
-                 << thrust::get<2>(tests) << "\t";
+        std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t" << thrust::get<2>(tests) << "\t";
         stats.push_back(thrust::get<0>(tests));
         stats.push_back(thrust::get<1>(tests));
         stats.push_back(thrust::get<2>(tests));
         // Quarantine stats
         auto quarant = agents->getQuarantineStats(timestamp);
-        std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t"
-                 << thrust::get<2>(quarant) << "\t";
+        std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t" << thrust::get<2>(quarant) << "\t";
         stats.push_back(thrust::get<0>(quarant));
         stats.push_back(thrust::get<1>(quarant));
         stats.push_back(thrust::get<2>(quarant));
