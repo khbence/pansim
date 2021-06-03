@@ -53,6 +53,9 @@ Indices of location types as used in the locations input
 ## parameters
 Defines how the different agent states modifies the symptons and the transmission rate of an agent. Symptons will modifies the chance of a bad state progression for the agent, therefore lower number if increase the agent's survivalibility. The transmission rate will modify what infectiousness number would an infected agent to be considered. The sex and age part is self-explanatory. The possible preConditions are defined here and the ID are being used in agents file. The condition name is just a human readable description.
 
+## Disease progression data
+
+
 ## Side notes
 We will not expect the locations and agentType IDs to run from 0 to n in a monoton way without any gap. We will map it during initialization.
 We will only expect it for the schedules of the AgentTypes to make continously through typic and common schedules.
