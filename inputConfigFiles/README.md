@@ -51,7 +51,16 @@ Indices of location types as used in the locations input
 * types: It's not used in simulation, it just describes the location types in human readable form. Type indices have to match the above and the ones in the locations input
 
 ## parameters
-Defines how the different agent states modifies the symptons and the transmission rate of an agent. Symptons will modifies the chance of a bad state progression for the agent, therefore lower number if increase the agent's survivalibility. The transmission rate will modify what infectiousness number would an infected agent to be considered. The sex and age part is self-explanatory. The possible preConditions are defined here and the ID are being used in agents file. The condition name is just a human readable description.
+Defines how the different agent states modifies the symptoms and the transmission rate of an agent. Symptoms will modifies the chance of a bad state progression for the agent, therefore lower number if increase the agent's survivalibility. The transmission rate will modify what infectiousness number would an infected agent to be considered. The sex and age part is self-explanatory. The possible preConditions are defined here and the ID are being used in agents file. The condition name is just a human readable description.
+
+## Disease progression data
+transition_config.json describes which transition belongs to the given agent with specific age and pre-cond. Here, the states' specific properties are also listed:
+* WB: well-being state
+* infectious
+* accuracyPCR: how accurate the PCR test in that state
+* accuracyAntigen: how accurate the antigen test in that state
+generate_transition.m file generate the age and pre-cond.-specific disease progression data (depending on some defined parameter values) by using transition_average.m function. The outputs can be found in progression folder. These json files describe specific properties of states (like average length, max. length) and the chance (probability) of going from this state to a specific state and whether it is a bad progression or not.
+
 
 ## Side notes
 We will not expect the locations and agentType IDs to run from 0 to n in a monoton way without any gap. We will map it during initialization.
