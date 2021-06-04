@@ -67,11 +67,16 @@ int main(int argc, char** argv) {
     }
 
     RandomGenerator::init(omp_get_max_threads());
-    config::Simulation_t s{ result };
-    END_PROFILING("init");
-    BEGIN_PROFILING("runSimulation");
-    s.runSimulation();
-    END_PROFILING("runSimulation");
-    Timing::report();
+    try {
+        config::Simulation_t s{ result };
+        END_PROFILING("init");
+        BEGIN_PROFILING("runSimulation");
+        s.runSimulation();
+        END_PROFILING("runSimulation");
+        Timing::report();
+    } catch (const init::ProgramInit& e) {
+        std::cerr << e.what();
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }

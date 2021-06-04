@@ -62,6 +62,9 @@ transition_config.json describes which transition belongs to the given agent wit
 generate_transition.m file generate the age and pre-cond.-specific disease progression data (depending on some defined parameter values) by using transition_average.m function. The outputs can be found in progression folder. These json files describe specific properties of states (like average length, max. length) and the chance (probability) of going from this state to a specific state and whether it is a bad progression or not.
 
 
+## Disease progression data
+
+
 ## Side notes
 We will not expect the locations and agentType IDs to run from 0 to n in a monoton way without any gap. We will map it during initialization.
 We will only expect it for the schedules of the AgentTypes to make continously through typic and common schedules.
