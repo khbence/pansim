@@ -18,6 +18,64 @@ private:
     std::ofstream file;
     thrust::device_vector<unsigned> susceptible1;
 
+    class DumpStore {
+        std::vector<unsigned> timestamp;
+        std::vector<unsigned> variant;
+        std::vector<unsigned> locationIds;
+        std::vector<unsigned> locationOffsets; //For the nth timeStampVariant
+        std::vector<unsigned> infectedAgentsAtLocation;
+        std::vector<unsigned> infectedAgentOffsets; //For the nth locationId
+        std::vector<unsigned> infectiousAgentsAtLocation;
+        std::vector<unsigned> infectiousAgentOffsets; //For the nth locationId
+        std::vector<float>    infectiousnessOfAgents;
+        public:
+        DumpStore() {
+            locationOffsets.push_back(0);
+            infectedAgentOffsets.push_back(0);
+            infectiousAgentOffsets.push_back(0);
+        }
+        void insert(unsigned _timestamp, unsigned _variant, thrust::host_vector<unsigned> _locationIds,
+                    thrust::host_vector<unsigned> _infectedAgentsAtLocation, thrust::host_vector<unsigned> _infectiousAgents,
+                    thrust::host_vector<float> _infectiousnessOfAgents) {
+                        timestamp.push_back(_timestamp);
+                        variant.push_back(_variant);
+                        locationIds.insert(locationIds.end(), _locationIds.begin(), _locationIds.end());
+                        locationOffsets.push_back(locationIds.size());
+                        infectedAgentsAtLocation.insert(infectedAgentsAtLocation.end(), _infectedAgentsAtLocation.begin(), _infectedAgentsAtLocation.end());
+                        infectedAgentOffsets.push_back(infectedAgentsAtLocation.size());
+                        infectiousAgentsAtLocation.insert(infectiousAgentsAtLocation.end(), _infectiousAgents.begin(), _infectiousAgents.end());
+                        infectiousAgentOffsets.push_back(infectiousAgentsAtLocation.size());
+                        infectiousnessOfAgents.insert(infectiousnessOfAgents.end(), _infectiousnessOfAgents.begin(), _infectiousnessOfAgents.end());
+        }
+        void write(std::string fname) {
+            std::ofstream file;
+            file.open(fname);
+            file << timestamp.size() << "\n";
+            thrust::copy(timestamp.begin(), timestamp.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(variant.begin(), variant.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(locationOffsets.begin(),
+                locationOffsets.end(),
+                std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(locationIds.begin(), locationIds.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(infectedAgentOffsets.begin(), infectedAgentOffsets.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(infectedAgentsAtLocation.begin(), infectedAgentsAtLocation.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(infectiousAgentOffsets.begin(), infectiousAgentOffsets.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(infectiousAgentsAtLocation.begin(), infectiousAgentsAtLocation.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(infectiousnessOfAgents.begin(), infectiousnessOfAgents.end(), std::ostream_iterator<float>(file, " "));
+            file << "\n";
+            file.close();
+        }
+    };
+    DumpStore *dumpstore = nullptr;
+
 public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("k,infectionCoefficient",
@@ -29,12 +87,19 @@ public:
             cxxopts::value<std::string>()->default_value(""));
     }
 
+    void finalize() {
+        if (flagInfectionAtLocations)
+            dumpstore->write(dumpDirectory);
+        delete dumpstore;
+    }
+
 protected:
     void initializeArgs(const cxxopts::ParseResult& result) {
         this->k = result["infectionCoefficient"].as<double>();
         dumpToFile = result["dumpLocationInfections"].as<unsigned>();
         dumpDirectory = result["dumpLocationInfectiousList"].as<std::string>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
+        if (flagInfectionAtLocations) dumpstore = new DumpStore();
     }
 
 public:
@@ -296,6 +361,7 @@ public:
         if (numberOfPeople != locationLength[locationLength.size() - 1]) {
             throw CustomErrors("dumpLocationInfectiousList: mismatch between number of people calculations");
         }
+        //save infectious people's IDs
         thrust::device_vector<unsigned> peopleIds(numberOfPeople);
         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(peopleFlagsByLocation.begin(),
                              locationAgentList.begin(),
@@ -307,7 +373,21 @@ public:
                 if (thrust::get<0>(tup))// if person should be written
                     thrust::get<2>(tup) = thrust::get<1>(tup);// then write ID there
             });
-        std::ofstream file;
+
+        //save infectious people's infectiousness
+        thrust::device_vector<float> infectiousness(numberOfPeople);
+        thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(peopleFlagsByLocation.begin(),
+                             thrust::make_permutation_iterator(ppstates.begin(),locationAgentList.begin()),
+                             thrust::make_permutation_iterator(infectiousness.begin(), peopleOffsetsByLocation.begin()))),
+            thrust::make_zip_iterator(thrust::make_tuple(peopleFlagsByLocation.end(),
+                thrust::make_permutation_iterator(ppstates.begin(),locationAgentList.end()),
+                thrust::make_permutation_iterator(infectiousness.begin(), peopleOffsetsByLocation.end()))),
+            [] HD(thrust::tuple<unsigned&, PPState_t&, float&> tup) {
+                if (thrust::get<0>(tup))// if person should be written
+                    thrust::get<2>(tup) = thrust::get<1>(tup).isInfectious();// then infectiousness
+            });
+
+        /*std::ofstream file;
         file.open(dumpDirectory + "infectiousList_v" + std::to_string(variant) + "_" + std::to_string(simTime.getTimestamp())
                   + ".txt");
         file << numberOfLocsWithInfections << "\n";
@@ -323,7 +403,10 @@ public:
         file << "\n";
         thrust::copy(peopleIds.begin(), peopleIds.end(), std::ostream_iterator<unsigned>(file, " "));
         file << "\n";
-        file.close();
+        file.close();*/
+        dumpstore->insert(simTime.getTimestamp(), variant, outLocationIds,
+                    newlyInfectedPeopleIds, peopleIds,
+                    infectiousness);
     }
 
 

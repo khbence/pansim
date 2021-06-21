@@ -82,7 +82,7 @@ set_property(CACHE ClosurePolicy PROPERTY STRINGS NoClosure RuleClosure)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/configTypes.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/configTypes.h @ONLY)
 
-option(USE_GPU, "Using CUDA-GPU if available" ON)
+option(USE_GPU "Using CUDA-GPU if available" ON)
 
 if(USE_GPU)
     find_package(CUDAToolkit)

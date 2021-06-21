@@ -505,6 +505,7 @@ public:
             ++simTime;
         }
         agents->printAgentStatJSON(outAgentStat);
+        InfectionPolicy<Simulation>::finalize();
     }
 
     void toggleCurfew(bool enable, unsigned curfewBegin, unsigned curfewEnd) {
