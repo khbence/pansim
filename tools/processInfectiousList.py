@@ -17,24 +17,24 @@ def binary_search(arr, x):
     return -1
 
 def getContactList(agentId, infLocation, timestamp, variant, infectiousList):
-    timestamps = [int(s) for s in infectiousList[1][0:-1].split(' ')]
+    timestamps = infectiousList[1]
     tsPos = binary_search(timestamps, timestamp)
-    variants = [int(s) for s in infectiousList[2][0:-1].split(' ')]
+    variants = infectiousList[2]
     while variants[tsPos] != variant:
         if variants[tsPos] > variant:
             tsPos = tsPos-1
         else:
             tsPos = tsPos+1
-    locationOffsets = [int(s) for s in infectiousList[3][0:-1].split(' ')]
-    locationIds = [int(s) for s in infectiousList[4][0:-1].split(' ')]
+    locationOffsets = infectiousList[3]
+    locationIds = infectiousList[4]
     locationOffset = -1
     for i in range(locationOffsets[tsPos], locationOffsets[tsPos+1]):
         if locationIds[i] == infLocation:
             locationOffset = i
             break
-    infectiousAgentOffsets = [int(s) for s in infectiousList[7][0:-1].split(' ')]
-    infectiousAgentsAtLocation = [int(s) for s in infectiousList[8][0:-1].split(' ')]
-    infectiousnessOfAgents = [float(s) for s in infectiousList[9][0:-1].split(' ')]
+    infectiousAgentOffsets = infectiousList[7]
+    infectiousAgentsAtLocation = infectiousList[8]
+    infectiousnessOfAgents = infectiousList[9]
     outAgentIds = infectiousAgentsAtLocation[infectiousAgentOffsets[locationOffset]:infectiousAgentOffsets[locationOffset+1]]
     outInf = infectiousnessOfAgents[infectiousAgentOffsets[locationOffset]:infectiousAgentOffsets[locationOffset+1]]
     return outAgentIds, outInf
@@ -44,6 +44,9 @@ people = json.load(stats)['Statistics']
 stats.close()
 dumpf = open('dumped.txt')
 infectiousList = dumpf.read().splitlines()
+for i in range(1,9):
+    infectiousList[i] = [int(s) for s in infectiousList[i][0:-1].split(' ')]
+infectiousList[9] = [float(s) for s in infectiousList[9][0:-1].split(' ')]
 
 #do the second person:
 agentId = people[1]['ID']
