@@ -56,12 +56,12 @@ void HD DynamicPPState::updateMeta() {
 std::string DynamicPPState::initTransitionMatrix(
     std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>& inputData,
     parser::ProgressionDirectory& config,
-    float multiplier) {
+    std::vector<float> &multiplier) {
     // init global parameters that are used to be static
     detail::DynamicPPState::h_numberOfStates = config.stateInformation.stateNames.size();
     detail::DynamicPPState::h_infectious =
         decltype(detail::DynamicPPState::h_infectious)(detail::DynamicPPState::h_numberOfStates);
-    detail::DynamicPPState::h_variantMultiplier = decltype(detail::DynamicPPState::h_variantMultiplier)(2);
+    detail::DynamicPPState::h_variantMultiplier = decltype(detail::DynamicPPState::h_variantMultiplier)(multiplier.size()+1);
     detail::DynamicPPState::h_accuracyPCR =
         decltype(detail::DynamicPPState::h_accuracyPCR)(detail::DynamicPPState::h_numberOfStates);
     detail::DynamicPPState::h_accuracyAntigen =
@@ -89,7 +89,8 @@ std::string DynamicPPState::initTransitionMatrix(
     }
 
     detail::DynamicPPState::h_variantMultiplier[0] = 1.0;
-    detail::DynamicPPState::h_variantMultiplier[1] = multiplier;
+    for (int i = 0; i < multiplier.size(); i++)
+        detail::DynamicPPState::h_variantMultiplier[i+1] = multiplier[i];
 
     for (const auto& e : config.stateInformation.infectedStates) {
         auto idx = detail::DynamicPPState::nameIndexMap.at(e);
@@ -140,8 +141,8 @@ std::string DynamicPPState::initTransitionMatrix(
     cudaMemcpyToSymbol(detail::DynamicPPState::infectious, &infTMP, sizeof(float*));
 
     float* varTMP;
-    cudaMalloc((void**)&varTMP, 2 * sizeof(float));
-    cudaMemcpy(varTMP, detail::DynamicPPState::h_variantMultiplier.data(), 2 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMalloc((void**)&varTMP, (multiplier.size()+1) * sizeof(float));
+    cudaMemcpy(varTMP, detail::DynamicPPState::h_variantMultiplier.data(), (multiplier.size()+1) * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(detail::DynamicPPState::variantMultiplier, &varTMP, sizeof(float*));
 
     float* accuracyPCRTMP;

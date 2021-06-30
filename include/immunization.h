@@ -17,7 +17,7 @@
 #include "progressionMatrixFormat.h"
 #include "dataProvider.h"
 #include "progressionType.h"
-
+#include "smallTools.h"
 
 template<class Simulation>
 class Immunization {
@@ -25,7 +25,7 @@ class Immunization {
     thrust::device_vector<uint8_t> immunizationRound;
     unsigned currentCategory = 0;
 #define numberOfCategories 9
-    std::vector<int8_t> vaccinationOrder;
+    std::vector<int> vaccinationOrder;
     unsigned startAfterDay = 0;
     unsigned dailyDoses = 0;
     unsigned diagnosticLevel = 0;
@@ -78,22 +78,8 @@ public:
         } catch (std::exception& e) {}
 
         std::string orderString = result["immunizationOrder"].as<std::string>();
-        std::stringstream ss(orderString);
-        std::string arg;
-        for (char i; ss >> i;) {
-            arg.push_back(i);
-            if (ss.peek() == ',') {
-                if (arg.length() > 0 && isdigit(arg[0])) {
-                    vaccinationOrder.push_back(atoi(arg.c_str()));
-                    arg.clear();
-                }
-                ss.ignore();
-            }
-        }
-        if (arg.length() > 0 && isdigit(arg[0])) {
-            vaccinationOrder.push_back(atoi(arg.c_str()));
-            arg.clear();
-        }
+        vaccinationOrder = splitStringInt(orderString, ',');
+        
         if (vaccinationOrder.size() != numberOfCategories)
             throw CustomErrors("immunizationOrder mush have exactly " + std::to_string(numberOfCategories) + " values");
         for (int i = 0; i < numberOfCategories; i++)

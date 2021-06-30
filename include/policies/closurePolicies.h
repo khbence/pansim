@@ -96,6 +96,8 @@ public:
         globalConditions.reserve(rules.rules.size());
         this->rules.reserve(rules.rules.size());
 
+        int variantIdx = 0;
+
         for (const parser::ClosureRules::Rule& rule : rules.rules) {
 
             // check if masks/closures are enabled
@@ -109,6 +111,7 @@ public:
             int closeAfter = rule.closeAfter;
             int openAfter = rule.openAfter;
             double threshold = rule.threshold;
+            double threshold2 = rule.threshold2;
             if (rule.conditionType.compare("afterDays") == 0) {
                 std::vector<unsigned> none;
                 if (closeAfter >= 0 || openAfter <= 0)
@@ -124,7 +127,7 @@ public:
                     throw CustomErrors("For closure rule 'hospitalizedFraction', closeAfter and openAfter must be >0");
                 globalConditions.emplace_back(hospitalStates,
                     0,
-                    [threshold, openAfter, closeAfter, numberOfAgents](GlobalCondition* c, std::vector<unsigned>& stats) {
+                    [threshold, threshold2, openAfter, closeAfter, numberOfAgents](GlobalCondition* c, std::vector<unsigned>& stats) {
                         // calculate fraction
                         double accum = 0.0;
                         for (unsigned i = 0; i < c->headerPos.size(); i++) accum += stats[c->headerPos[i]];
@@ -133,7 +136,7 @@ public:
                         c->history[c->pos] = value;
                         c->pos = (c->pos + 1) % (c->history.size());
                         // check if above threshold, and if so has it been for the last closeAfter days
-                        if (value > threshold) {
+                        if (c->active == false && value > threshold) {
                             bool wasBelow = false;
                             for (unsigned i = ClosureHelpers::mod(c->pos - closeAfter, c->history.size()); i != c->pos;
                                  i = (i + 1) % c->history.size()) {
@@ -143,18 +146,21 @@ public:
                                 return true;
                             else
                                 return c->active;
-                        } else {
+                        } else if (c->active == true && value <= threshold2) {
                             // below threshold for openAfter days
                             bool wasAbove = false;
                             for (unsigned i = ClosureHelpers::mod(c->pos - openAfter, c->history.size()); i != c->pos;
                                  i = (i + 1) % c->history.size()) {
-                                wasAbove |= c->history[i] >= threshold;
+                                wasAbove |= c->history[i] >= threshold2;
                             }
-                            if (!wasAbove)
+                            if (!wasAbove) {
+                                printf("Value %g Below %g for %d days\n", value, threshold2, openAfter);
                                 return false;
+                            }
                             else
                                 return c->active;
                         }
+                        else return c->active;
                     });
                 globalConditions.back().history.resize(std::max(closeAfter, openAfter) + 2, 0.0);
             } else if (rule.conditionType.compare("newDeadFraction") == 0) {
@@ -166,7 +172,7 @@ public:
                 deadState.push_back(0);
                 globalConditions.emplace_back(deadState,
                     0,
-                    [threshold, openAfter, closeAfter, numberOfAgents](GlobalCondition* c, std::vector<unsigned>& stats) {
+                    [threshold, threshold2, openAfter, closeAfter, numberOfAgents](GlobalCondition* c, std::vector<unsigned>& stats) {
                         double value = (stats[c->headerPos[0]] - c->headerPos[1])
                                        / (double)numberOfAgents;// new dead is number of dead - last time
                         c->headerPos[1] = stats[c->headerPos[0]];// save previous value
@@ -174,7 +180,7 @@ public:
                         c->history[c->pos] = value;
                         c->pos = (c->pos + 1) % (c->history.size());
                         // check if above threshold, and if so has it been for the last closeAfter days
-                        if (value > threshold) {
+                        if (c->active == false && value > threshold) {
                             bool wasBelow = false;
                             for (unsigned i = ClosureHelpers::mod(c->pos - closeAfter, c->history.size()); i != c->pos;
                                  i = (i + 1) % c->history.size()) {
@@ -184,18 +190,19 @@ public:
                                 return true;
                             else
                                 return c->active;
-                        } else {
+                        } else if (c->active == true && value <= threshold2) {
                             // below threshold for openAfter days
                             bool wasAbove = false;
                             for (unsigned i = ClosureHelpers::mod(c->pos - openAfter, c->history.size()); i != c->pos;
                                  i = (i + 1) % c->history.size()) {
-                                wasAbove |= c->history[i] >= threshold;
+                                wasAbove |= c->history[i] >= threshold2;
                             }
                             if (!wasAbove)
                                 return false;
                             else
                                 return c->active;
                         }
+                        else return c->active;
                     });
                 globalConditions.back().history.resize(std::max(closeAfter, openAfter) + 2, 0.0);
             } else {
@@ -296,7 +303,8 @@ public:
                 std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
                 auto realThis = static_cast<SimulationType*>(this);
                 double fraction = std::stod(rule.parameter);
-                this->rules.emplace_back(rule.name, conds, [&, realThis, diags, fraction](Rule* r) {
+                variantIdx++;
+                this->rules.emplace_back(rule.name, conds, [&, realThis, diags, fraction, variantIdx](Rule* r) {
                     bool expose = true;
                     for (GlobalCondition* c : r->conditions) { expose = expose && c->active; }
                     if (expose) {
@@ -310,7 +318,7 @@ public:
                                 realThis->agents->location.end(),
                                 exposed.end(),
                                 realThis->agents->agentStats.end())),
-                            [fraction, timestamp] HD(
+                            [fraction, timestamp, variantIdx] HD(
                                 thrust::tuple<typename SimulationType::PPState_t&, unsigned&, unsigned&, AgentStats&> tup) {
                                 auto& state = thrust::get<0>(tup);
                                 auto& agentLocation = thrust::get<1>(tup);
@@ -318,17 +326,17 @@ public:
                                 auto& agentStat = thrust::get<3>(tup);
                                 if (state.getSusceptible() > 0.0f
                                     && RandomGenerator::randomUnit() < fraction * state.getSusceptible()) {
-                                    state.gotInfected(1);
+                                    state.gotInfected(variantIdx);
                                     agentStat.infectedTimestamp = timestamp;
                                     agentStat.infectedLocation = agentLocation;
                                     agentStat.worstState = state.getStateIdx();
                                     agentStat.worstStateTimestamp = timestamp;
-                                    agentStat.variant = 1;
+                                    agentStat.variant = variantIdx;
                                     exposed = 1;
                                 }
                             });
                         unsigned count = thrust::count(exposed.begin(), exposed.end(), unsigned(1));
-                        if (diags > 0) printf("Exposed %d people to mutation\n", count);
+                        if (diags > 0) printf("Exposed %d people to mutation to variant %d\n", count, variantIdx);
                     }
                 });
             } else if (rule.name.compare("ReduceMovement") == 0) {

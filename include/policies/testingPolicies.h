@@ -5,6 +5,7 @@
 #include "cxxopts.hpp"
 #include "operators.h"
 #include "locationTypesFormat.h"
+#include "smallTools.h"
 
 template<typename SimulationType>
 class NoTesting {
@@ -326,23 +327,8 @@ public:
     void initializeArgs(const cxxopts::ParseResult& result) {
         testingDelay = result["testingRepeatDelay"].as<unsigned>();
         std::string probsString = result["testingProbabilities"].as<std::string>();
-        std::stringstream ss(probsString);
-        std::string arg;
-        std::vector<double> params;
-        for (char i; ss >> i;) {
-            arg.push_back(i);
-            if (ss.peek() == ',') {
-                if (arg.length() > 0 && isdigit(arg[0])) {
-                    params.push_back(atof(arg.c_str()));
-                    arg.clear();
-                }
-                ss.ignore();
-            }
-        }
-        if (arg.length() > 0 && isdigit(arg[0])) {
-            params.push_back(atof(arg.c_str()));
-            arg.clear();
-        }
+        std::vector<double> params = splitStringDouble(probsString, ',');
+        
         if (params.size() > 0) testingRandom = params[0];
         if (params.size() > 1) testingHome = params[1];
         if (params.size() > 2) testingWork = params[2];

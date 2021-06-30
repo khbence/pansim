@@ -10,6 +10,7 @@ namespace parser {
             DECODABLE_MEMBER(std::string, name);
             DECODABLE_MEMBER(std::string, conditionType);
             DECODABLE_MEMBER(double, threshold);
+            DECODABLE_MEMBER(double, threshold2);
             DECODABLE_MEMBER(std::string, parameter);
             DECODABLE_MEMBER(int, closeAfter);
             DECODABLE_MEMBER(int, openAfter);

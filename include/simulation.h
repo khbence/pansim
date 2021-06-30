@@ -11,6 +11,7 @@
 #include <cxxopts.hpp>
 #include "dataProvider.h"
 #include "immunization.h"
+#include "smallTools.h"
 
 template<typename PositionType,
     typename TypeOfLocation,
@@ -76,8 +77,8 @@ public:
     std::string statesHeader;
     int enableOtherDisease = 1;
     Immunization<Simulation>* immunization;
-    float mutationMultiplier;
-    float mutationProgressionScaling = 1.0;
+    std::vector<float> mutationMultiplier;
+    std::vector<float> mutationProgressionScaling;
     Timehandler simTime;
 
     friend class MovementPolicy<Simulation>;
@@ -88,11 +89,14 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("otherDisease",
             "Enable (1) or disable (0) non-COVID related hospitalization and sudden death ",
-            cxxopts::value<int>()->default_value("1"))("mutationMultiplier",
+            cxxopts::value<int>()->default_value("1"))
+            ("mutationMultiplier",
             "infectiousness multiplier for mutated virus ",
-            cxxopts::value<float>()->default_value("1.0"))("mutationProgressionScaling",
+            cxxopts::value<std::string>()->default_value(""))
+            ("mutationProgressionScaling",
             "disease progression scaling for mutated virus ",
-            cxxopts::value<float>()->default_value("1.0"))("startDay",
+            cxxopts::value<std::string>()->default_value(""))
+            ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
             cxxopts::value<unsigned>()->default_value("0"));
 
@@ -329,7 +333,11 @@ public:
         auto& diagnosed = agents->diagnosed;
         unsigned timestamp = simTime.getTimestamp();
         unsigned tracked = locs->tracked;
-        float progressionScaling = mutationProgressionScaling;
+        float progressionScaling[4];
+        assert(mutationProgressionScaling.size()<=4);
+        for (int i = 0; i < mutationProgressionScaling.size(); i++)
+            progressionScaling[i] = mutationProgressionScaling[i];
+
         // Update states
         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(ppstates.begin(),
                              agentMeta.begin(),
@@ -348,7 +356,7 @@ public:
                 auto& diagnosed = thrust::get<3>(tup);
                 unsigned agentID = thrust::get<4>(tup);
                 bool recovered =
-                    ppstate.update(meta.getScalingSymptoms() * (ppstate.getVariant() == 1 ? progressionScaling : 1.0),
+                    ppstate.update(meta.getScalingSymptoms() * (ppstate.getVariant() > 0 ? progressionScaling[ppstate.getVariant()-1] : 1.0),
                         agentStat,
                         timestamp,
                         agentID,
@@ -398,15 +406,23 @@ public:
         stats.push_back(thrust::get<1>(quarant));
         stats.push_back(thrust::get<2>(quarant));
 
-        if (mutationMultiplier != 1.0f) {
+        if (mutationMultiplier.size() > 0) {
             unsigned allInfected =
                 thrust::count_if(ppstates.begin(), ppstates.end(), [] HD(PPState state) { return state.isInfected(); });
-            unsigned variant1 = thrust::count_if(ppstates.begin(), ppstates.end(), [] HD(PPState state) {
-                return state.isInfected() && state.getVariant() == 1;
-            });
-            unsigned percentage = unsigned(double(variant1) / double(allInfected) * 100.0);
-            std::cout << percentage << "\t";
-            stats.push_back(percentage);
+            std::vector<unsigned> variantcounts(mutationMultiplier.size());
+            std::string out;
+            for (int variant = 0; variant < mutationMultiplier.size(); variant++) {
+                variantcounts[variant] = thrust::count_if(ppstates.begin(), ppstates.end(), [variant] HD(PPState state) {
+                    return state.isInfected() && state.getVariant() == variant+1;
+                });
+                variantcounts[variant] = unsigned(double(variantcounts[variant]) / double(allInfected) * 100.0);
+                if (variant>0)
+                    out = out + "," + std::to_string(variantcounts[variant]);
+                else
+                    out = std::to_string(variantcounts[variant]);
+            }
+            std::cout << out << "\t";
+            stats.push_back(variantcounts[0]); //TODO: this is just the first one...
         } else {
             std::cout << unsigned(0) << "\t";
             stats.push_back(unsigned(0));
@@ -450,8 +466,8 @@ public:
         immunization->initializeArgs(result);
         agents->initializeArgs(result);
         enableOtherDisease = result["otherDisease"].as<int>();
-        mutationMultiplier = result["mutationMultiplier"].as<float>();
-        mutationProgressionScaling = result["mutationProgressionScaling"].as<float>();
+        mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
+        mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
         DataProvider data{ result };
         try {
             std::string header = PPState_t::initTransitionMatrix(
@@ -501,7 +517,8 @@ public:
             MovementPolicy<Simulation>::movement(simTime, timeStep);
             ClosurePolicy<Simulation>::step(simTime, timeStep);
             InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, 0);
-            if (mutationMultiplier != 1.0f) InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, 1);
+            for (int variant = 0; variant < mutationMultiplier.size(); variant++)
+                InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, variant+1);
             ++simTime;
         }
         agents->printAgentStatJSON(outAgentStat);

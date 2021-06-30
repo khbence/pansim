@@ -28,7 +28,7 @@ public:
     static std::string initTransitionMatrix(
         std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>& inputData,
         parser::ProgressionDirectory& config,
-        float variantMultiplier);
+        std::vector<float> &variantMultiplier);
     static HD unsigned getNumberOfStates();
     static std::vector<std::string> getStateNames();
 

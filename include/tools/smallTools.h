@@ -4,6 +4,9 @@
 #include <omp.h>
 #include <array>
 #include <stdexcept>
+#include <vector>
+#include <string>
+#include <sstream>
 
 std::string separator();
 
@@ -24,3 +27,8 @@ auto SecantMethod(lambda&& func, double x0, double x1, double precision) {
     }
     return x_k;
 }
+
+std::vector<double> splitStringDouble(std::string probsString, char sep);
+std::vector<float> splitStringFloat(std::string probsString, char sep);
+std::vector<int> splitStringInt(std::string probsString, char sep);
+std::vector<std::string> splitStringString(std::string header, char sep);
