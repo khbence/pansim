@@ -304,6 +304,9 @@ public:
                 auto realThis = static_cast<SimulationType*>(this);
                 double fraction = std::stod(rule.parameter);
                 variantIdx++;
+                if (variantIdx >= realThis->mutationMultiplier.size()+1) {
+                    throw CustomErrors("More ExposeToMutation events defined than mutationMultipliers specified on the command line");
+                }
                 this->rules.emplace_back(rule.name, conds, [&, realThis, diags, fraction, variantIdx](Rule* r) {
                     bool expose = true;
                     for (GlobalCondition* c : r->conditions) { expose = expose && c->active; }
@@ -324,8 +327,8 @@ public:
                                 auto& agentLocation = thrust::get<1>(tup);
                                 auto& exposed = thrust::get<2>(tup);
                                 auto& agentStat = thrust::get<3>(tup);
-                                if (state.getSusceptible() > 0.0f
-                                    && RandomGenerator::randomUnit() < fraction * state.getSusceptible()) {
+                                if (state.getSusceptible(variantIdx) > 0.0f
+                                    && RandomGenerator::randomUnit() < fraction * state.getSusceptible(variantIdx)) {
                                     state.gotInfected(variantIdx);
                                     agentStat.infectedTimestamp = timestamp;
                                     agentStat.infectedLocation = agentLocation;

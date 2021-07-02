@@ -16,7 +16,7 @@ class DynamicPPState {
 
     char state = 0;// a number
     short daysBeforeNextState = -1;
-    float susceptible = 1.0;
+    float susceptible[MAX_STRAINS] = {0.0};
     uint8_t variant = 0;
 
     static HD ProgressionMatrix& getTransition(unsigned progressionID_p);
@@ -24,7 +24,6 @@ class DynamicPPState {
     void HD updateMeta();
 
 public:
-    DynamicPPState() = default;
     static std::string initTransitionMatrix(
         std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>& inputData,
         parser::ProgressionDirectory& config,
@@ -32,6 +31,7 @@ public:
     static HD unsigned getNumberOfStates();
     static std::vector<std::string> getStateNames();
 
+    DynamicPPState();
     DynamicPPState(const std::string& name, unsigned progressionID_p);
     void HD gotInfected(uint8_t variant);
     bool HD update(float scalingSymptons, AgentStats& agentStats, unsigned simTime, unsigned agentID, unsigned tracked);
@@ -39,9 +39,9 @@ public:
     [[nodiscard]] states::WBStates HD getWBState() const;
     [[nodiscard]] float HD isInfectious() const { return infectious; }
     [[nodiscard]] float HD isInfectious(uint8_t variant) const { return (variant == this->variant) ? infectious : 0.0f; }
-    [[nodiscard]] float HD getSusceptible() const { return susceptible; }
+    [[nodiscard]] float HD getSusceptible(uint8_t variant) const { return susceptible[variant]; }
     [[nodiscard]] uint8_t HD getVariant() const { return variant; }
-    void HD setSusceptible(float s) { this->susceptible = s; }
+    void HD setSusceptible(float s, uint8_t variant) { this->susceptible[variant] = s; }
     [[nodiscard]] bool HD isInfected() const;
     [[nodiscard]] char HD die(bool covid);
     [[nodiscard]] float HD getAccuracyPCR() const;

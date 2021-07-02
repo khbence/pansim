@@ -46,10 +46,12 @@ HD ProgressionMatrix& DynamicPPState::getTransition(unsigned progressionID_p) {
 void HD DynamicPPState::updateMeta() {
 #ifdef __CUDA_ARCH__
     infectious = detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
-    susceptible = detail::DynamicPPState::susceptible[state];
+    for (int i = 0; i < MAX_STRAINS; i++)
+        susceptible[i] = detail::DynamicPPState::susceptible[state];
 #else
     infectious = detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
-    susceptible = detail::DynamicPPState::h_susceptible[state];
+    for (int i = 0; i < MAX_STRAINS; i++)
+        susceptible[i] = detail::DynamicPPState::h_susceptible[state];
 #endif
 }
 
@@ -209,10 +211,17 @@ std::vector<std::string> DynamicPPState::getStateNames() {
     return names;
 }
 
+DynamicPPState::DynamicPPState() : progressionID(0), state(0), 
+            daysBeforeNextState(getTransition(progressionID).calculateJustDays(state)) {
+    for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 1.0f;
+    updateMeta();
+};
+
 DynamicPPState::DynamicPPState(const std::string& name, unsigned progressionID_p)
     : progressionID(progressionID_p),
       state(detail::DynamicPPState::nameIndexMap.find(name)->second),
       daysBeforeNextState(getTransition(progressionID).calculateJustDays(state)) {
+    for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 1.0f;
     updateMeta();
 }
 

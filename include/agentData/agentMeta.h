@@ -21,7 +21,7 @@ class BasicAgentMeta {
         [[nodiscard]] float getTransmission() const;
     };
 
-    float scalingSymptoms = 1.0;
+    float scalingSymptoms[MAX_STRAINS] = {0.0};
     float scalingTransmission = 1.0;
     uint8_t age = 0;
     uint8_t preCondIdx = 0;
@@ -37,7 +37,8 @@ public:
     BasicAgentMeta(char gender, unsigned age, std::string preCondition);
     BasicAgentMeta();
 
-    [[nodiscard]] float HD getScalingSymptoms() const;
+    void HD setScalingSymptoms(float scaling, uint8_t strain);
+    [[nodiscard]] float HD getScalingSymptoms(uint8_t strain) const;
     [[nodiscard]] float HD getScalingTransmission() const;
 
     [[nodiscard]] uint8_t HD getAge() const;

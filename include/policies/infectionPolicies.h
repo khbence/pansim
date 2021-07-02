@@ -127,7 +127,7 @@ public:
                 susceptible1,
                 ppstates,
                 agentLocations,
-                [] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible() > 0; });
+                [variant] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible(variant) > 0; });
         }
         if (dumpToFile > 0 && simTime.getTimestamp() % dumpToFile == 0) {
             file.open("locationStats_v" + std::to_string(variant) + "_" + std::to_string(simTime.getTimestamp()) + ".txt");
@@ -172,7 +172,7 @@ public:
                 susceptible2,
                 ppstates,
                 agentLocations,
-                [] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible() > 0; });
+                [variant] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible(variant) > 0; });
             thrust::transform(susceptible1.begin(),
                 susceptible1.end(),
                 susceptible2.begin(),

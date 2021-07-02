@@ -13,3 +13,6 @@
 #include <thrust/binary_search.h>
 #include <thrust/sort.h>
 #include <thrust/sequence.h>
+
+#define MAX_STRAINS 4
+#define MIN(a, b) (a) < (b) ? (a) : (b)

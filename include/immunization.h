@@ -26,9 +26,12 @@ class Immunization {
     unsigned currentCategory = 0;
 #define numberOfCategories 9
     std::vector<int> vaccinationOrder;
+    std::vector<float> immunizationEfficiencyInfection;
+    std::vector<float> immunizationEfficiencyProgression;
     unsigned startAfterDay = 0;
     unsigned dailyDoses = 0;
     unsigned diagnosticLevel = 0;
+    unsigned numVariants = 1;
 
     unsigned numberOfVaccinesToday(Timehandler& simTime) {
         // float availPerWeek[] = {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 4943.59527, 8544.33033,
@@ -67,7 +70,13 @@ public:
             "Order of immunization (starting at 1, 0 to skip) for agents in different categories health workers, nursery home "
             "worker/resident, 60+, 18-60 with underlying condition, essential worker, 18+, 60+underlying, school teachers, "
             "children",
-            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,0"));
+            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,0"))
+            ("immunizationEfficiencyInfection",
+            "Efficiency of immunization against infection after 12 days and 28 days (pairs of comma-separated values for different strains)",
+            cxxopts::value<std::string>()->default_value("0.52,0.96,0.52,0.96,0.52,0.96"))
+            ("immunizationEfficiencyProgression",
+            "Efficiency of immunization in mitigating disease progression after 12 days and 28 days (pairs of comma-separated values for different strains)",
+            cxxopts::value<std::string>()->default_value("1.0,1.0,1.0,1.0,1.0,1.0"));
     }
 
     void initializeArgs(const cxxopts::ParseResult& result) {
@@ -86,6 +95,15 @@ public:
             if (vaccinationOrder[i] > numberOfCategories)
                 throw CustomErrors(
                     "immunizationOrder values have to be  less or equal to " + std::to_string(numberOfCategories));
+        
+        immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
+        immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
+        numVariants = sim ->mutationMultiplier.size()+1;
+        if (immunizationEfficiencyInfection.size() < 2 * numVariants ||
+            immunizationEfficiencyProgression.size() < 2 * numVariants) {
+                throw CustomErrors(
+                    "immunizationEfficiency parameters have to be at least of size 2x the number of strains");
+            }
     }
 
     void initCategories() {
@@ -305,18 +323,30 @@ public:
         if (timestamp == 0) timestamp++;// First day already immunizing, then we sohuld not set immunizedTimestamp to 0
 
         // Update immunity based on days since immunization
+        float immunizationEfficiencyInfectionLocal[2*MAX_STRAINS];
+        float immunizationEfficiencyProgressionLocal[2*MAX_STRAINS];
+        for (int i = 0; i < immunizationEfficiencyInfection.size(); i++) {
+            immunizationEfficiencyInfectionLocal[i] = immunizationEfficiencyInfection[i];
+            immunizationEfficiencyProgressionLocal[i] = immunizationEfficiencyProgression[i];
+        }
+        unsigned numVariantsLocal = numVariants;
         thrust::for_each(
-            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin())),
-            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end())),
-            [timeStep, timestamp] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&> tup) {
-                // If not immunized, or already recovered, return
-                if (thrust::get<1>(tup).immunizationTimestamp == 0 || thrust::get<0>(tup).getSusceptible() == 0.0) return;
+            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin())),
+            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end())),
+            [timeStep, timestamp, immunizationEfficiencyInfectionLocal, immunizationEfficiencyProgressionLocal, numVariantsLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
+                // If not immunized, return
+                if (thrust::get<1>(tup).immunizationTimestamp == 0) return;
                 // Otherwise get more immune after days since immunization
                 unsigned daysSinceImmunization = (timestamp - thrust::get<1>(tup).immunizationTimestamp) / (24 * 60 / timeStep);
-                if (daysSinceImmunization >= 28)
-                    thrust::get<0>(tup).setSusceptible(0.04);// 96%
-                else if (daysSinceImmunization >= 12)
-                    thrust::get<0>(tup).setSusceptible(0.48);// 52%
+                for (int i = 0; i < numVariantsLocal; i ++) {
+                    if (daysSinceImmunization >= 28) {
+                        thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i+1]), i);
+                        thrust::get<2>(tup).setScalingSymptoms(immunizationEfficiencyProgressionLocal[2*i+1], i);
+                    } else if (daysSinceImmunization >= 12) {
+                        thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i]), i);
+                        thrust::get<2>(tup).setScalingSymptoms(immunizationEfficiencyProgressionLocal[2*i], i);
+                    }
+                }
             });
 
         this->immunizedToday = 0;

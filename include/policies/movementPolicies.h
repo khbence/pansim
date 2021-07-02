@@ -6,7 +6,6 @@
 #include "operators.h"
 #include "locationTypesFormat.h"
 
-#define MIN(a, b) (a) < (b) ? (a) : (b)
 template<typename SimulationType>
 class NoMovement {
 public:

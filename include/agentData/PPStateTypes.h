@@ -21,7 +21,7 @@ public:
     [[nodiscard]] HD states::WBStates getWBState() const;
     virtual HD char getStateIdx() const = 0;
     [[nodiscard]] virtual bool HD isInfectious() const { return state == states::SIRD::I; }
-    [[nodiscard]] virtual float HD getSusceptible() const { return state == states::SIRD::S; }
+    [[nodiscard]] virtual float HD getSusceptible(uint8_t variant) const { return state == states::SIRD::S; }
 };
 
 class PPStateSIRBasic : public PPStateSIRAbstract {

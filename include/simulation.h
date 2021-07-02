@@ -333,8 +333,8 @@ public:
         auto& diagnosed = agents->diagnosed;
         unsigned timestamp = simTime.getTimestamp();
         unsigned tracked = locs->tracked;
-        float progressionScaling[4];
-        assert(mutationProgressionScaling.size()<=4);
+        float progressionScaling[MAX_STRAINS];
+        assert(mutationProgressionScaling.size()<=MAX_STRAINS);
         for (int i = 0; i < mutationProgressionScaling.size(); i++)
             progressionScaling[i] = mutationProgressionScaling[i];
 
@@ -356,7 +356,7 @@ public:
                 auto& diagnosed = thrust::get<3>(tup);
                 unsigned agentID = thrust::get<4>(tup);
                 bool recovered =
-                    ppstate.update(meta.getScalingSymptoms() * (ppstate.getVariant() > 0 ? progressionScaling[ppstate.getVariant()-1] : 1.0),
+                    ppstate.update(meta.getScalingSymptoms(ppstate.getVariant()) * (ppstate.getVariant() > 0 ? progressionScaling[ppstate.getVariant()-1] : 1.0),
                         agentStat,
                         timestamp,
                         agentID,
@@ -458,6 +458,9 @@ public:
           simTime(timeStep, 0, static_cast<Days>(result["startDay"].as<unsigned>())) {
         //        PROFILE_FUNCTION();
         outAgentStat = result["outAgentStat"].as<std::string>();
+        enableOtherDisease = result["otherDisease"].as<int>();
+        mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
+        mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
         TestingPolicy<Simulation>::initializeArgs(result);
@@ -465,9 +468,6 @@ public:
         immunization = new Immunization<Simulation>(this);
         immunization->initializeArgs(result);
         agents->initializeArgs(result);
-        enableOtherDisease = result["otherDisease"].as<int>();
-        mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
-        mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
         DataProvider data{ result };
         try {
             std::string header = PPState_t::initTransitionMatrix(
