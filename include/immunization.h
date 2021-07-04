@@ -41,18 +41,20 @@ class Immunization {
         // {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 2471.797635, 4272.165165, 4281.989595, 4580.44486,
         // 4806.19465, 5126.23065, 5138.01055, 4680.550355, 4776.744925, 4988.782925, 4861.15961, 4411.56837, 4411.56837,
         // 4378.184165, 4391.943075, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485,
-        // 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485}; float availPerWeek[] = {1260.0, 1260.0,1260.0,
-        // 1260.0, 1260.0, 1260.0, 1260.0, 1260.0, //8 weeks of 0.1%
-        //                        921*7.0*1.0,  1126*7.0*1.0, 768*7.0*1.0, 1060*7.0*1.0, 821*7.0*1.0,  1506*7.0*1.0,
-        //                        1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1973*7.0, 1973*7.0, 1973*7.0, 1973*7.0}; //latest
+        // 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485}; 
+        // float availPerWeek[] = {1260.0, 1260.0,1260.0, 1260.0, 1260.0, 1260.0, 1260.0, 1260.0, //8 weeks of 0.1%
+        //                         921*7.0*1.0,  1126*7.0*1.0, 768*7.0*1.0, 1060*7.0*1.0, 821*7.0*1.0,  1506*7.0*1.0,
+        //                         1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1973*7.0, 1973*7.0, 1973*7.0, 1973*7.0}; //latest
         //                        prediction
         // 3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780};
         // //then
+        /* kelet+nyugat */ float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 4021, 4631, 6505, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399};
+        /* csak nyugat */ // float availPerWeek[] = {1083, 919, 395, 1599, 796, 994, 1435,1734, 2055, 3572, 2671,3937 ,5097, 5935, 3564,5283,2447,1705,2778,5727,2686,2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686};
         if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= startAfterDay) {
-            // unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
-            // unsigned week = day/7;
-            // return availPerWeek[week>21?21:week]/7.0;
-            return dailyDoses;
+            unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
+            unsigned week = day/7;
+            return availPerWeek[week>21?21:week]/7.0;
+            //return dailyDoses;
         } else
             return 0;
     }
@@ -70,7 +72,7 @@ public:
             "Order of immunization (starting at 1, 0 to skip) for agents in different categories health workers, nursery home "
             "worker/resident, 60+, 18-60 with underlying condition, essential worker, 18+, 60+underlying, school teachers, "
             "children",
-            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,0"))
+            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7"))
             ("immunizationEfficiencyInfection",
             "Efficiency of immunization against infection after 12 days and 28 days (pairs of comma-separated values for different strains)",
             cxxopts::value<std::string>()->default_value("0.52,0.96,0.52,0.96,0.52,0.96"))
@@ -145,7 +147,7 @@ public:
         // Category elderly with underlying condition
         auto cat_elderly_underlying = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getPrecondIdx() > 0 && agentMetaDataPtr[id].getAge() >= 60)
-                return thrust::make_pair(true, 0.8f);
+                return thrust::make_pair(true, 0.85f);
             else
                 return thrust::make_pair(false, 0.0f);
         };
@@ -153,7 +155,7 @@ public:
         // Category elderly
         auto cat_elderly = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() >= 60)
-                return thrust::make_pair(true, 0.7f);
+                return thrust::make_pair(true, 0.77f);
             else
                 return thrust::make_pair(false, 0.0f);
         };
@@ -198,8 +200,8 @@ public:
 
         // Category over 3-18
         auto cat_child = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
-            if (agentMetaDataPtr[id].getAge() >= 3 && agentMetaDataPtr[id].getAge() < 18)
-                return thrust::make_pair(true, 0.7f);
+            if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18)
+                return thrust::make_pair(true, 0.3f);
             else
                 return thrust::make_pair(false, 0.0f);
         };
