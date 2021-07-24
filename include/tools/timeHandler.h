@@ -20,6 +20,7 @@ class Timehandler {
     std::chrono::system_clock::time_point current = std::chrono::system_clock::now();
     std::chrono::minutes timeStep;
     Days startDay = Days::MONDAY;
+    unsigned startDate = 0; //Jan 1
     unsigned dayOffset = 0;
 
     static constexpr unsigned hoursPerWeek = 168;
@@ -68,7 +69,7 @@ public:
 
     [[nodiscard]] static std::vector<Days> parseDays(const std::string& rawDays);
 
-    explicit Timehandler(unsigned timeStep_p, unsigned weeksInTheFuture = 0, Days startDay = Days::MONDAY);
+    explicit Timehandler(unsigned timeStep_p, unsigned weeksInTheFuture = 0, Days startDay = Days::MONDAY, unsigned startDate = 0);
 
     bool HD operator<(const Timehandler& rhs) { return current < rhs.current; }
     bool HD operator>(const Timehandler& rhs) { return current > rhs.current; }
@@ -84,6 +85,7 @@ public:
     unsigned HD getMinutes() const;
     unsigned HD getTimestamp() const;
     unsigned HD getTimeStep() const { return (unsigned)timeStep.count(); };
+    unsigned HD getStartDate() const { return startDate; };
 
     [[nodiscard]] bool isMidnight() const { return (counter % stepsPerDay) == 0; }
 

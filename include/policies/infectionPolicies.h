@@ -409,6 +409,26 @@ public:
                     infectiousness);
     }
 
+    double seasonalityMultiplier(Timehandler& simTime) {
+        unsigned simDay = simTime.getTimestamp()/simTime.getStepsPerDay();
+        //if (simDay<100) return 1.0;
+        int d = simTime.getStartDate() + simDay; //267 sept 23
+        //int d_peak = 30; //assuming origin = feb 1
+        int d_peak = 45; //assuming origin = feb 15
+        //int d_peak = 59; //assuming origin = marc 1
+        int d_mod = d % 366;
+        if (d_mod > 366 / 2)
+            d_mod = 366 - d_mod;
+        double normed_value = 
+            (0.5 * 0.8 /*c0*/ * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * 0.8 /*c0*/))/
+            (0.5 * 0.8 /*c0*/ * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * 0.8 /*c0*/));
+        double calc_val = std::min(std::max(normed_value, 0.6/*trunc_val*/), 1.0);
+        if (d_mod < d_peak)
+            return 1.0;
+        else
+            return calc_val;
+    }
+
 
     void infectionsAtLocations(Timehandler& simTime, unsigned timeStep, uint8_t variant) {
         //        PROFILE_FUNCTION();
@@ -448,6 +468,8 @@ public:
         // Step 2 - calculate infection ratios, based on density of infected people
         //
         double tmpK = this->k;
+        double seasonality = seasonalityMultiplier(simTime);
+        //if (simTime.getStepsUntilMidnight()==1) printf("%g\n", seasonality);
         thrust::transform(thrust::make_zip_iterator(thrust::make_tuple(fullInfectedCounts.begin(),
                               locationListOffsets.begin(),
                               locationListOffsets.begin() + 1,
@@ -470,7 +492,7 @@ public:
                 y = parTMP.a * y + parTMP.b;
                 y *= thrust::get<3>(tuple);// Weighted by infectiousness
                 return y / (60.0 * 24.0 / static_cast<double>(timeStep));*/
-                return 1.0 - exp(-tmpK * densityOfInfected * thrust::get<3>(tuple) * static_cast<double>(timeStep));
+                return 1.0 - exp(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<double>(timeStep));
             });
 
         //

@@ -87,11 +87,12 @@ Timehandler& Timehandler::operator-=(const TimeDayDuration& dur) {
     return result;
 }
 
-Timehandler::Timehandler(unsigned timeStep_p, unsigned weeksInTheFuture, Days _startDay)
+Timehandler::Timehandler(unsigned timeStep_p, unsigned weeksInTheFuture, Days _startDay, unsigned _startDate)
     : timeStep(std::chrono::minutes(timeStep_p)),
       current(nextMidnight() + std::chrono::hours(hoursPerWeek * weeksInTheFuture)),
       stepsPerDay(minsPerDay / timeStep_p),
-      startDay(_startDay) {
+      startDay(_startDay),
+      startDate(_startDate) {
     if (minsPerDay % timeStep_p != 0) { throw init::BadTimeStep(timeStep_p); }
     dayOffset = (unsigned)getDay() > (unsigned)startDay ? ((unsigned)startDay + 7) - (unsigned)getDay()
                                                         : (unsigned)startDay - (unsigned)getDay();

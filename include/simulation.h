@@ -98,7 +98,10 @@ public:
             cxxopts::value<std::string>()->default_value(""))
             ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
-            cxxopts::value<unsigned>()->default_value("0"));
+            cxxopts::value<unsigned>()->default_value("0"))
+            ("startDate",
+            "days into the year the simulation starts with (Jan 1 is 0) ",
+            cxxopts::value<unsigned>()->default_value("267"));
 
         InfectionPolicy<Simulation>::addProgramParameters(options);
         MovementPolicy<Simulation>::addProgramParameters(options);
@@ -358,6 +361,7 @@ public:
                 bool recovered =
                     ppstate.update(meta.getScalingSymptoms(ppstate.getVariant()) * (ppstate.getVariant() > 0 ? progressionScaling[ppstate.getVariant()-1] : 1.0),
                         agentStat,
+                        meta,
                         timestamp,
                         agentID,
                         tracked);
@@ -455,7 +459,7 @@ public:
     explicit Simulation(const cxxopts::ParseResult& result)
         : timeStep(result["deltat"].as<decltype(timeStep)>()),
           lengthOfSimulationWeeks(result["weeks"].as<decltype(lengthOfSimulationWeeks)>()),
-          simTime(timeStep, 0, static_cast<Days>(result["startDay"].as<unsigned>())) {
+          simTime(timeStep, 0, static_cast<Days>(result["startDay"].as<unsigned>()), result["startDate"].as<unsigned>()) {
         //        PROFILE_FUNCTION();
         outAgentStat = result["outAgentStat"].as<std::string>();
         enableOtherDisease = result["otherDisease"].as<int>();
@@ -533,5 +537,6 @@ public:
     }
     void setSchoolAgeRestriction(unsigned limit) { MovementPolicy<Simulation>::schoolAgeRestriction = limit; }
     void toggleHolidayMode(bool enable) { MovementPolicy<Simulation>::holidayModeActive = enable; }
+    void quarantinePolicy(unsigned newQP) { MovementPolicy<Simulation>::quarantinePolicy = newQP; }
     Timehandler& getSimTime() { return simTime; }
 };
