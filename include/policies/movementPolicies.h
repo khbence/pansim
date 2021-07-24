@@ -173,6 +173,7 @@ namespace RealMovementOps {
         quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until) {
         if (a.quarantinePolicy == 0) return;
         if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false) return;
+        if (a.agentStatsPtr[i].immunizationTimestamp > 0) return;
         a.quarantinedPtr[i] = true;
         a.agentStatsPtr[i].quarantinedTimestamp = a.timestamp;
         unsigned previousQuarantineUntil = a.agentStatsPtr[i].quarantinedUntilTimestamp;
@@ -1303,7 +1304,6 @@ class RealMovement {
     unsigned cemeteryLoc;
     unsigned doctor;
     unsigned tracked;
-    unsigned quarantinePolicy;
     unsigned quarantineLength;
     unsigned school;
     unsigned classroom;
@@ -1316,6 +1316,7 @@ public:
     bool curfewTimeConverted = false;
     unsigned schoolAgeRestriction = 99;
     bool holidayModeActive = false;
+    unsigned quarantinePolicy;
     // add program parameters if we need any, this function got called already
     // from Simulation
     static void addProgramParameters(cxxopts::Options& options) {
