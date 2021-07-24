@@ -236,7 +236,7 @@ void HD DynamicPPState::gotInfected(uint8_t v) {
     updateMeta();
 }
 
-bool HD DynamicPPState::update(float scalingSymptons, AgentStats& stats, unsigned simTime, unsigned agentID, unsigned tracked) {
+bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAgentMeta &meta, unsigned simTime, unsigned agentID, unsigned tracked) {
     if (daysBeforeNextState == -2) {
         daysBeforeNextState = getTransition(progressionID).calculateJustDays(state);
     } else if (daysBeforeNextState > 0) {
@@ -247,7 +247,7 @@ bool HD DynamicPPState::update(float scalingSymptons, AgentStats& stats, unsigne
     if (daysBeforeNextState == 0) {
         states::WBStates oldWBState = this->getWBState();
         auto oldState = state;
-        auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptons);
+        auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptoms);
         state = thrust::get<0>(tmp);
         updateMeta();
         daysBeforeNextState = thrust::get<1>(tmp);
@@ -266,6 +266,18 @@ bool HD DynamicPPState::update(float scalingSymptons, AgentStats& stats, unsigne
                     static_cast<int>(this->getWBState()),
                     daysBeforeNextState);
             }
+        } else if (oldState > 0 && state == 0) { //Recovered to Susceptible
+            if (stats.worstState == 3) { //I2 asymptomatic
+                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.1f, 0);
+                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.2f, 1);
+                susceptible[2] = 0.55f; meta.setScalingSymptoms(0.45f, 2);
+            } else {
+                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.1f, 0);
+                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.1f, 1);
+                susceptible[2] = 0.35f; meta.setScalingSymptoms(0.2f, 2);
+            }
+            // for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 0.5f;
+            // for (int i = 0; i < MAX_STRAINS; i++) meta.setScalingSymptoms(0.3f, i);
         } else if (oldState != state) {// if (oldWBState != states::WBStates::W) this will record any
             // good progression!
             stats.worstStateEndTimestamp = simTime;

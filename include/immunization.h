@@ -53,7 +53,7 @@ class Immunization {
         if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= startAfterDay) {
             unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
             unsigned week = day/7;
-            return availPerWeek[week>21?21:week]/7.0;
+            return availPerWeek[week>28?28:week]/7.0;
             //return dailyDoses;
         } else
             return 0;
@@ -175,7 +175,7 @@ public:
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if (possibleTypesPtr[idx] == 4
                     && essentialPtr[possibleLocationsPtr[idx]] == 1)// TODO pull these params from config
-                    return thrust::make_pair(true, 0.6f);
+                    return thrust::make_pair(true, 0.6f);//0.75
             }
             return thrust::make_pair(false, 0.0f);
         };
@@ -185,7 +185,7 @@ public:
                               unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if (possibleTypesPtr[idx] == 4 && locationTypePtr[possibleLocationsPtr[idx]] == 3)
-                    return thrust::make_pair(true, 0.7f);
+                    return thrust::make_pair(true, 0.7f);//0.75
             }
             return thrust::make_pair(false, 0.0f);
         };
@@ -193,7 +193,7 @@ public:
         // Category over 18
         auto cat_adult = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() > 17)
-                return thrust::make_pair(true, 0.6f);
+                return thrust::make_pair(true, 0.6f);//0.75
             else
                 return thrust::make_pair(false, 0.0f);
         };
@@ -201,7 +201,7 @@ public:
         // Category over 3-18
         auto cat_child = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18)
-                return thrust::make_pair(true, 0.3f);
+                return thrust::make_pair(true, 0.3f);//0.4
             else
                 return thrust::make_pair(false, 0.0f);
         };
@@ -343,32 +343,33 @@ public:
                 for (int i = 0; i < numVariantsLocal; i ++) {
                     if (daysSinceImmunization >= 28) {
                         thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i+1]), i);
-                        thrust::get<2>(tup).setScalingSymptoms(immunizationEfficiencyProgressionLocal[2*i+1], i);
+                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i+1]), i);
                     } else if (daysSinceImmunization >= 12) {
                         thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i]), i);
-                        thrust::get<2>(tup).setScalingSymptoms(immunizationEfficiencyProgressionLocal[2*i], i);
+                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i]), i);
                     }
                 }
             });
 
         this->immunizedToday = 0;
         // no vaccines today, or everybody already immunized, return
-        if (numberOfVaccinesToday(simTime) == 0 || currentCategory >= numberOfCategories) return;
+        if (numberOfVaccinesToday(simTime) == 0 || currentCategory > numberOfCategories) return;
 
         unsigned available = numberOfVaccinesToday(simTime);
         while (available > 0 && currentCategory < numberOfCategories) {
             // Count number of eligible in current group
             unsigned count = 0;
-            while (count == 0 && currentCategory < numberOfCategories) {
+            while (count == 0 && currentCategory <= numberOfCategories) {
                 unsigned currentCategoryLocal = currentCategory + 1;// agents' categories start at 1
+                unsigned numberOfCategoriesLocal = numberOfCategories + 1;
                 count = thrust::count_if(
                     thrust::make_zip_iterator(thrust::make_tuple(
                         immunizationRound.begin(), sim->agents->agentStats.begin(), sim->agents->PPValues.begin())),
                     thrust::make_zip_iterator(thrust::make_tuple(
                         immunizationRound.end(), sim->agents->agentStats.end(), sim->agents->PPValues.end())),
-                    [currentCategoryLocal, timeStep, timestamp] HD(
+                    [currentCategoryLocal, numberOfCategoriesLocal, timeStep, timestamp] HD(
                         thrust::tuple<uint8_t, AgentStats, typename Simulation::PPState_t> tup) {
-                        if (thrust::get<0>(tup) == currentCategoryLocal &&// TODO how many days since diagnosis?
+                        if ((thrust::get<0>(tup) == currentCategoryLocal || currentCategoryLocal==numberOfCategoriesLocal) &&
                             thrust::get<1>(tup).immunizationTimestamp == 0
                             && thrust::get<2>(tup).getWBState() == states::WBStates::W
                             && ((timestamp < (24 * 60 / timeStep) * 3 * 30 && thrust::get<1>(tup).diagnosedTimestamp == 0)
