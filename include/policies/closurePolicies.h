@@ -103,7 +103,8 @@ public:
             // check if masks/closures are enabled
             if (!enableClosures && !rule.name.compare("Masks") == 0 && !rule.name.compare("Curfew") == 0
                 && !rule.name.compare("HolidayMode") == 0 && !rule.name.compare("SchoolAgeRestriction") == 0
-                && !rule.name.compare("ExposeToMutation") == 0 && !rule.name.compare("ReduceMovement") == 0)
+                && !rule.name.compare("ExposeToMutation") == 0 && !rule.name.compare("ReduceMovement") == 0
+                && !rule.name.compare("QuarantinePolicy")==0)
                 continue;
 
             // Create condition
@@ -278,6 +279,20 @@ public:
                         realThis->toggleHolidayMode(close);
                         r->previousOpenState = shouldBeOpen;
                         if (diags > 0) printf("Holiday mode %s\n", (int)shouldBeOpen ? "disabled" : "enabled");
+                    }
+                });
+            } else if (rule.name.compare("QuarantinePolicy")==0) {
+                //Curfew
+                std::vector<GlobalCondition*> conds = {&globalConditions[globalConditions.size()-1]};
+                auto realThis = static_cast<SimulationType*>(this);
+                int newQP = std::stoi(rule.parameter);
+                this->rules.emplace_back(rule.name, conds, [&, realThis,diags,newQP](Rule *r) {
+                    bool close = true;
+                    for (GlobalCondition *c : r->conditions) {close = close && c->active;}
+                    if (close) {
+                        realThis->quarantinePolicy(newQP);
+                        r->previousOpenState = close;
+                        if (diags>0) printf("Quarantine policy level: %d\n", newQP);
                     }
                 });
             } else if (rule.name.compare("SchoolAgeRestriction") == 0) {
