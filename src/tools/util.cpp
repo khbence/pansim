@@ -32,19 +32,20 @@ void extractOffsets(unsigned* locOfAgents, unsigned* locationListOffsets, unsign
     cudaDeviceSynchronize();
 #endif
 }
+
 void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
-    thrust::device_vector<unsigned>& locationIdsOfAgents,
+    thrust::device_vector<unsigned>& futureCopyOfLocationOfAgents,
     thrust::device_vector<unsigned>& locationAgentList,
     thrust::device_vector<unsigned>& locationListOffsets) {
     //    PROFILE_FUNCTION();
 
     // Make a copy of locationOfAgents
-    thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), locationIdsOfAgents.begin());
+    thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), futureCopyOfLocationOfAgents.begin());
     thrust::sequence(locationAgentList.begin(), locationAgentList.end());
     // Now sort by location, so locationAgentList contains agent IDs sorted by
     // location
     // BEGIN_PROFILING("sort")
-    thrust::stable_sort_by_key(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), locationAgentList.begin());
+    thrust::stable_sort_by_key(futureCopyOfLocationOfAgents.begin(), futureCopyOfLocationOfAgents.end(), locationAgentList.begin());
     // END_PROFILING("sort")
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     // Count number of people at any given location
@@ -60,8 +61,8 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
     thrust::exclusive_scan(locationListOffsets.begin(), locationListOffsets.end(), locationListOffsets.begin());
 #else
     // Now extract offsets into locationAgentList where locations begin
-    unsigned* locationIdsOfAgentsPtr = thrust::raw_pointer_cast(locationIdsOfAgents.data());
+    unsigned* locationIdsOfAgentsPtr = thrust::raw_pointer_cast(futureCopyOfLocationOfAgents.data());
     unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
-    extractOffsets(locationIdsOfAgentsPtr, locationListOffsetsPtr, locationIdsOfAgents.size(), locationListOffsets.size() - 1);
+    extractOffsets(locationIdsOfAgentsPtr, locationListOffsetsPtr, futureCopyOfLocationOfAgents.size(), locationListOffsets.size() - 1);
 #endif
 };
