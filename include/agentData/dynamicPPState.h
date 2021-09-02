@@ -39,6 +39,7 @@ public:
     [[nodiscard]] char HD getStateIdx() const { return state; }
     [[nodiscard]] states::WBStates HD getWBState() const;
     void HD setInfectious(float inf)  { infectious = inf; }
+    void HD reduceInfectiousness(float multiplier);
     [[nodiscard]] float HD isInfectious() const { return infectious; }
     [[nodiscard]] float HD isInfectious(uint8_t variant) const { return (variant == this->variant) ? infectious : 0.0f; }
     [[nodiscard]] float HD getSusceptible(uint8_t variant) const { return susceptible[variant]; }

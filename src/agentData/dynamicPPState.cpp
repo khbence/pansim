@@ -43,6 +43,14 @@ HD ProgressionMatrix& DynamicPPState::getTransition(unsigned progressionID_p) {
 #endif
 }
 
+void HD DynamicPPState::reduceInfectiousness(float multiplier) {
+#ifdef __CUDA_ARCH__
+infectious = multiplier * detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
+#else
+infectious = multiplier * detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
+#endif
+}
+
 void HD DynamicPPState::updateMeta() {
 #ifdef __CUDA_ARCH__
     infectious = detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
@@ -268,13 +276,13 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
             }
         } else if (oldState > 0 && state == 0) { //Recovered to Susceptible
             if (stats.worstState == 3) { //I2 asymptomatic
-                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.1f, 0);
-                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.2f, 1);
-                susceptible[2] = 0.55f; meta.setScalingSymptoms(0.45f, 2);
+                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.31f, 0);
+                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.31f, 1);
+                susceptible[2] = 0.2f; meta.setScalingSymptoms(0.31f, 2);//0.55,0.45
             } else {
-                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.1f, 0);
-                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.1f, 1);
-                susceptible[2] = 0.35f; meta.setScalingSymptoms(0.2f, 2);
+                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.31f, 0);
+                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.31f, 1);//0.44
+                susceptible[2] = 0.2f; meta.setScalingSymptoms(0.31f, 2);//0.35,0.2
             }
             // for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 0.5f;
             // for (int i = 0; i < MAX_STRAINS; i++) meta.setScalingSymptoms(0.3f, i);

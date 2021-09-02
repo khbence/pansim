@@ -336,12 +336,10 @@ public:
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin())),
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end())),
             [timeStep, timestamp, immunizationEfficiencyInfectionLocal, immunizationEfficiencyProgressionLocal, numVariantsLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
-                //If agent is re-infected, make them less infectious TODO: external parameter
                 if (thrust::get<0>(tup).isInfectious() > 0 &&
-                    thrust::get<1>(tup).infectedTimestamp != std::numeric_limits<unsigned>::max() &&
-                    (timestamp - thrust::get<1>(tup).infectedTimestamp) / (24 * 60 / timeStep) > 30) {
-                        thrust::get<0>(tup).setInfectious(thrust::get<0>(tup).isInfectious() * 0.5);
-                    }
+                    thrust::get<1>(tup).infectedCount > 1) {
+                        thrust::get<0>(tup).reduceInfectiousness(0.5);
+                }
                 // If not immunized, return
                 if (thrust::get<1>(tup).immunizationTimestamp == 0) return;
                 // Otherwise get more immune after days since immunization
@@ -352,7 +350,7 @@ public:
                         thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i+1]), i);
                         //If agent is infected, make them less infectious TODO: external parameter
                         if (thrust::get<0>(tup).isInfectious())
-                            thrust::get<0>(tup).setInfectious(thrust::get<0>(tup).isInfectious() * 0.5);
+                            thrust::get<0>(tup).reduceInfectiousness(0.5);
                     } else if (daysSinceImmunization >= 12) {
                         thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i]), i);
                         thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i]), i);
