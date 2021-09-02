@@ -449,7 +449,23 @@ public:
                     agentStat.infectedTimestamp > timestamp - 24 * 60 / timeStepL && agentStat.infectedTimestamp <= timestamp);
             });
         stats.push_back(newInfected);
-        std::cout << newInfected;
+        std::cout << newInfected << "\t";
+
+        //Number of cumulative infections so far
+        unsigned infectionCount =
+            thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
+                return agentStat.infectedCount;
+            });
+        stats.push_back(infectionCount);
+        std::cout << infectionCount << "\t";
+
+        //Number of reinfections so far
+        unsigned reinfectionCount =
+            thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
+                return agentStat.infectedCount > 1;
+            });
+        stats.push_back(reinfectionCount);
+        std::cout << reinfectionCount << "\t";
 
         std::cout << '\n';
         return stats;
@@ -492,7 +508,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();

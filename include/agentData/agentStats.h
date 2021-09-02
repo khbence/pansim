@@ -16,6 +16,7 @@ public:
     unsigned hospitalizedUntilTimestamp = 0;
     unsigned immunizationTimestamp = 0;
     uint8_t variant = 0;
+    uint8_t infectedCount = 0;
     char worstState = 0;
     friend std::ostream& operator<<(std::ostream& os, const AgentStats& s);
 };

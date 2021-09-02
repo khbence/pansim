@@ -347,6 +347,7 @@ public:
                                     state.gotInfected(variantIdx);
                                     agentStat.infectedTimestamp = timestamp;
                                     agentStat.infectedLocation = agentLocation;
+                                    agentStat.infectedCount++;
                                     agentStat.worstState = state.getStateIdx();
                                     agentStat.worstStateTimestamp = timestamp;
                                     agentStat.variant = variantIdx;

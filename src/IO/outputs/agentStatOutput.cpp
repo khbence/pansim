@@ -11,6 +11,7 @@ AgentStatOutput::AgentStatOutput(const thrust::host_vector<AgentStats>& data) {
             rapidjson::Value currentAgent(rapidjson::kObjectType);
             currentAgent.AddMember("ID", idx, allocator);
             currentAgent.AddMember("infectionTime", e.infectedTimestamp, allocator);
+            currentAgent.AddMember("infectedCount", e.infectedCount, allocator);
             currentAgent.AddMember("variant", e.variant, allocator);
             currentAgent.AddMember("InfectionLoc", e.infectedLocation, allocator);
             currentAgent.AddMember("diagnosisTime", e.diagnosedTimestamp, allocator);

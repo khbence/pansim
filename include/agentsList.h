@@ -179,6 +179,7 @@ public:
             AgentStats stat;
             if (PPValues_h.back().isInfected() > 0) {// Is infected at the beginning
                 stat.infectedTimestamp = 0;
+                stat.infectedCount = 1;
                 stat.worstState = PPValues_h.back().getStateIdx();
                 stat.worstStateTimestamp = 0;
             }

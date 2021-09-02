@@ -284,6 +284,7 @@ public:
                     && RandomGenerator::randomUnit() < infectionRatio * ppstate.getSusceptible(variant)) {
                     ppstate.gotInfected(variant);
                     agentStat.infectedTimestamp = timestamp;
+                    agentStat.infectedCount++;
                     agentStat.infectedLocation = agentLocation;
                     agentStat.worstState = ppstate.getStateIdx();
                     agentStat.worstStateTimestamp = timestamp;

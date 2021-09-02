@@ -2,7 +2,7 @@
 
 std::ostream& operator<<(std::ostream& os, const AgentStats& s) {
     if (s.infectedTimestamp == std::numeric_limits<decltype(s.infectedTimestamp)>::max()) { return os; }
-    os << "Infected at " << s.infectedTimestamp << " with variant " << s.variant << " location " << s.infectedLocation
+    os << "Infected at " << s.infectedTimestamp << " for " << int(s.infectedCount) << " time with variant " << s.variant << " location " << s.infectedLocation
        << " diagnosed: " << s.diagnosedTimestamp << " last quarantined: " << s.quarantinedTimestamp << " - "
        << s.quarantinedUntilTimestamp << " total days in quarantine " << s.daysInQuarantine;
     os << " worst state " << static_cast<unsigned>(s.worstState) << " between: " << s.worstStateTimestamp << "-"
