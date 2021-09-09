@@ -1308,6 +1308,7 @@ class RealMovement {
     unsigned school;
     unsigned classroom;
     unsigned work;
+    std::string dumpLocationAgentList;
 
 public:
     bool enableCurfew = false;
@@ -1327,12 +1328,16 @@ public:
             "household, 3 - + classroom/work, 4 - + school",
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(3))))("quarantineLength",
             "Length of quarantine in days",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(10))));
+            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(10))))
+            ("dumpLocationAgentList",
+            "Dump per-location list of agents at each iteration",
+            cxxopts::value<std::string>()->default_value(""));
     }
     void initializeArgs(const cxxopts::ParseResult& result) {
         tracked = result["trace"].as<unsigned>();
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
+        dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
     }
     void init(const parser::LocationTypes& data, unsigned cemeteryID) {
         publicSpace = data.publicSpace;
@@ -1636,5 +1641,16 @@ public:
         cudaDeviceSynchronize();
 #endif
         Util::updatePerLocationAgentLists(agentLocations, locationIdsOfAgents, locationAgentList, locationListOffsets);
+
+        if (dumpLocationAgentList.length()>0) {
+            std::ofstream file;
+            file.open(dumpLocationAgentList + "/locationList"+std::to_string(a.timestamp)+".txt");
+            file << locationListOffsets.size()-1 << "\n";
+            thrust::copy(locationListOffsets.begin(), locationListOffsets.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            thrust::copy(locationAgentList.begin(), locationAgentList.end(), std::ostream_iterator<unsigned>(file, " "));
+            file << "\n";
+            file.close();
+        }
     }
 };
