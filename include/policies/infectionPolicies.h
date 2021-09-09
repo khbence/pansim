@@ -412,16 +412,19 @@ public:
     double seasonalityMultiplier(Timehandler& simTime) {
         unsigned simDay = simTime.getTimestamp()/simTime.getStepsPerDay();
         //if (simDay<100) return 1.0;
-        int d = simTime.getStartDate() + simDay; //267 sept 23
+        int d = simTime.getStartDate() + simDay+14; //267 sept 23
         //int d_peak = 30; //assuming origin = feb 1
-        int d_peak = 45; //assuming origin = feb 15
-        //int d_peak = 59; //assuming origin = marc 1
+        //int d_peak = 45; //assuming origin = feb 15
+        // int d_peak = 59; //assuming origin = marc 1
+        int d_peak = 59+21+6; //assuming origin = mar 27
+        // int d_peak = 90;
+        double c0 = 2.5; //0.8;
         int d_mod = d % 366;
         if (d_mod > 366 / 2)
             d_mod = 366 - d_mod;
         double normed_value = 
-            (0.5 * 0.8 /*c0*/ * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * 0.8 /*c0*/))/
-            (0.5 * 0.8 /*c0*/ * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * 0.8 /*c0*/));
+            (0.5 * c0 * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * c0))/
+            (0.5 * c0 * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * c0));
         double calc_val = std::min(std::max(normed_value, 0.6/*trunc_val*/), 1.0);
         if (d_mod < d_peak)
             return 1.0;
