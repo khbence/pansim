@@ -5,9 +5,9 @@
 AgentStatOutput::AgentStatOutput(const thrust::host_vector<AgentStats>& data) {
     rapidjson::Value stats(rapidjson::kArrayType);
     const auto& names = DynamicPPState::getStateNames();
-    unsigned idx = 0;
-    for (const auto& e : data) {
-        if (e.infectedTimestamp != std::numeric_limits<decltype(e.infectedTimestamp)>::max() || e.worstState != 0) {
+    for (unsigned idx = 0; idx < data.size(); idx++) {
+        auto &e = data[idx];
+        // if (e.infectedTimestamp != std::numeric_limits<decltype(e.infectedTimestamp)>::max() || e.worstState != 0) {
             rapidjson::Value currentAgent(rapidjson::kObjectType);
             currentAgent.AddMember("ID", idx, allocator);
             currentAgent.AddMember("infectionTime", e.infectedTimestamp, allocator);
@@ -31,8 +31,7 @@ AgentStatOutput::AgentStatOutput(const thrust::host_vector<AgentStats>& data) {
             }
             currentAgent.AddMember("worstState", worst, allocator);
             stats.PushBack(currentAgent, allocator);
-        }
-        ++idx;
+        // }
     }
     d.AddMember("Statistics", stats, allocator);
 }

@@ -78,6 +78,7 @@ public:
     int enableOtherDisease = 1;
     Immunization<Simulation>* immunization;
     std::vector<float> mutationMultiplier;
+    std::vector<float> acquiredMultiplier;
     std::vector<float> mutationProgressionScaling;
     Timehandler simTime;
 
@@ -92,13 +93,16 @@ public:
             cxxopts::value<int>()->default_value("1"))
             ("mutationMultiplier",
             "infectiousness multiplier for mutated virus ",
-            cxxopts::value<std::string>()->default_value(""))
+            cxxopts::value<std::string>()->default_value("1.7613,2.64"))
+            ("acquiredMultiplier",
+            "susceptibility vs. reinfection and progression weight with acquired immunity ",
+            cxxopts::value<std::string>()->default_value("0.1,0.22,0.2,0.22,0.2,0.22"))
             ("mutationProgressionScaling",
             "disease progression scaling for mutated virus ",
-            cxxopts::value<std::string>()->default_value(""))
+            cxxopts::value<std::string>()->default_value("1.207,1.64"))
             ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
-            cxxopts::value<unsigned>()->default_value("0"))
+            cxxopts::value<unsigned>()->default_value("2"))
             ("startDate",
             "days into the year the simulation starts with (Jan 1 is 0) ",
             cxxopts::value<unsigned>()->default_value("267"));
@@ -451,7 +455,7 @@ public:
         stats.push_back(newInfected);
         std::cout << newInfected << "\t";
 
-        //Number of cumulative infections so far
+        //Number of people infected at least once
         unsigned infectionCount =
             thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
                 return agentStat.infectedCount;
@@ -480,6 +484,7 @@ public:
         outAgentStat = result["outAgentStat"].as<std::string>();
         enableOtherDisease = result["otherDisease"].as<int>();
         mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
+        acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
         mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
@@ -491,7 +496,7 @@ public:
         DataProvider data{ result };
         try {
             std::string header = PPState_t::initTransitionMatrix(
-                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), mutationMultiplier);
+                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), mutationMultiplier, acquiredMultiplier);
             agents->initAgentMeta(data.acquireParameters());
             locs->initLocationTypes(data.acquireLocationTypes());
             auto tmp = locs->initLocations(data.acquireLocations(), data.acquireLocationTypes());

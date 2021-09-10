@@ -80,7 +80,7 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("k,infectionCoefficient",
             "Infection: >0 :infectiousness coefficient ",
-            cxxopts::value<double>()->default_value("0.000362213"))("dumpLocationInfections",// 291642
+            cxxopts::value<double>()->default_value("0.00035613"))("dumpLocationInfections",// 291642
             "Dump per-location statistics every N timestep ",
             cxxopts::value<unsigned>()->default_value("0"))("dumpLocationInfectiousList",
             "Dump per-location list of infectious people ",

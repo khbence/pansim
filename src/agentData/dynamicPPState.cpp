@@ -11,6 +11,7 @@ namespace detail {
         char h_deadState;
         std::vector<float> h_infectious;
         std::vector<float> h_variantMultiplier;
+        std::vector<float> h_acquired;
         std::vector<float> h_accuracyPCR;
         std::vector<float> h_accuracyAntigen;
         std::vector<bool> h_susceptible;
@@ -24,6 +25,7 @@ namespace detail {
         __constant__ char nonCOVIDDeadState = 0;
         __constant__ float* infectious;
         __constant__ float* variantMultiplier;
+        __constant__ float* acquired;
         __constant__ float* accuracyPCR;
         __constant__ float* accuracyAntigen;
         __constant__ bool* susceptible;
@@ -66,12 +68,13 @@ void HD DynamicPPState::updateMeta() {
 std::string DynamicPPState::initTransitionMatrix(
     std::map<ProgressionType, std::pair<parser::TransitionFormat, unsigned>, std::less<>>& inputData,
     parser::ProgressionDirectory& config,
-    std::vector<float> &multiplier) {
+    std::vector<float> &multiplier, std::vector<float> &acquired) {
     // init global parameters that are used to be static
     detail::DynamicPPState::h_numberOfStates = config.stateInformation.stateNames.size();
     detail::DynamicPPState::h_infectious =
         decltype(detail::DynamicPPState::h_infectious)(detail::DynamicPPState::h_numberOfStates);
     detail::DynamicPPState::h_variantMultiplier = decltype(detail::DynamicPPState::h_variantMultiplier)(multiplier.size()+1);
+    detail::DynamicPPState::h_acquired = decltype(detail::DynamicPPState::h_acquired)(MAX_STRAINS*2);
     detail::DynamicPPState::h_accuracyPCR =
         decltype(detail::DynamicPPState::h_accuracyPCR)(detail::DynamicPPState::h_numberOfStates);
     detail::DynamicPPState::h_accuracyAntigen =
@@ -101,6 +104,16 @@ std::string DynamicPPState::initTransitionMatrix(
     detail::DynamicPPState::h_variantMultiplier[0] = 1.0;
     for (int i = 0; i < multiplier.size(); i++)
         detail::DynamicPPState::h_variantMultiplier[i+1] = multiplier[i];
+
+    for (int i = 0; i < MAX_STRAINS; i++) {
+        if (i*2+1 < acquired.size()) {
+            detail::DynamicPPState::h_acquired[i*2] = acquired[i*2];
+            detail::DynamicPPState::h_acquired[i*2+1] = acquired[i*2+1];
+        } else {
+            detail::DynamicPPState::h_acquired[i*2] = 1e-20;
+            detail::DynamicPPState::h_acquired[i*2+1] = 1e-20;
+        }
+    }
 
     for (const auto& e : config.stateInformation.infectedStates) {
         auto idx = detail::DynamicPPState::nameIndexMap.at(e);
@@ -154,6 +167,11 @@ std::string DynamicPPState::initTransitionMatrix(
     cudaMalloc((void**)&varTMP, (multiplier.size()+1) * sizeof(float));
     cudaMemcpy(varTMP, detail::DynamicPPState::h_variantMultiplier.data(), (multiplier.size()+1) * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(detail::DynamicPPState::variantMultiplier, &varTMP, sizeof(float*));
+
+    float* acqTMP;
+    cudaMalloc((void**)&acqTMP, (MAX_STRAINS) * 2 * sizeof(float));
+    cudaMemcpy(acqTMP, detail::DynamicPPState::h_acquired.data(), (MAX_STRAINS) * 2 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(detail::DynamicPPState::acquired, &acqTMP, sizeof(float*));
 
     float* accuracyPCRTMP;
     cudaMalloc((void**)&accuracyPCRTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
@@ -275,17 +293,29 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
                     daysBeforeNextState);
             }
         } else if (oldState > 0 && state == 0) { //Recovered to Susceptible
-            if (stats.worstState == 3) { //I2 asymptomatic
-                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.22f, 0);
-                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.22f, 1);
-                susceptible[2] = 0.2f; meta.setScalingSymptoms(0.22f, 2);//0.55,0.45
-            } else {
-                susceptible[0] = 0.1f; meta.setScalingSymptoms(0.22f, 0);
-                susceptible[1] = 0.2f; meta.setScalingSymptoms(0.22f, 1);//0.44
-                susceptible[2] = 0.2f; meta.setScalingSymptoms(0.22f, 2);//0.35,0.2
-            }
-            // for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 0.5f;
-            // for (int i = 0; i < MAX_STRAINS; i++) meta.setScalingSymptoms(0.3f, i);
+            // if (stats.worstState == 3) { //I2 asymptomatic
+            //     susceptible[0] = 0.1f; meta.setScalingSymptoms(0.22f, 0);
+            //     susceptible[1] = 0.2f; meta.setScalingSymptoms(0.22f, 1);
+            //     susceptible[2] = 0.2f; meta.setScalingSymptoms(0.22f, 2);//0.55,0.45
+            // } else {
+            //     susceptible[0] = 0.1f; meta.setScalingSymptoms(0.22f, 0);
+            //     susceptible[1] = 0.2f; meta.setScalingSymptoms(0.22f, 1);//0.44
+            //     susceptible[2] = 0.2f; meta.setScalingSymptoms(0.22f, 2);//0.35,0.2
+            // }
+             for (int i = 0; i < MAX_STRAINS; i++) {
+                 #ifdef __CUDA_ARCH__
+                 susceptible[i] = detail::DynamicPPState::acquired[2*i];
+                 #else
+                 susceptible[i] = detail::DynamicPPState::h_acquired[2*i];
+                 #endif
+             }
+             for (int i = 0; i < MAX_STRAINS; i++) {
+                 #ifdef __CUDA_ARCH__
+                 meta.setScalingSymptoms(detail::DynamicPPState::acquired[2*i+1], i);
+                 #else
+                 meta.setScalingSymptoms(detail::DynamicPPState::h_acquired[2*i+1], i);
+                 #endif
+             }
         } else if (oldState != state) {// if (oldWBState != states::WBStates::W) this will record any
             // good progression!
             stats.worstStateEndTimestamp = simTime;

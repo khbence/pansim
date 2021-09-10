@@ -67,7 +67,7 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("immunizationStart",
             "number of days into simulation when immunization starts",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))))("immunizationsPerDay",
+            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(96))))("immunizationsPerDay",
             "number of immunizations per day",
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))))("immunizationOrder",
             "Order of immunization (starting at 1, 0 to skip) for agents in different categories health workers, nursery home "
@@ -76,10 +76,10 @@ public:
             cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7"))
             ("immunizationEfficiencyInfection",
             "Efficiency of immunization against infection after 12 days and 28 days (pairs of comma-separated values for different strains)",
-            cxxopts::value<std::string>()->default_value("0.52,0.96,0.52,0.96,0.52,0.96"))
+            cxxopts::value<std::string>()->default_value("0.52,0.96,0.2,0.82,0.09,0.71"))
             ("immunizationEfficiencyProgression",
             "Efficiency of immunization in mitigating disease progression after 12 days and 28 days (pairs of comma-separated values for different strains)",
-            cxxopts::value<std::string>()->default_value("1.0,1.0,1.0,1.0,1.0,1.0"));
+            cxxopts::value<std::string>()->default_value("1.0,1.0,0.7,0.31,0.7,0.31"));
     }
 
     void initializeArgs(const cxxopts::ParseResult& result) {
@@ -129,7 +129,7 @@ public:
                 // TODO pull these params from config
                 if (possibleTypesPtr[idx] == 4
                     && (locationTypePtr[possibleLocationsPtr[idx]] == 12 || locationTypePtr[possibleLocationsPtr[idx]] == 14))
-                    return thrust::make_pair(true, 0.7f);
+                    return thrust::make_pair(true, 0.9f);
             }
             return thrust::make_pair(false, 0.0f);
         };
@@ -191,18 +191,18 @@ public:
             return thrust::make_pair(false, 0.0f);
         };
 
-        // Category over 18
+        // Category over 18-59
         auto cat_adult = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
-            if (agentMetaDataPtr[id].getAge() > 17)
-                return thrust::make_pair(true, 0.63f);//0.75
+            if (agentMetaDataPtr[id].getAge() > 17 && agentMetaDataPtr[id].getAge() < 60)
+                return thrust::make_pair(true, 0.62f);//0.75
             else
                 return thrust::make_pair(false, 0.0f);
         };
 
-        // Category over 3-18
+        // Category over 12-18
         auto cat_child = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18)
-                return thrust::make_pair(true, 0.34f);//0.4
+                return thrust::make_pair(true, 0.40f);//0.4
             else
                 return thrust::make_pair(false, 0.0f);
         };
