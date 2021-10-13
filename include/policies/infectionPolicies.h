@@ -35,7 +35,8 @@ private:
             infectiousAgentOffsets.push_back(0);
         }
         void insert(unsigned _timestamp, unsigned _variant, thrust::host_vector<unsigned> _locationIds,
-                    thrust::host_vector<unsigned> _infectedAgentsAtLocation, thrust::host_vector<unsigned> _infectiousAgents,
+                    thrust::host_vector<unsigned> _infectedAgentsAtLocation, thrust::host_vector<unsigned> _peopleOffsetsByLocation,
+                    thrust::host_vector<unsigned> _infectiousAgents,
                     thrust::host_vector<float> _infectiousnessOfAgents) {
                         timestamp.push_back(_timestamp);
                         variant.push_back(_variant);
@@ -43,8 +44,10 @@ private:
                         locationOffsets.push_back(locationIds.size());
                         infectedAgentsAtLocation.insert(infectedAgentsAtLocation.end(), _infectedAgentsAtLocation.begin(), _infectedAgentsAtLocation.end());
                         infectedAgentOffsets.push_back(infectedAgentsAtLocation.size());
+                        unsigned prevsize = infectiousAgentsAtLocation.size();
+                        thrust::transform(_peopleOffsetsByLocation.begin(), _peopleOffsetsByLocation.end(), _peopleOffsetsByLocation.begin(), [prevsize](unsigned in){return in+prevsize;});
+                        infectiousAgentOffsets.insert(infectiousAgentOffsets.end(),_peopleOffsetsByLocation.begin()+1, _peopleOffsetsByLocation.end());
                         infectiousAgentsAtLocation.insert(infectiousAgentsAtLocation.end(), _infectiousAgents.begin(), _infectiousAgents.end());
-                        infectiousAgentOffsets.push_back(infectiousAgentsAtLocation.size());
                         infectiousnessOfAgents.insert(infectiousnessOfAgents.end(), _infectiousnessOfAgents.begin(), _infectiousnessOfAgents.end());
         }
         void write(std::string fname) {
@@ -405,7 +408,7 @@ public:
         file << "\n";
         file.close();*/
         dumpstore->insert(simTime.getTimestamp(), variant, outLocationIds,
-                    newlyInfectedPeopleIds, peopleIds,
+                    newlyInfectedPeopleIds, locationLength, peopleIds,
                     infectiousness);
     }
 
