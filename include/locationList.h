@@ -17,6 +17,7 @@
 #include "customExceptions.h"
 #include "timeHandler.h"
 #include <cxxopts.hpp>
+#include <thrust/pair.h>
 
 template<typename SimulationType>
 class LocationsList {
@@ -59,7 +60,7 @@ public:
 
 
     // indices of agents sorted by location, and sorted by agent index
-    thrust::device_vector<unsigned> locationAgentList;
+    thrust::device_vector<thrust::pair<unsigned, unsigned>> locationAgentList;
     // indices of locations of the agents sorted
     // by location, and sorted by agent index
     thrust::device_vector<unsigned> locationIdsOfAgents;
@@ -226,7 +227,7 @@ public:
         locationAgentList.resize(agents->location.size());
         locationIdsOfAgents.resize(agents->location.size());
         locationListOffsets.resize(position.size() + 1);
-        Util::updatePerLocationAgentLists(agents->location, locationIdsOfAgents, locationAgentList, locationListOffsets);
+        Util::updatePerLocationAgentListsSort(agents->location, locationIdsOfAgents, locationAgentList, locationListOffsets);
     }
 
     // TODO optimise randoms for performance

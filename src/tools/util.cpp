@@ -33,20 +33,32 @@ void extractOffsets(unsigned* locOfAgents, unsigned* locationListOffsets, unsign
 #endif
 }
 
-void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
+void Util::updatePerLocationAgentListsSort(const thrust::device_vector<unsigned>& locationOfAgents,
     thrust::device_vector<unsigned>& futureCopyOfLocationOfAgents,
-    thrust::device_vector<unsigned>& locationAgentList,
+    thrust::device_vector<thrust::pair<unsigned, unsigned>>& locationAgentList,
     thrust::device_vector<unsigned>& locationListOffsets) {
     //    PROFILE_FUNCTION();
 
+    // old way of doing it:
     // Make a copy of locationOfAgents
-    thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), futureCopyOfLocationOfAgents.begin());
-    thrust::sequence(locationAgentList.begin(), locationAgentList.end());
+    // thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), futureCopyOfLocationOfAgents.begin());
+    // thrust::sequence(locationAgentList.begin(), locationAgentList.end());
     // Now sort by location, so locationAgentList contains agent IDs sorted by
     // location
     // BEGIN_PROFILING("sort")
-    thrust::stable_sort_by_key(futureCopyOfLocationOfAgents.begin(), futureCopyOfLocationOfAgents.end(), locationAgentList.begin());
+    // thrust::stable_sort_by_key(futureCopyOfLocationOfAgents.begin(), futureCopyOfLocationOfAgents.end(), locationAgentList.begin());
     // END_PROFILING("sort")
+
+    // new way
+    thrust::transform(thrust::make_zip_iterator(locationOfAgents.begin(), thrust::counting_iterator<unsigned>{0})
+                    , thrust::make_zip_iterator(locationOfAgents.begin(), thrust::counting_iterator<unsigned>{static_cast<unsigned>(locationOfAgents.size())})
+                    , locationAgentList.begin()
+                    , [](const thrust::tuple<unsigned, unsigned>& e) {
+                        return thrust::make_pair(thrust::get<0>(e), thrust::get<1>(e));
+                    });
+    
+    thrust::sort(locationAgentList.begin(), locationAgentList.end());
+
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     // Count number of people at any given location
     thrust::fill(locationListOffsets.begin(), locationListOffsets.end(), 0);

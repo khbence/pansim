@@ -17,6 +17,7 @@
 #include "progressionMatrixFormat.h"
 #include "dataProvider.h"
 #include "progressionType.h"
+#include "thrust/tuple.h"
 
 template<typename T>
 class Agent;
@@ -51,6 +52,12 @@ public:
     // longer, every agents' every locations, indexed by the offset
     thrust::device_vector<unsigned> possibleLocations;
     thrust::device_vector<unsigned> possibleTypes;
+
+    static constexpr unsigned AGENT = 0;
+    static constexpr unsigned FROM = 1;
+    static constexpr unsigned TO = 2;
+
+    thrust::device_vector<thrust::tuple<unsigned, unsigned, unsigned>> movement;
 
     thrust::tuple<unsigned, unsigned, unsigned> getQuarantineStats(unsigned timestamp) {
         thrust::tuple<unsigned, unsigned, unsigned> res = thrust::transform_reduce(
