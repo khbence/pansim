@@ -17,6 +17,7 @@
 #include "progressionMatrixFormat.h"
 #include "dataProvider.h"
 #include "progressionType.h"
+#include "thrust/tuple.h"
 
 template<typename T>
 class Agent;
@@ -42,6 +43,7 @@ public:
     // id in the array of the progression matrices
     thrust::device_vector<bool> diagnosed;
     thrust::device_vector<unsigned> location;
+    thrust::device_vector<thrust::tuple<unsigned, unsigned, unsigned>> movements;
     thrust::device_vector<unsigned> types;
     thrust::device_vector<AgentStats> agentStats;
     thrust::device_vector<bool> quarantined;
@@ -261,6 +263,7 @@ public:
         diagnosed = diagnosed_h;
         quarantined = quarantined_h;
         location = location_h;
+        movements = decltype(movements){location.size()};
         types = types_h;
         agents = agents_h;
         locationOffset = locationOffset_h;

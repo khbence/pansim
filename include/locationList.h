@@ -60,6 +60,9 @@ public:
 
     // indices of agents sorted by location, and sorted by agent index
     thrust::device_vector<unsigned> locationAgentList;
+    // these are the location indeces part of the locationAgentList
+    // for better data reaching patterns we put it into two arrays instead of a single pair
+    thrust::device_vector<unsigned> locationPartAgentList;
     // indices of locations of the agents sorted
     // by location, and sorted by agent index
     thrust::device_vector<unsigned> locationIdsOfAgents;
@@ -223,10 +226,11 @@ public:
 
     void initialize() {
         auto agents = SimulationType::AgentListType::getInstance();
-        locationAgentList.resize(agents->location.size());
-        locationIdsOfAgents.resize(agents->location.size());
-        locationListOffsets.resize(position.size() + 1);
-        Util::updatePerLocationAgentLists(agents->location, locationIdsOfAgents, locationAgentList, locationListOffsets);
+        locationAgentList = decltype(locationAgentList){agents->location.size()};
+        locationPartAgentList = decltype(locationPartAgentList){agents->location.size()};
+        locationIdsOfAgents = decltype(locationIdsOfAgents){agents->location.size()};
+        locationListOffsets = decltype(locationListOffsets){position.size() + 1};
+        Util::updatePerLocationAgentListsSort(agents->location, locationIdsOfAgents, locationAgentList, locationPartAgentList, locationListOffsets);
     }
 
     // TODO optimise randoms for performance

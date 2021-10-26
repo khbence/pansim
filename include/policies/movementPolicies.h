@@ -61,7 +61,7 @@ public:
                 }
                 stepsUntilMove--;
             });
-        Util::updatePerLocationAgentLists(agentLocations, locationIdsOfAgents, locationAgentList, locationListOffsets);
+        Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
     }
 };
 
@@ -1640,7 +1640,7 @@ public:
         RealMovementOps::doMovementDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents, a);
         cudaDeviceSynchronize();
 #endif
-        Util::updatePerLocationAgentLists(agentLocations, locationIdsOfAgents, locationAgentList, locationListOffsets);
+        Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
 
         if (dumpLocationAgentList.length()>0) {
             std::ofstream file;
