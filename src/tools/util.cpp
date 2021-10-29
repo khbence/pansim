@@ -1,5 +1,6 @@
 #include "util.h"
 #include "timing.h"
+#include "thrust/set_operations.h"
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 __global__ void extractOffsets_kernel(unsigned* locOfAgents, unsigned* locationListOffsets, unsigned length, unsigned nLocs) {
@@ -41,25 +42,12 @@ void Util::updatePerLocationAgentListsSort(const thrust::device_vector<unsigned>
     thrust::device_vector<unsigned>& locationListOffsets) {
     //    PROFILE_FUNCTION();
 
-    // old way of doing it:
-    // Make a copy of locationOfAgents
-    // thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), futureCopyOfLocationOfAgents.begin());
-    // thrust::sequence(locationAgentList.begin(), locationAgentList.end());
-    // Now sort by location, so locationAgentList contains agent IDs sorted by
-    // location
-    // BEGIN_PROFILING("sort")
-    // thrust::stable_sort_by_key(futureCopyOfLocationOfAgents.begin(), futureCopyOfLocationOfAgents.end(), locationAgentList.begin());
-    // END_PROFILING("sort")
-
-    // new way
     thrust::transform(thrust::make_zip_iterator(locationOfAgents.begin(), thrust::counting_iterator<unsigned>{0})
                     , thrust::make_zip_iterator(locationOfAgents.begin(), thrust::counting_iterator<unsigned>{static_cast<unsigned>(locationOfAgents.size())})
                     , thrust::make_zip_iterator(locationAgentList.begin(), locationPartAgentList.begin())
                     , [](const thrust::tuple<unsigned, unsigned>& e) {
                         return thrust::make_pair(thrust::get<0>(e), thrust::get<1>(e));
                     });
-    
-    // thrust::sort(locationAgentList.begin(), locationAgentList.end());
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     // Count number of people at any given location
@@ -80,3 +68,48 @@ void Util::updatePerLocationAgentListsSort(const thrust::device_vector<unsigned>
     extractOffsets(locationIdsOfAgentsPtr, locationListOffsetsPtr, futureCopyOfLocationOfAgents.size(), locationListOffsets.size() - 1);
 #endif
 };
+
+void Util::updatePerLocationAgentListsSet(thrust::device_vector<unsigned>& locationAgentList,
+    thrust::device_vector<unsigned>& locationPartAgentList,
+    thrust::device_vector<unsigned>& scanResult,
+    thrust::device_vector<unsigned>& flags,
+    thrust::device_vector<thrust::tuple<unsigned, unsigned, unsigned>>& movement,
+    thrust::device_vector<thrust::tuple<unsigned, unsigned>>& copyOfPair) {
+    
+    thrust::transform(movement.begin(), movement.end(), flags.begin(), [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& e) {
+        return static_cast<unsigned>(thrust::get<1>(e) != thrust::get<2>(e));
+    });
+    thrust::exclusive_scan(flags.begin(), flags.end(), scanResult.begin());
+    auto movedLength = scanResult.back() + static_cast<unsigned>(flags.back());
+    thrust::device_vector<thrust::tuple<unsigned, unsigned, unsigned>> movedAgents(movedLength);
+    thrust::scatter_if(movement.begin(), movement.end(), scanResult.begin(), flags.begin(), movedAgents.begin());
+    thrust::sort(movedAgents.begin(), movedAgents.end(), [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& lhs, const thrust::tuple<unsigned, unsigned, unsigned>& rhs) {
+        if(thrust::get<1>(lhs) == thrust::get<1>(rhs)) {
+            return thrust::get<0>(lhs) < thrust::get<0>(rhs);
+        }
+        return thrust::get<1>(lhs) < thrust::get<1>(rhs);
+    });
+    auto movementToPairFROM = [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& e) {
+        return thrust::make_tuple(thrust::get<1>(e), thrust::get<0>(e));
+    };
+    thrust::set_difference(thrust::make_zip_iterator(locationPartAgentList.begin(), locationAgentList.begin())
+        , thrust::make_zip_iterator(locationPartAgentList.end(), locationAgentList.end())
+        , thrust::make_transform_iterator(movedAgents.begin(), movementToPairFROM)
+        , thrust::make_transform_iterator(movedAgents.end(), movementToPairFROM)
+        , copyOfPair.begin());
+    
+    thrust::sort(movedAgents.begin(), movedAgents.end(), [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& lhs, const thrust::tuple<unsigned, unsigned, unsigned>& rhs) {
+        if(thrust::get<2>(lhs) == thrust::get<2>(rhs)) {
+            return thrust::get<0>(lhs) < thrust::get<0>(rhs);
+        }
+        return thrust::get<2>(lhs) < thrust::get<2>(rhs);
+    });
+    auto movementToPairTO = [] HD (const thrust::tuple<unsigned, unsigned, unsigned>& e) {
+        return thrust::make_tuple(thrust::get<2>(e), thrust::get<0>(e));
+    };
+    thrust::set_union(copyOfPair.begin()
+            , copyOfPair.begin() + static_cast<ptrdiff_t>(locationAgentList.size() - movedAgents.size())
+            , thrust::make_transform_iterator(movedAgents.begin(), movementToPairTO)
+            , thrust::make_transform_iterator(movedAgents.end(), movementToPairTO)
+            , thrust::make_zip_iterator(locationPartAgentList.begin(), locationAgentList.begin()));
+}

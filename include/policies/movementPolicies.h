@@ -5,6 +5,7 @@
 #include "cxxopts.hpp"
 #include "operators.h"
 #include "locationTypesFormat.h"
+#include "thrust/count.h"
 
 template<typename SimulationType>
 class NoMovement {
@@ -134,6 +135,7 @@ namespace RealMovementOps {
         unsigned* eventOffsetPtr;
         AgentTypeList::Event* eventsPtr;
         unsigned* agentLocationsPtr;
+        thrust::tuple<unsigned, unsigned, unsigned>* movement;
         unsigned long* locationOffsetPtr;
         unsigned* possibleLocationsPtr;
         unsigned* possibleTypesPtr;
@@ -256,7 +258,10 @@ namespace RealMovementOps {
         void
         doMovement(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a) {
         unsigned& agentType = a.agentTypesPtr[i];
-
+        a.movement[i] = thrust::make_tuple(i, a.agentLocationsPtr[i], static_cast<unsigned>(0));
+        ScopeExit se([&]() {
+            thrust::get<2>(a.movement[i]) = a.agentLocationsPtr[i];
+        });
         // if not dead or not in hospital (covid or non-covid) go home at curfew
         if (a.enableCurfew && a.curfewBegin == a.simTime.getMinutes() / a.timeStep) {
             states::WBStates wBState = a.agentStatesPtr[i].getWBState();
@@ -1609,6 +1614,8 @@ public:
         a.agentStatsPtr = thrust::raw_pointer_cast(agentStats.data());
         a.stepsUntilMovePtr = thrust::raw_pointer_cast(this->stepsUntilMove.data());
         a.noWorkAgentPtr = thrust::raw_pointer_cast(noWorkAgent.data());
+        auto& movement = realThis->agents->movements;
+        a.movement = thrust::raw_pointer_cast(movement.data());
 
         // Arrays storing actual location IDs for each agent, for each location
         // type
@@ -1640,8 +1647,16 @@ public:
         RealMovementOps::doMovementDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents, a);
         cudaDeviceSynchronize();
 #endif
-        Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
+        
+        auto moved = thrust::count_if(movement.begin(), movement.end(), [](const thrust::tuple<unsigned, unsigned, unsigned>& e){
+            return thrust::get<1>(e) != thrust::get<2>(e);
+        });
+        if(static_cast<double>(moved) / static_cast<double>(movement.size()) < 0.25) {
 
+        } else {
+            Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
+        }
+        
         if (dumpLocationAgentList.length()>0) {
             std::ofstream file;
             file.open(dumpLocationAgentList + "/locationList"+std::to_string(a.timestamp)+".txt");

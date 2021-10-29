@@ -1,6 +1,7 @@
 #pragma once
 #include "datatypes.h"
 #include "timing.h"
+#include "thrust/tuple.h"
 
 class Util {
 public:
@@ -9,6 +10,14 @@ public:
     thrust::device_vector<unsigned>& locationAgentList,
     thrust::device_vector<unsigned>& locationPartAgentList,
     thrust::device_vector<unsigned>& locationListOffsets);
+
+    // movement, flags, scanResult, 
+    static void updatePerLocationAgentListsSet(thrust::device_vector<unsigned>& locationAgentList,
+    thrust::device_vector<unsigned>& locationPartAgentList,
+    thrust::device_vector<unsigned>& scanResult,
+    thrust::device_vector<unsigned>& flags,
+    thrust::device_vector<thrust::tuple<unsigned, unsigned, unsigned>>& movement,
+    thrust::device_vector<thrust::tuple<unsigned, unsigned>>& copyOfPair);
 };
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA

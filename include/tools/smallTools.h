@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <optional>
 
 std::string separator();
 
@@ -32,3 +33,21 @@ std::vector<double> splitStringDouble(std::string probsString, char sep);
 std::vector<float> splitStringFloat(std::string probsString, char sep);
 std::vector<int> splitStringInt(std::string probsString, char sep);
 std::vector<std::string> splitStringString(std::string header, char sep);
+
+template<typename F>
+class ScopeExit {
+    std::optional<F> fn;
+
+public:
+    ScopeExit() = default;
+    explicit ScopeExit(F fnP) : fn(fnP) {}
+    ScopeExit(const ScopeExit&) = delete;
+    ScopeExit& operator=(const ScopeExit&) = delete;
+    ScopeExit(ScopeExit&&) = default;
+    ScopeExit& operator=(ScopeExit&&) = default;
+    ~ScopeExit() {
+        if(fn) {
+            fn.value()();
+        }
+    }
+};

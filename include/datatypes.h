@@ -16,3 +16,7 @@
 
 #define MAX_STRAINS 4
 #define MIN(a, b) (a) < (b) ? (a) : (b)
+
+#define AGENT = 0;
+#define FROM = 1;
+#define TO = 2;
