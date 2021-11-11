@@ -69,6 +69,11 @@ public:
     // into locationAgentList
     thrust::device_vector<unsigned> locationListOffsets;
 
+    //containers for setSort
+    thrust::device_vector<unsigned> scanResult;
+    thrust::device_vector<unsigned> flags;
+    thrust::device_vector<thrust::tuple<unsigned, unsigned>> copyOfPairs;
+
     std::map<unsigned, std::string> generalLocationTypes;
 
     unsigned tracked;
@@ -230,6 +235,9 @@ public:
         locationPartAgentList = decltype(locationPartAgentList){agents->location.size()};
         locationIdsOfAgents = decltype(locationIdsOfAgents){agents->location.size()};
         locationListOffsets = decltype(locationListOffsets){position.size() + 1};
+        scanResult = decltype(scanResult){agents->location.size()};
+        flags = decltype(flags){agents->location.size()};
+        copyOfPairs = decltype(copyOfPairs){agents->location.size()};
         Util::updatePerLocationAgentListsSort(agents->location, locationIdsOfAgents, locationAgentList, locationPartAgentList, locationListOffsets);
     }
 

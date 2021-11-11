@@ -1314,6 +1314,7 @@ class RealMovement {
     unsigned classroom;
     unsigned work;
     std::string dumpLocationAgentList;
+    bool needLocationAgentList;
 
 public:
     bool enableCurfew = false;
@@ -1343,6 +1344,9 @@ public:
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
         dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
+        auto dumpInf = result["dumpLocationInfections"].as<int>();
+        auto dumInfList = result["dumpLocationInfectiousList"].as<std::string>();
+        needLocationAgentList = !((dumpLocationAgentList == "") && (dumpInf == 0) && (dumInfList == ""));
     }
     void init(const parser::LocationTypes& data, unsigned cemeteryID) {
         publicSpace = data.publicSpace;
@@ -1648,13 +1652,15 @@ public:
         cudaDeviceSynchronize();
 #endif
         
-        auto moved = thrust::count_if(movement.begin(), movement.end(), [](const thrust::tuple<unsigned, unsigned, unsigned>& e){
-            return thrust::get<1>(e) != thrust::get<2>(e);
-        });
-        if(static_cast<double>(moved) / static_cast<double>(movement.size()) < 0.25) {
-
-        } else {
-            Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
+        if(needLocationAgentList) {
+            auto moved = thrust::count_if(movement.begin(), movement.end(), [](const thrust::tuple<unsigned, unsigned, unsigned>& e){
+                return thrust::get<1>(e) != thrust::get<2>(e);
+            });
+            if(static_cast<double>(moved) / static_cast<double>(movement.size()) < 0.25) {
+                Util::updatePerLocationAgentListsSet(agentLocations, realThis->locs->locationPartAgentList, realThis->locs->scanResult, realThis->locs->flags, movement, realThis->locs->copyOfPairs);
+            } else {
+                Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);
+            }
         }
         
         if (dumpLocationAgentList.length()>0) {
