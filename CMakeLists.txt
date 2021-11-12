@@ -88,9 +88,6 @@ if(USE_GPU)
     find_package(CUDAToolkit)
 endif(USE_GPU)
 
-find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
-find_package(CUB REQUIRED PATHS "cub/cub/cmake/")
-
 add_executable(${MAIN_BINARY} src/main.cpp)
 
 if(CUDAToolkit_FOUND AND USE_GPU)
@@ -112,7 +109,6 @@ if(CUDAToolkit_FOUND AND USE_GPU)
 
     message(STATUS "Using CUDA-GPU")
     enable_language(CUDA)
-    thrust_create_target(Thrust HOST CPP DEVICE CUDA)
     cuda_convert_flags(project_warnings)
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --expt-extended-lambda")
     set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
@@ -122,10 +118,17 @@ else()
         message(INFO "CUDA does not exists")
     endif()
     message(STATUS "Using CPU only")
+endif()
+
+find_package(Thrust REQUIRED PATHS "thrust/thrust/cmake/")
+find_package(OpenMP)
+
+if(CUDAToolkit_FOUND AND USE_GPU)
+    thrust_create_target(Thrust HOST CPP DEVICE CUDA)
+else()
     thrust_create_target(Thrust HOST CPP DEVICE OMP)
 endif()
 
-find_package(OpenMP)
 target_include_directories(${MAIN_BINARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
 target_link_libraries(${MAIN_BINARY} PUBLIC project_options Thrust ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
 # target_include_directories(${MAIN_BINARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
