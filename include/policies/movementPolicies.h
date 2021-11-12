@@ -259,7 +259,7 @@ namespace RealMovementOps {
         doMovement(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a) {
         unsigned& agentType = a.agentTypesPtr[i];
         a.movement[i] = thrust::make_tuple(i, a.agentLocationsPtr[i], static_cast<unsigned>(0));
-        ScopeExit se([&]() {
+        ScopeExit se([&a, i] HD () {
             thrust::get<2>(a.movement[i]) = a.agentLocationsPtr[i];
         });
         // if not dead or not in hospital (covid or non-covid) go home at curfew
@@ -1337,16 +1337,19 @@ public:
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(10))))
             ("dumpLocationAgentList",
             "Dump per-location list of agents at each iteration",
-            cxxopts::value<std::string>()->default_value(""));
+            cxxopts::value<std::string>()->default_value(""))(
+                "threshold", "threshold to switch between sort or set solution", cxxopts::value<double>()->default_value("0.0")
+            );
     }
     void initializeArgs(const cxxopts::ParseResult& result) {
         tracked = result["trace"].as<unsigned>();
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
         dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
-        auto dumpInf = result["dumpLocationInfections"].as<int>();
-        auto dumInfList = result["dumpLocationInfectiousList"].as<std::string>();
-        needLocationAgentList = !((dumpLocationAgentList == "") && (dumpInf == 0) && (dumInfList == ""));
+        // auto dumpInf = result["dumpLocationInfections"].as<int>();
+        // auto dumInfList = result["dumpLocationInfectiousList"].as<std::string>();
+        // needLocationAgentList = !((dumpLocationAgentList == "") && (dumpInf == 0) && (dumInfList == ""));
+        needLocationAgentList = true; // for the benchmark
     }
     void init(const parser::LocationTypes& data, unsigned cemeteryID) {
         publicSpace = data.publicSpace;
