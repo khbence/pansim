@@ -32,7 +32,7 @@ class Immunization {
     unsigned dailyDoses = 0;
     unsigned diagnosticLevel = 0;
     unsigned numVariants = 1;
-
+#define pct75 1
     unsigned numberOfVaccinesToday(Timehandler& simTime) {
         // float availPerWeek[] = {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 4943.59527, 8544.33033,
         // 8563.97919, 9160.88972, 9612.38930, 10252.4613, 10276.0211, 9361.10071, 9553.48985, 9977.56585, 9722.31922,
@@ -48,14 +48,19 @@ class Immunization {
         //                        prediction
         // 3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780};
         // //then
-        /* kelet+nyugat */ //float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 4021, 4631, 6505, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399};
-        float availPerWeek[] = {189, 941, 1073, 465, 1410, 1182, 896, 2027, 4264, 5578, 6206, 4481, 6249, 7512, 9613, 7653, 6310, 8597, 4122, 5719, 7451, 2412, 2266, 1581, 1177, 1209, 753, 616, 546, 534, 532, 452, 498, 543, 590, 1364};
+        #if pct75==1
+        /* kelet+nyugat 75%-ra */
+        float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424};
+        #else
+        /* kelet+nyugat */ float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 4021, 4631, 6505, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399, 4399};
+        #endif
+        //float availPerWeek[] = {189, 941, 1073, 465, 1410, 1182, 896, 2027, 4264, 5578, 6206, 4481, 6249, 7512, 9613, 7653, 6310, 8597, 4122, 5719, 7451, 2412, 2266, 1581, 1177, 1209, 753, 616, 546, 534, 532, 452, 498, 543, 590, 1364};
         /* csak nyugat */ // float availPerWeek[] = {1083, 919, 395, 1599, 796, 994, 1435,1734, 2055, 3572, 2671,3937 ,5097, 5935, 3564,5283,2447,1705,2778,5727,2686,2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686};
         if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= startAfterDay) {
             unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
             unsigned week = day/7;
             return availPerWeek[week>35?35:week]/7.0;
-            //return dailyDoses;
+            // return dailyDoses;
         } else
             return 0;
     }
@@ -155,18 +160,20 @@ public:
 
         // Category elderly
         auto cat_elderly = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
-            if (agentMetaDataPtr[id].getAge() >= 60)
-                return thrust::make_pair(true, 0.82f);
-            else
+            if (agentMetaDataPtr[id].getAge() >= 60) {
+                if (pct75) return thrust::make_pair(true, 0.89f);
+                else return thrust::make_pair(true, 0.82f); //75%: 0.89
+            } else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category 18-59, underlying condition
         auto cat_underlying = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getPrecondIdx() > 0 && agentMetaDataPtr[id].getAge() >= 18
-                && agentMetaDataPtr[id].getAge() < 60)
-                return thrust::make_pair(true, 0.8f);
-            else
+                && agentMetaDataPtr[id].getAge() < 60) {
+                if (pct75) return thrust::make_pair(true, 0.95f);
+                else return thrust::make_pair(true, 0.8f); //75%: 0.95
+            } else
                 return thrust::make_pair(false, 0.0f);
         };
 
@@ -175,8 +182,9 @@ public:
                                  unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if (possibleTypesPtr[idx] == 4
-                    && essentialPtr[possibleLocationsPtr[idx]] == 1)// TODO pull these params from config
-                    return thrust::make_pair(true, 0.75f);//0.75
+                    && essentialPtr[possibleLocationsPtr[idx]] == 1)
+                    if (pct75) return thrust::make_pair(true, 0.85f);
+                    else return thrust::make_pair(true, 0.75f); //75%: 0.85
             }
             return thrust::make_pair(false, 0.0f);
         };
@@ -185,25 +193,29 @@ public:
         auto cat_school = [locationOffsetPtr, possibleTypesPtr, locationTypePtr, possibleLocationsPtr] HD(
                               unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
-                if (possibleTypesPtr[idx] == 4 && locationTypePtr[possibleLocationsPtr[idx]] == 3)
-                    return thrust::make_pair(true, 0.80f);//0.75
+                if (possibleTypesPtr[idx] == 4 && locationTypePtr[possibleLocationsPtr[idx]] == 3) {
+                    if (pct75) return thrust::make_pair(true, 0.8f);
+                    else return thrust::make_pair(true, 0.80f); //75%: 0.8
+                }
             }
             return thrust::make_pair(false, 0.0f);
         };
 
         // Category over 18-59
         auto cat_adult = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
-            if (agentMetaDataPtr[id].getAge() > 17 && agentMetaDataPtr[id].getAge() < 60)
-                return thrust::make_pair(true, 0.62f);//0.75
-            else
+            if (agentMetaDataPtr[id].getAge() > 17 && agentMetaDataPtr[id].getAge() < 60) {
+                if (pct75) return thrust::make_pair(true, 0.88f);
+                else return thrust::make_pair(true, 0.62f); //75%: 0.88
+            } else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category over 12-18
         auto cat_child = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
-            if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18)
-                return thrust::make_pair(true, 0.40f);//0.4
-            else
+            if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18) {
+                if (pct75) return thrust::make_pair(true, 0.6f);
+                else return thrust::make_pair(true, 0.40f); //75%: 0.6
+            } else
                 return thrust::make_pair(false, 0.0f);
         };
 
@@ -338,8 +350,9 @@ public:
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end())),
             [timeStep, timestamp, immunizationEfficiencyInfectionLocal, immunizationEfficiencyProgressionLocal, numVariantsLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
                 if (thrust::get<0>(tup).isInfectious() > 0 &&
-                    thrust::get<1>(tup).infectedCount > 1) {
-                        thrust::get<0>(tup).reduceInfectiousness(0.5);
+                    thrust::get<1>(tup).infectedCount > 1 /*&&
+                    thrust::get<0>(tup).getVariant() < 2*/) {
+                        thrust::get<0>(tup).reduceInfectiousness(0.65);
                 }
                 // If not immunized, return
                 if (thrust::get<1>(tup).immunizationTimestamp == 0) return;
@@ -350,8 +363,8 @@ public:
                         thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i+1]), i);
                         thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i+1]), i);
                         //If agent is infected, make them less infectious TODO: external parameter
-                        if (thrust::get<0>(tup).isInfectious())
-                            thrust::get<0>(tup).reduceInfectiousness(0.5);
+                        if (thrust::get<0>(tup).isInfectious() /*&& thrust::get<0>(tup).getVariant() < 2*/)
+                            thrust::get<0>(tup).reduceInfectiousness(0.65);
                     } else if (daysSinceImmunization >= 12) {
                         thrust::get<0>(tup).setSusceptible(MIN(thrust::get<0>(tup).getSusceptible(i),1.0f-immunizationEfficiencyInfectionLocal[2*i]), i);
                         thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i]), i);
