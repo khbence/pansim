@@ -164,7 +164,7 @@ namespace DetailedTestingOps {
         if (a.timestamp > a.testingDelay * 24 * 60 / a.timeStep && a.lastTestPtr[i] != std::numeric_limits<unsigned>::max()
             && a.lastTestPtr[i] > a.timestamp - a.testingDelay * 24 * 60 / a.timeStep)
             return;
-        if (a.agentStatesPtr[i].getWBState() == states::D || a.diagnosedPtr[i]) return;
+        if (a.agentStatesPtr[i].getWBState() == states::WBStates::D || a.diagnosedPtr[i]) return;
 
         // Check home
         unsigned home = RealMovementOps::findActualLocationForType(i,
