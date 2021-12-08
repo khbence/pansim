@@ -465,8 +465,8 @@ public:
 
         //Number of reinfections so far
         unsigned reinfectionCount =
-            thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
-                return agentStat.infectedCount > 1;
+            thrust::reduce(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
+                return agentStat.infectedCount > 1 ? agentStat.infectedCount-1 : 0;
             });
         stats.push_back(reinfectionCount);
         std::cout << reinfectionCount << "\t";
