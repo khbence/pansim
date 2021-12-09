@@ -163,6 +163,8 @@ namespace RealMovementOps {
         unsigned curfewEnd;
         bool enableCurfew;
         unsigned schoolAgeRestriction;
+        bool quarantineImmuneActive;
+        bool lockdownNonvaccActive;
     };
 
     template<typename PPState, typename AgentMeta, typename LocationType>
@@ -170,10 +172,10 @@ namespace RealMovementOps {
     __device__
 #endif
         void
-        quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until) {
+        quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until, bool quarantineImmuneActive) {
         if (a.quarantinePolicy == 0) return;
-        if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false) return;
-        if (a.agentStatsPtr[i].immunizationTimestamp > 0) return;
+        if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false && quarantineImmuneActive == false) return;
+        if (a.agentStatsPtr[i].immunizationTimestamp > 0 && quarantineImmuneActive == false) return;
         a.quarantinedPtr[i] = true;
         a.agentStatsPtr[i].quarantinedTimestamp = a.timestamp;
         unsigned previousQuarantineUntil = a.agentStatsPtr[i].quarantinedUntilTimestamp;
@@ -407,7 +409,7 @@ namespace RealMovementOps {
                                                             // being counted as random test in
                                                             // TestingPolicy
 
-                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);
+                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);
             }
             checkLarger(i, a);
             return;
@@ -432,7 +434,7 @@ namespace RealMovementOps {
                         a.simTime.getMinutes() % 60,
                         a.agentLocationsPtr[i],
                         a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
-                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
+                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]], a.quarantineImmuneActive);
             }
             // if now quarantined
             if (a.quarantinedPtr[i] == true) {
@@ -495,7 +497,7 @@ namespace RealMovementOps {
 
             // Diagnosed, but not yet quarantined
             if (a.quarantinePolicy > 0 && !a.quarantinedPtr[i]) {
-                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);
+                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);
                 if (i == a.tracked && a.quarantinedPtr[i]) {
                     printf(
                         "Agent %d of type %d day %d at %d:%d WBState %d was "
@@ -896,7 +898,7 @@ namespace RealMovementOps {
                 || a.locationTypePtr[a.agentLocationsPtr[i]] == a.workType)) {
             // if not currently under quarantine
             if (!a.quarantinedPtr[i]) {
-                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
+                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]], a.quarantineImmuneActive);
 
                 if (i == a.tracked && a.quarantinedPtr[i])
                     printf(
@@ -992,7 +994,7 @@ namespace RealMovementOps {
 
                 RealMovementOps::quarantineAgent(i,
                     a,
-                    a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);// TODO: quarantine period
+                    a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);// TODO: quarantine period
 
                 // We are not moving the agent - stay here for full duration,
                 // potentially infect others when moving next, he will go into
@@ -1317,6 +1319,8 @@ public:
     bool curfewTimeConverted = false;
     unsigned schoolAgeRestriction = 99;
     bool holidayModeActive = false;
+    bool quarantineImmuneActive = false;
+    bool lockdownNonvaccActive = false;
     unsigned quarantinePolicy;
     // add program parameters if we need any, this function got called already
     // from Simulation
@@ -1571,6 +1575,8 @@ public:
         a.curfewBegin = curfewBegin;
         a.curfewEnd = curfewEnd;
         a.schoolAgeRestriction = schoolAgeRestriction;
+        a.quarantineImmuneActive = quarantineImmuneActive;
+        a.lockdownNonvaccActive = lockdownNonvaccActive;
 
         // Location-based data
         thrust::device_vector<unsigned>& locationAgentList = realThis->locs->locationAgentList;

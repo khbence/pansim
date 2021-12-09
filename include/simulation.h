@@ -465,9 +465,9 @@ public:
 
         //Number of reinfections so far
         unsigned reinfectionCount =
-            thrust::reduce(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
-                return agentStat.infectedCount > 1 ? agentStat.infectedCount-1 : 0;
-            });
+            thrust::transform_reduce(agentStats.begin(), agentStats.end(), 
+                                     [] HD(AgentStats agentStat) {return unsigned(agentStat.infectedCount > 1 ? agentStat.infectedCount-1 : 0);},
+                                     (unsigned)0, thrust::plus<unsigned>());
         stats.push_back(reinfectionCount);
         std::cout << reinfectionCount << "\t";
 
@@ -558,6 +558,8 @@ public:
     }
     void setSchoolAgeRestriction(unsigned limit) { MovementPolicy<Simulation>::schoolAgeRestriction = limit; }
     void toggleHolidayMode(bool enable) { MovementPolicy<Simulation>::holidayModeActive = enable; }
+    void toggleQuarantineImmune(bool enable) { MovementPolicy<Simulation>::quarantineImmuneActive = enable; }
+    void toggleLockdownNonvacc(bool enable) { MovementPolicy<Simulation>::lockdownNonvaccActive = enable; }
     void quarantinePolicy(unsigned newQP) { MovementPolicy<Simulation>::quarantinePolicy = newQP; }
     Timehandler& getSimTime() { return simTime; }
 };

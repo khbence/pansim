@@ -104,7 +104,8 @@ public:
             if (!enableClosures && !rule.name.compare("Masks") == 0 && !rule.name.compare("Curfew") == 0
                 && !rule.name.compare("HolidayMode") == 0 && !rule.name.compare("SchoolAgeRestriction") == 0
                 && !rule.name.compare("ExposeToMutation") == 0 && !rule.name.compare("ReduceMovement") == 0
-                && !rule.name.compare("QuarantinePolicy")==0)
+                && !rule.name.compare("QuarantinePolicy")==0 && !rule.name.compare("QuarantineImmune")==0
+                && !rule.name.compare("LockdownNonvacc")==0)
                 continue;
 
             // Create condition
@@ -279,6 +280,34 @@ public:
                         realThis->toggleHolidayMode(close);
                         r->previousOpenState = shouldBeOpen;
                         if (diags > 0) printf("Holiday mode %s\n", (int)shouldBeOpen ? "disabled" : "enabled");
+                    }
+                });
+            } else if (rule.name.compare("QuarantineImmune") == 0) {
+                // Curfew
+                std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, realThis, diags](Rule* r) {
+                    bool close = true;
+                    for (GlobalCondition* c : r->conditions) { close = close && c->active; }
+                    bool shouldBeOpen = !close;
+                    if (r->previousOpenState != shouldBeOpen) {
+                        realThis->toggleQuarantineImmune(close);
+                        r->previousOpenState = shouldBeOpen;
+                        if (diags > 0) printf("Quaratining those \"immune\" %s\n", (int)shouldBeOpen ? "disabled" : "enabled");
+                    }
+                });
+            } else if (rule.name.compare("LockdownNonvacc") == 0) {
+                // Curfew
+                std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, realThis, diags](Rule* r) {
+                    bool close = true;
+                    for (GlobalCondition* c : r->conditions) { close = close && c->active; }
+                    bool shouldBeOpen = !close;
+                    if (r->previousOpenState != shouldBeOpen) {
+                        realThis->toggleLockdownNonvacc(close);
+                        r->previousOpenState = shouldBeOpen;
+                        if (diags > 0) printf("Locking down those \"non-immune\" %s\n", (int)shouldBeOpen ? "disabled" : "enabled");
                     }
                 });
             } else if (rule.name.compare("QuarantinePolicy")==0) {
