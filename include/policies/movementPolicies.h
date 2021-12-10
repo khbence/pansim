@@ -159,6 +159,7 @@ namespace RealMovementOps {
         unsigned workType;
         LocationType* locationTypePtr;
         uint8_t* noWorkAgentPtr;
+        uint8_t* essentialLocPtr;
         unsigned curfewBegin;
         unsigned curfewEnd;
         bool enableCurfew;
@@ -320,6 +321,7 @@ namespace RealMovementOps {
             return;
         }
 
+        //Check if quarantine is over
         if (a.agentStatsPtr[i].quarantinedUntilTimestamp <= a.timestamp) { a.quarantinedPtr[i] = false; }
 
         states::WBStates wBState = a.agentStatesPtr[i].getWBState();
@@ -677,9 +679,11 @@ namespace RealMovementOps {
             unsigned wasClosed = std::numeric_limits<unsigned>::max();
             bool schoolAndTooOld = (newLocationType == a.schoolType || newLocationType == a.classroomType)
                                    && a.agentMetaDataPtr[i].getAge() >= a.schoolAgeRestriction;
-            if (schoolAndTooOld
+            if (schoolAndTooOld //school is closed for student
                 || ((a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
-                    && newLocationType != a.workType)) {
+                    && newLocationType != a.workType) //or destination is closed and it's not agent's workplace
+                || (a.lockdownNonvaccActive && a.agentStatsPtr[i].immunizationTimestamp==0)) //or non-immune should be locked down, and this is nonessential
+                {
                 // If closed, but there is another option to go to different type location, try that
                 if (numPotentialEvents > 1) {
                     double rand = RandomGenerator::randomReal(1.0);
@@ -713,8 +717,9 @@ namespace RealMovementOps {
                                             && a.agentMetaDataPtr[i].getAge() >= a.schoolAgeRestriction;
                     // is that closed too?
                     if (schoolAndTooOld
-                        || (a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
-                               && newLocationType != a.workType) {
+                        || ((a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
+                               && newLocationType != a.workType)
+                        || (a.lockdownNonvaccActive && a.agentStatsPtr[i].immunizationTimestamp==0)) {
                         wasClosed = newLocation;
                         newLocation = RealMovementOps::findActualLocationForType(i,
                             a.homeType,
@@ -1595,6 +1600,7 @@ public:
         a.locationQuarantineUntilPtr = thrust::raw_pointer_cast(locationQuarantineUntil.data());
         thrust::device_vector<typename SimulationType::TypeOfLocation_t>& locationTypes = realThis->locs->locType;
         a.locationTypePtr = thrust::raw_pointer_cast(locationTypes.data());
+        a.essentialLocPtr = thrust::raw_pointer_cast(realThis->locs->essential.data());
 
         // Agent-based data
         thrust::device_vector<unsigned>& agentLocations = realThis->agents->location;
@@ -1631,6 +1637,7 @@ public:
         a.eventOffsetPtr = thrust::raw_pointer_cast(eventOffset.data());
         thrust::device_vector<AgentTypeList::Event>& events = realThis->agents->agentTypes.events;
         a.eventsPtr = thrust::raw_pointer_cast(events.data());
+
 
         unsigned numberOfAgents = agentLocations.size();
         unsigned numberOfLocations = locationListOffsets.size() - 1;
