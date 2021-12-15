@@ -435,9 +435,9 @@ public:
         // int d_peak = 59; //assuming origin = marc 1
         int d_peak = 59+21+6; //assuming origin = mar 27
         // int d_peak = 90;
-        double c0 = 2.5; //0.8;
+        double c0 = 3.08; //0.8;
 
-        if (simDay > 250) {
+        if (simDay > 250 && simDay < 450) {
             d += d_offset;
             d_peak += d_peak_offset;
             c0 = c0_offset;
@@ -448,7 +448,7 @@ public:
         double normed_value = 
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * c0))/
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * c0));
-        double calc_val = std::min(std::max(normed_value, 0.6/*trunc_val*/), 1.0);
+        double calc_val = std::min(std::max(normed_value, 0.5/*trunc_val*/), 1.0);
         if (d_mod < d_peak)
             return 1.0;
         else
