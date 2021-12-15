@@ -78,7 +78,6 @@ public:
     int enableOtherDisease = 1;
     Immunization<Simulation>* immunization;
     std::vector<float> mutationMultiplier;
-    std::vector<float> acquiredMultiplier;
     std::vector<float> mutationProgressionScaling;
     Timehandler simTime;
 
@@ -94,9 +93,6 @@ public:
             ("mutationMultiplier",
             "infectiousness multiplier for mutated virus ",
             cxxopts::value<std::string>()->default_value("1.7613,2.64"))
-            ("acquiredMultiplier",
-            "susceptibility vs. reinfection and progression weight with acquired immunity ",
-            cxxopts::value<std::string>()->default_value("0.1,0.22,0.2,0.22,0.2,0.22"))
             ("mutationProgressionScaling",
             "disease progression scaling for mutated virus ",
             cxxopts::value<std::string>()->default_value("1.207,1.64"))
@@ -471,6 +467,14 @@ public:
         stats.push_back(reinfectionCount);
         std::cout << reinfectionCount << "\t";
 
+        //Cumulative number of boosters
+        unsigned boosters =
+            thrust::transform_reduce(agentStats.begin(), agentStats.end(), 
+                                     [] HD(AgentStats agentStat) {return unsigned(agentStat.immunizationCount > 1 ? agentStat.immunizationCount-1 : 0);},
+                                     (unsigned)0, thrust::plus<unsigned>());
+        stats.push_back(boosters);
+        std::cout << boosters << "\t";
+
         std::cout << '\n';
         return stats;
     }
@@ -484,7 +488,6 @@ public:
         outAgentStat = result["outAgentStat"].as<std::string>();
         enableOtherDisease = result["otherDisease"].as<int>();
         mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
-        acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
         mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
@@ -496,7 +499,7 @@ public:
         DataProvider data{ result };
         try {
             std::string header = PPState_t::initTransitionMatrix(
-                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), mutationMultiplier, acquiredMultiplier);
+                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), mutationMultiplier);
             agents->initAgentMeta(data.acquireParameters());
             locs->initLocationTypes(data.acquireLocationTypes());
             auto tmp = locs->initLocations(data.acquireLocations(), data.acquireLocationTypes());
@@ -513,7 +516,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
