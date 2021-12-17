@@ -1,1 +1,400 @@
-{"stateInformation":{"stateNames":["S","E","I1","I2","I3","I4","I5_h","I6_h","R_h","R","D1","D2"],"firstInfectedState":"E","nonCOVIDDeadState":"D2","susceptibleStates":["S"],"infectedStates":["E","I1","I2","I3","I4","I5_h","I6_h"]},"transitionMatrices":[{"fileName":"transition_illness0_1.json","age":[0,4],"preCond":"0"},{"fileName":"transition_illness1_1.json","age":[0,4],"preCond":"1"},{"fileName":"transition_illness2_1.json","age":[0,4],"preCond":"2"},{"fileName":"transition_illness3_1.json","age":[0,4],"preCond":"3"},{"fileName":"transition_illness4_1.json","age":[0,4],"preCond":"4"},{"fileName":"transition_illness0_2.json","age":[5,14],"preCond":"0"},{"fileName":"transition_illness1_2.json","age":[5,14],"preCond":"1"},{"fileName":"transition_illness2_2.json","age":[5,14],"preCond":"2"},{"fileName":"transition_illness3_2.json","age":[5,14],"preCond":"3"},{"fileName":"transition_illness4_2.json","age":[5,14],"preCond":"4"},{"fileName":"transition_illness0_3.json","age":[15,29],"preCond":"0"},{"fileName":"transition_illness1_3.json","age":[15,29],"preCond":"1"},{"fileName":"transition_illness2_3.json","age":[15,29],"preCond":"2"},{"fileName":"transition_illness3_3.json","age":[15,29],"preCond":"3"},{"fileName":"transition_illness4_3.json","age":[15,29],"preCond":"4"},{"fileName":"transition_illness0_4.json","age":[30,59],"preCond":"0"},{"fileName":"transition_illness1_4.json","age":[30,59],"preCond":"1"},{"fileName":"transition_illness2_4.json","age":[30,59],"preCond":"2"},{"fileName":"transition_illness3_4.json","age":[30,59],"preCond":"3"},{"fileName":"transition_illness4_4.json","age":[30,59],"preCond":"4"},{"fileName":"transition_illness0_5.json","age":[60,69],"preCond":"0"},{"fileName":"transition_illness1_5.json","age":[60,69],"preCond":"1"},{"fileName":"transition_illness2_5.json","age":[60,69],"preCond":"2"},{"fileName":"transition_illness3_5.json","age":[60,69],"preCond":"3"},{"fileName":"transition_illness4_5.json","age":[60,69],"preCond":"4"},{"fileName":"transition_illness0_6.json","age":[70,79],"preCond":"0"},{"fileName":"transition_illness1_6.json","age":[70,79],"preCond":"1"},{"fileName":"transition_illness2_6.json","age":[70,79],"preCond":"2"},{"fileName":"transition_illness3_6.json","age":[70,79],"preCond":"3"},{"fileName":"transition_illness4_6.json","age":[70,79],"preCond":"4"},{"fileName":"transition_illness0_7.json","age":[80,-1],"preCond":"0"},{"fileName":"transition_illness1_7.json","age":[80,-1],"preCond":"1"},{"fileName":"transition_illness2_7.json","age":[80,-1],"preCond":"2"},{"fileName":"transition_illness3_7.json","age":[80,-1],"preCond":"3"},{"fileName":"transition_illness4_7.json","age":[80,-1],"preCond":"4"}],"states":[{"stateName":"S","WB":"W","infectious":0,"accuracyPCR":0,"accuracyAntigen":0},{"stateName":"E","WB":"W","infectious":0,"accuracyPCR":1,"accuracyAntigen":0.25},{"stateName":"I1","WB":"W","infectious":1,"accuracyPCR":1,"accuracyAntigen":0.5},{"stateName":"I2","WB":"W","infectious":0.75,"accuracyPCR":1,"accuracyAntigen":0.5},{"stateName":"I3","WB":"N","infectious":1,"accuracyPCR":1,"accuracyAntigen":0.5},{"stateName":"I4","WB":"M","infectious":1,"accuracyPCR":1,"accuracyAntigen":0.5},{"stateName":"I5_h","WB":"S","infectious":0.1,"accuracyPCR":1,"accuracyAntigen":0.1},{"stateName":"I6_h","WB":"S","infectious":0.1,"accuracyPCR":1,"accuracyAntigen":0.1},{"stateName":"R_h","WB":"S","infectious":0,"accuracyPCR":0,"accuracyAntigen":0},{"stateName":"R","WB":"W","infectious":0,"accuracyPCR":0,"accuracyAntigen":0},{"stateName":"D1","WB":"D","infectious":0,"accuracyPCR":0,"accuracyAntigen":0},{"stateName":"D2","WB":"D","infectious":0,"accuracyPCR":0,"accuracyAntigen":0}]}
+{
+    "stateInformation": {
+        "stateNames": [
+            "S",
+            "E",
+            "I1",
+            "I2",
+            "I3",
+            "I4",
+            "I5_h",
+            "I6_h",
+            "R_h",
+            "R",
+            "D1",
+            "D2"
+        ],
+        "firstInfectedState": "E",
+        "nonCOVIDDeadState": "D2",
+        "susceptibleStates": [
+            "S"
+        ],
+        "infectedStates": [
+            "E",
+            "I1",
+            "I2",
+            "I3",
+            "I4",
+            "I5_h",
+            "I6_h"
+        ]
+    },
+    "transitionMatrices": [
+        {
+            "fileName": "transition_illness0_1.json",
+            "age": [
+                0,
+                4
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_1.json",
+            "age": [
+                0,
+                4
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_1.json",
+            "age": [
+                0,
+                4
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_1.json",
+            "age": [
+                0,
+                4
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_1.json",
+            "age": [
+                0,
+                4
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_2.json",
+            "age": [
+                5,
+                14
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_2.json",
+            "age": [
+                5,
+                14
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_2.json",
+            "age": [
+                5,
+                14
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_2.json",
+            "age": [
+                5,
+                14
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_2.json",
+            "age": [
+                5,
+                14
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_3.json",
+            "age": [
+                15,
+                29
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_3.json",
+            "age": [
+                15,
+                29
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_3.json",
+            "age": [
+                15,
+                29
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_3.json",
+            "age": [
+                15,
+                29
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_3.json",
+            "age": [
+                15,
+                29
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_4.json",
+            "age": [
+                30,
+                59
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_4.json",
+            "age": [
+                30,
+                59
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_4.json",
+            "age": [
+                30,
+                59
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_4.json",
+            "age": [
+                30,
+                59
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_4.json",
+            "age": [
+                30,
+                59
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_5.json",
+            "age": [
+                60,
+                69
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_5.json",
+            "age": [
+                60,
+                69
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_5.json",
+            "age": [
+                60,
+                69
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_5.json",
+            "age": [
+                60,
+                69
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_5.json",
+            "age": [
+                60,
+                69
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_6.json",
+            "age": [
+                70,
+                79
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_6.json",
+            "age": [
+                70,
+                79
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_6.json",
+            "age": [
+                70,
+                79
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_6.json",
+            "age": [
+                70,
+                79
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_6.json",
+            "age": [
+                70,
+                79
+            ],
+            "preCond": "4"
+        },
+        {
+            "fileName": "transition_illness0_7.json",
+            "age": [
+                80,
+                -1
+            ],
+            "preCond": "0"
+        },
+        {
+            "fileName": "transition_illness1_7.json",
+            "age": [
+                80,
+                -1
+            ],
+            "preCond": "1"
+        },
+        {
+            "fileName": "transition_illness2_7.json",
+            "age": [
+                80,
+                -1
+            ],
+            "preCond": "2"
+        },
+        {
+            "fileName": "transition_illness3_7.json",
+            "age": [
+                80,
+                -1
+            ],
+            "preCond": "3"
+        },
+        {
+            "fileName": "transition_illness4_7.json",
+            "age": [
+                80,
+                -1
+            ],
+            "preCond": "4"
+        }
+    ],
+    "states": [
+        {
+            "stateName": "S",
+            "WB": "W",
+            "infectious": 0,
+            "accuracyPCR": 0,
+            "accuracyAntigen": 0
+        },
+        {
+            "stateName": "E",
+            "WB": "W",
+            "infectious": 0,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.25
+        },
+        {
+            "stateName": "I1",
+            "WB": "W",
+            "infectious": 1,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.5
+        },
+        {
+            "stateName": "I2",
+            "WB": "W",
+            "infectious": 0.75,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.5
+        },
+        {
+            "stateName": "I3",
+            "WB": "N",
+            "infectious": 1,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.5
+        },
+        {
+            "stateName": "I4",
+            "WB": "M",
+            "infectious": 1,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.5
+        },
+        {
+            "stateName": "I5_h",
+            "WB": "S",
+            "infectious": 0.1,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.1
+        },
+        {
+            "stateName": "I6_h",
+            "WB": "S",
+            "infectious": 0.1,
+            "accuracyPCR": 1,
+            "accuracyAntigen": 0.1
+        },
+        {
+            "stateName": "R_h",
+            "WB": "S",
+            "infectious": 0,
+            "accuracyPCR": 0,
+            "accuracyAntigen": 0
+        },
+        {
+            "stateName": "R",
+            "WB": "W",
+            "infectious": 0,
+            "accuracyPCR": 0,
+            "accuracyAntigen": 0
+        },
+        {
+            "stateName": "D1",
+            "WB": "D",
+            "infectious": 0,
+            "accuracyPCR": 0,
+            "accuracyAntigen": 0
+        },
+        {
+            "stateName": "D2",
+            "WB": "D",
+            "infectious": 0,
+            "accuracyPCR": 0,
+            "accuracyAntigen": 0
+        }
+    ]
+}

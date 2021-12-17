@@ -258,10 +258,6 @@ namespace RealMovementOps {
         void
         doMovement(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a) {
         unsigned& agentType = a.agentTypesPtr[i];
-        a.movement[i] = thrust::make_tuple(i, a.agentLocationsPtr[i], static_cast<unsigned>(0));
-        ScopeExit se([&a, i] HD () {
-            thrust::get<2>(a.movement[i]) = a.agentLocationsPtr[i];
-        });
         // if not dead or not in hospital (covid or non-covid) go home at curfew
         if (a.enableCurfew && a.curfewBegin == a.simTime.getMinutes() / a.timeStep) {
             states::WBStates wBState = a.agentStatesPtr[i].getWBState();
@@ -1017,7 +1013,12 @@ namespace RealMovementOps {
     template<typename PPState, typename AgentMeta, typename LocationType>
     __global__ void doMovementDriver(unsigned numberOfAgents, MovementArguments<PPState, AgentMeta, LocationType> a) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
-        if (i < numberOfAgents) { RealMovementOps::doMovement(i, a); }
+        if (i < numberOfAgents) {
+            auto from = a.agentLocationsPtr[i];
+            RealMovementOps::doMovement(i, a);
+            // a.movement[i] = thrust::make_tuple(i, from, a.agentLocationsPtr[i]);
+        }
+
     }
 #endif
 
@@ -1649,7 +1650,11 @@ public:
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
 #pragma omp parallel for
-        for (unsigned i = 0; i < numberOfAgents; i++) { RealMovementOps::doMovement(i, a); }
+        for (unsigned i = 0; i < numberOfAgents; i++) {
+            auto from = a.agentLocationsPtr[i];
+            RealMovementOps::doMovement(i, a);
+            a.movement[i] = thrust::make_tuple(i, from, a.agentLocationsPtr[i]);
+        }
 #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
         RealMovementOps::doMovementDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents, a);
         cudaDeviceSynchronize();
