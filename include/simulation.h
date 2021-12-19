@@ -92,10 +92,10 @@ public:
             cxxopts::value<int>()->default_value("1"))
             ("mutationMultiplier",
             "infectiousness multiplier for mutated virus ",
-            cxxopts::value<std::string>()->default_value("1.7613,2.64"))
+            cxxopts::value<std::string>()->default_value("1.72,2.58"))
             ("mutationProgressionScaling",
             "disease progression scaling for mutated virus ",
-            cxxopts::value<std::string>()->default_value("1.207,1.64"))
+            cxxopts::value<std::string>()->default_value("1.27,1.73"))
             ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
             cxxopts::value<unsigned>()->default_value("2"))
@@ -475,6 +475,14 @@ public:
         stats.push_back(boosters);
         std::cout << boosters << "\t";
 
+        //Cumulative number of boosters
+        float susceptib =
+            thrust::transform_reduce(ppstates.begin(), ppstates.end(), 
+                                     [] HD(PPState state) {return 1.0f-state.getSusceptible(0);},
+                                     0.0f, thrust::plus<float>());
+        stats.push_back((unsigned)susceptib);
+        std::cout << (unsigned)susceptib << "\t";
+
         std::cout << '\n';
         return stats;
     }
@@ -516,7 +524,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
