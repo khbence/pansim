@@ -143,7 +143,7 @@ public:
         immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
         immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
         vaccinationGroupLevel = splitStringFloat(result["vaccinationGroupLevel"].as<std::string>(), ',');
-        numVariants = sim ->mutationMultiplier.size()+1;
+        numVariants = sim ->infectiousnessMultiplier.size();
         if (immunizationEfficiencyInfection.size() < 3 * numVariants ||
             immunizationEfficiencyProgression.size() < 3 * numVariants) {
                 throw CustomErrors(
@@ -431,8 +431,13 @@ public:
                                 susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*0.95f));
                                 thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),0.1f), i);
                             } else {
-                                susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]));
-                                thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),acquired[2*i+1]), i);
+                                // if (thrust::get<1>(tup).worstState == 2) {//asymptomatic
+                                //     susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]/2.0f));
+                                //     thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),MIN(1.0,acquired[2*i+1]*2)), i);
+                                // } else {
+                                    susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]));
+                                    thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),acquired[2*i+1]), i);
+                                // }
                             }
                         }
                 }
