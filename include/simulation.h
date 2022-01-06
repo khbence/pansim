@@ -454,7 +454,7 @@ public:
         //Number of people infected at least once
         unsigned infectionCount =
             thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
-                return agentStat.infectedCount;
+                return agentStat.infectedCount>0;
             });
         stats.push_back(infectionCount);
         std::cout << infectionCount << "\t";
