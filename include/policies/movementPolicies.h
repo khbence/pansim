@@ -1014,7 +1014,6 @@ namespace RealMovementOps {
     __global__ void doMovementDriver(unsigned numberOfAgents, MovementArguments<PPState, AgentMeta, LocationType> a) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
         if (i < numberOfAgents) {
-            auto from = a.agentLocationsPtr[i];
             RealMovementOps::doMovement(i, a);
             // a.movement[i] = thrust::make_tuple(i, from, a.agentLocationsPtr[i]);
         }
@@ -1661,7 +1660,7 @@ public:
 #endif
         
         if(needLocationAgentList) {
-            auto moved = thrust::count_if(movement.begin(), movement.end(), [](const thrust::tuple<unsigned, unsigned, unsigned>& e){
+            auto moved = thrust::count_if(movement.begin(), movement.end(), [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& e){
                 return thrust::get<1>(e) != thrust::get<2>(e);
             });
             if(static_cast<double>(moved) / static_cast<double>(movement.size()) < 0.25) {
