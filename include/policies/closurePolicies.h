@@ -348,8 +348,8 @@ public:
                 auto realThis = static_cast<SimulationType*>(this);
                 double fraction = std::stod(rule.parameter);
                 variantIdx++;
-                if (variantIdx >= realThis->mutationMultiplier.size()+1) {
-                    throw CustomErrors("More ExposeToMutation events defined than mutationMultipliers specified on the command line");
+                if (variantIdx >= realThis->infectiousnessMultiplier.size()) {
+                    throw CustomErrors("More ExposeToMutation events defined than infectiousnessMultiplier specified on the command line");
                 }
                 this->rules.emplace_back(rule.name, conds, [&, realThis, diags, fraction, variantIdx](Rule* r) {
                     bool expose = true;

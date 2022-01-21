@@ -85,20 +85,20 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("k,infectionCoefficient",
             "Infection: >0 :infectiousness coefficient ",
-            cxxopts::value<double>()->default_value("0.00035613"))("dumpLocationInfections",// 291642
+            cxxopts::value<double>()->default_value("0.000347"))("dumpLocationInfections",// 291642
             "Dump per-location statistics every N timestep ",
             cxxopts::value<unsigned>()->default_value("0"))("dumpLocationInfectiousList",
             "Dump per-location list of infectious people ",
             cxxopts::value<std::string>()->default_value(""))
             ("d_offset",
             "seasonality day offset ",
-            cxxopts::value<int>()->default_value("0"))
+            cxxopts::value<int>()->default_value("-5"))
             ("d_peak_offset",
             "seasonality peak day offset ",
             cxxopts::value<int>()->default_value("0"))
             ("c0",
             "seasonality c0 value ",
-            cxxopts::value<double>()->default_value("2.5"));
+            cxxopts::value<double>()->default_value("3.08"));
     }
 
     void finalize() {

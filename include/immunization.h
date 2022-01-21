@@ -24,56 +24,46 @@ class Immunization {
     Simulation* sim;
     thrust::device_vector<uint8_t> immunizationRound;
     unsigned currentCategory = 0;
-#define numberOfCategories 9
+#define numberOfCategories 10
     std::vector<int> vaccinationOrder;
+    std::vector<float> vaccinationGroupLevel;
     std::vector<float> immunizationEfficiencyInfection;
     std::vector<float> immunizationEfficiencyProgression;
     std::vector<float> acquiredMultiplier;
+    std::vector<float> vaccPerWeek;
+    std::vector<float> boosterPerWeek;
     unsigned startAfterDay = 0;
     unsigned boosterStartAfterDay = 0;
     unsigned dailyDoses = 0;
+    unsigned dailyBoosters = 0;
     unsigned diagnosticLevel = 0;
     unsigned numVariants = 1;
 #define pct75 0
     unsigned numberOfVaccinesToday(Timehandler& simTime) {
-        // float availPerWeek[] = {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 4943.59527, 8544.33033,
-        // 8563.97919, 9160.88972, 9612.38930, 10252.4613, 10276.0211, 9361.10071, 9553.48985, 9977.56585, 9722.31922,
-        // 8823.13674, 8823.13674, 8756.36833, 8783.88615, 8799.57697, 5717.15701, 5705.37712, 5670.0374, 5662.16849,
-        // 5799.61623, 5795.70531, 5772.14553, 3852.02365, 3043.12224, 3031.34235, 934.522142}; float availPerWeek[] =
-        // {1115.178518, 486.88636, 895.271552, 1876.9132, 1955.46154, 2471.797635, 4272.165165, 4281.989595, 4580.44486,
-        // 4806.19465, 5126.23065, 5138.01055, 4680.550355, 4776.744925, 4988.782925, 4861.15961, 4411.56837, 4411.56837,
-        // 4378.184165, 4391.943075, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485,
-        // 4399.788485, 4399.788485, 4399.788485, 4399.788485, 4399.788485}; 
-        // float availPerWeek[] = {1260.0, 1260.0,1260.0, 1260.0, 1260.0, 1260.0, 1260.0, 1260.0, //8 weeks of 0.1%
-        //                         921*7.0*1.0,  1126*7.0*1.0, 768*7.0*1.0, 1060*7.0*1.0, 821*7.0*1.0,  1506*7.0*1.0,
-        //                         1506*7.0*1.0, 1506*7.0*1.0, 1506*7.0*1.0, 1973*7.0, 1973*7.0, 1973*7.0, 1973*7.0}; //latest
-        //                        prediction
-        // 3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780,3780};
-        // //then
         #if pct75==1
         /* kelet+nyugat 75%-ra */
-        float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424};
+        // float availPerWeek[] = {1083, 919, 395, 1599, 796, 1038, 1726, 4630, 5703,6052,4474, 5897, 7951, 9656, 6495, 5994, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424, 8424};
         #else
-        /* kelet+nyugat */ float availPerWeek[] = {189, 941, 1074, 465, 1410, 1183, 897, 2028, 4266, 5581, 6208, 4483, 6252, 7515, 9617, 7656, 6313, 8601, 4124, 5721, 7454, 2413, 2267, 1187, 1177, 1209, 754, 616, 547, 535, 533, 452, 498, 445, 590, 1364, 650, 369, 340, 325, 268, 259, 280, 277, 321, 448, 472, 1280, 1075, 1075, 1075};
+        // /* kelet+nyugat */ float availPerWeek[] = {189, 941, 1074, 465, 1410, 1183, 897, 2028, 4266, 5581, 6208, 4483, 6252, 7515, 9617, 7656, 6313, 8601, 4124, 5721, 7454, 2413, 2267, 1187, 1177, 1209, 754, 616, 547, 535, 533, 452, 498, 445, 590, 1364, 650, 369, 340, 325, 268, 259, 280, 277, 321, 448, 472, 1280, 1075, 1075, 1075};
         #endif
         //float availPerWeek[] = {189, 941, 1073, 465, 1410, 1182, 896, 2027, 4264, 5578, 6206, 4481, 6249, 7512, 9613, 7653, 6310, 8597, 4122, 5719, 7451, 2412, 2266, 1581, 1177, 1209, 753, 616, 546, 534, 532, 452, 498, 543, 590, 1364};
         /* csak nyugat */ // float availPerWeek[] = {1083, 919, 395, 1599, 796, 994, 1435,1734, 2055, 3572, 2671,3937 ,5097, 5935, 3564,5283,2447,1705,2778,5727,2686,2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686, 2686};
         if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= startAfterDay) {
+            if (vaccPerWeek.size() == 0) return dailyDoses;
             unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-startAfterDay;
             unsigned week = day/7;
-            return availPerWeek[week>48?48:week]/7.0;
-            // return dailyDoses;
+            return vaccPerWeek[week>=vaccPerWeek.size()?vaccPerWeek.size()-1:week]/7.0;
         } else
             return 0;
     }
 
     unsigned numberOfBoostersToday(Timehandler& simTime) {
-        float availPerWeek[] = {52000, 78000, 64750, 104000, 114000, 107000, 101000, 99000, 91000, 95000, 101000, 108000, 101000, 176000, 232000, 310582, 575816, 274865, 224673, 224673, 224673, 224673, 224673, 0, 0};
+        // float availPerWeek[] = {955, 1433, 1190, 1911, 2095, 1966, 1856, 1819, 1672, 1746, 1856, 1984, 1856, 3234, 4263, 5707, 10580, 5050, 4128, 4128, 4128, 4128, 4128, 0, 0};
         if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= boosterStartAfterDay) {
+            if (boosterPerWeek.size() == 0) return dailyBoosters;
             unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-boosterStartAfterDay;
             unsigned week = day/7;
-            return availPerWeek[week>24?24:week]/7.0;
-            // return dailyDoses;
+            return boosterPerWeek[week>=boosterPerWeek.size()?boosterPerWeek.size()-1:week]/7.0;
         } else
             return 0;
     }
@@ -88,19 +78,26 @@ public:
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(96))))
             ("boosterStart",
             "number of days into simulation when booster immunizations starts",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(315))))("immunizationsPerDay",
-            "number of immunizations per day",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))))("immunizationOrder",
+            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(315))))("immunizationsPerWeek",
+            "number of immunizations per week - number or file with comma separated values for each week",
+            cxxopts::value<std::string>()->default_value("inputConfigFiles/vaccPerWeek.txt"))
+            ("boostersPerWeek",
+            "number of boosters per week - number or file with comma separated values for each week",
+            cxxopts::value<std::string>()->default_value("inputConfigFiles/boosterPerWeek.txt"))
+            ("immunizationOrder",
             "Order of immunization (starting at 1, 0 to skip) for agents in different categories health workers, nursery home "
             "worker/resident, 60+, 18-60 with underlying condition, essential worker, 18+, 60+underlying, school teachers, "
-            "children",
-            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7"))
+            "12-18 children, 5-12 children",
+            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7,0"))
+            ("vaccinationGroupLevel",
+            "Immunization level in different groups in the order listed in immunizationOrder's description",
+            cxxopts::value<std::string>()->default_value("0.9,0.85,0.9,0.82,0.8,0.75,0.8,0.67,0.4,0.2")) //75%: "0.9,0.85,0.9,0.89,0.95,0.85,0.8,0.88,0.6,0.4"
             ("immunizationEfficiencyInfection",
-            "Efficiency of immunization against infection after 12 days and 28 days (pairs of comma-separated values for different strains)",
-            cxxopts::value<std::string>()->default_value("0.52,0.96,0.2,0.82,0.09,0.71"))
+            "Efficiency of immunization against infection after 12 days, 28 days, and after booster (pairs of comma-separated values for different strains)",
+            cxxopts::value<std::string>()->default_value("0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91"))
             ("immunizationEfficiencyProgression",
-            "Efficiency of immunization in mitigating disease progression after 12 days and 28 days (pairs of comma-separated values for different strains)",
-            cxxopts::value<std::string>()->default_value("1.0,1.0,0.7,0.31,0.7,0.31"))
+            "Efficiency of immunization in mitigating disease progression after 12 days, 28 days, and after booster (pairs of comma-separated values for different strains)",
+            cxxopts::value<std::string>()->default_value("1.0,1.0,1.0,0.4,0.22,0.1,0.4,0.22,0.1"))
             ("acquiredMultiplier",
             "susceptibility vs. reinfection and progression weight with acquired immunity ",
             cxxopts::value<std::string>()->default_value("0.9,0.22,0.8,0.22,0.8,0.22"));
@@ -109,7 +106,24 @@ public:
     void initializeArgs(const cxxopts::ParseResult& result) {
         startAfterDay = result["immunizationStart"].as<unsigned>();
         boosterStartAfterDay = result["boosterStart"].as<unsigned>();
-        dailyDoses = result["immunizationsPerDay"].as<unsigned>();
+        std::string immStr = result["immunizationsPerWeek"].as<std::string>();
+        char *endptr = nullptr;
+        dailyDoses = strtoul(immStr.c_str(), &endptr, 10)/7;
+        if (endptr != immStr.c_str()+immStr.length()) {
+            std::ifstream t(immStr.c_str());
+            std::stringstream buffer;
+            buffer << t.rdbuf();
+            vaccPerWeek = splitStringFloat(buffer.str(), ',');
+        }
+        std::string bstrStr = result["boostersPerWeek"].as<std::string>();
+        dailyBoosters = strtoul(bstrStr.c_str(), &endptr, 10)/7;
+        if (endptr != bstrStr.c_str()+bstrStr.length()) {
+            std::ifstream t(bstrStr.c_str());
+            std::stringstream buffer;
+            buffer << t.rdbuf();
+            boosterPerWeek = splitStringFloat(buffer.str(), ',');
+        }
+        
         try {
             diagnosticLevel = result["diags"].as<unsigned>();
         } catch (std::exception& e) {}
@@ -128,11 +142,12 @@ public:
         
         immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
         immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
-        numVariants = sim ->mutationMultiplier.size()+1;
-        if (immunizationEfficiencyInfection.size() < 2 * numVariants ||
-            immunizationEfficiencyProgression.size() < 2 * numVariants) {
+        vaccinationGroupLevel = splitStringFloat(result["vaccinationGroupLevel"].as<std::string>(), ',');
+        numVariants = sim ->infectiousnessMultiplier.size();
+        if (immunizationEfficiencyInfection.size() < 3 * numVariants ||
+            immunizationEfficiencyProgression.size() < 3 * numVariants) {
                 throw CustomErrors(
-                    "immunizationEfficiency parameters have to be at least of size 2x the number of strains");
+                    "immunizationEfficiency parameters have to be at least of size 3x the number of strains");
             }
     }
 
@@ -150,93 +165,104 @@ public:
         // Figure out which category agents belong to, and determine if agent is willing to be vaccinated
 
         // Category health worker
-        auto cat_healthworker = [locationOffsetPtr, possibleTypesPtr, possibleLocationsPtr, locationTypePtr] HD(
+        float cat0_lvl = vaccinationGroupLevel[0];
+        auto cat_healthworker = [locationOffsetPtr, possibleTypesPtr, possibleLocationsPtr, locationTypePtr, cat0_lvl] HD(
                                     unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
-                // TODO pull these params from config
                 if (possibleTypesPtr[idx] == 4
                     && (locationTypePtr[possibleLocationsPtr[idx]] == 12 || locationTypePtr[possibleLocationsPtr[idx]] == 14))
-                    return thrust::make_pair(true, 0.9f);
+                    return thrust::make_pair(true, cat0_lvl);
             }
             return thrust::make_pair(false, 0.0f);
         };
 
         // Category nursery home workers & residents
-        auto cat_nursery = [locationOffsetPtr, possibleTypesPtr, locationTypePtr, possibleLocationsPtr] HD(
+        float cat1_lvl = vaccinationGroupLevel[1];
+        auto cat_nursery = [locationOffsetPtr, possibleTypesPtr, locationTypePtr, possibleLocationsPtr, cat1_lvl] HD(
                                unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if ((possibleTypesPtr[idx] == 4 || possibleTypesPtr[idx] == 2)
-                    && locationTypePtr[possibleLocationsPtr[idx]] == 22)// TODO pull these params from config
-                    return thrust::make_pair(true, 0.85f);
+                    && locationTypePtr[possibleLocationsPtr[idx]] == 22)
+                    return thrust::make_pair(true, cat1_lvl);
             }
             return thrust::make_pair(false, 0.0f);
         };
 
         // Category elderly with underlying condition
-        auto cat_elderly_underlying = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
+        float cat2_lvl = vaccinationGroupLevel[2];
+        auto cat_elderly_underlying = [agentMetaDataPtr, cat2_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getPrecondIdx() > 0 && agentMetaDataPtr[id].getAge() >= 60)
-                return thrust::make_pair(true, 0.9f);
+                return thrust::make_pair(true, cat2_lvl);
             else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category elderly
-        auto cat_elderly = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
+        float cat3_lvl = vaccinationGroupLevel[3];
+        auto cat_elderly = [agentMetaDataPtr, cat3_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() >= 60) {
-                if (pct75) return thrust::make_pair(true, 0.89f);
-                else return thrust::make_pair(true, 0.82f); //75%: 0.89
+                return thrust::make_pair(true, cat3_lvl); //75%: 0.89
             } else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category 18-59, underlying condition
-        auto cat_underlying = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
+        float cat4_lvl = vaccinationGroupLevel[4];
+        auto cat_underlying = [agentMetaDataPtr, cat4_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getPrecondIdx() > 0 && agentMetaDataPtr[id].getAge() >= 18
                 && agentMetaDataPtr[id].getAge() < 60) {
-                if (pct75) return thrust::make_pair(true, 0.95f);
-                else return thrust::make_pair(true, 0.8f); //75%: 0.95
+                return thrust::make_pair(true, cat4_lvl); //75%: 0.95
             } else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category essential workers
-        auto cat_essential = [locationOffsetPtr, possibleTypesPtr, essentialPtr, possibleLocationsPtr] HD(
+        float cat5_lvl = vaccinationGroupLevel[5];
+        auto cat_essential = [locationOffsetPtr, possibleTypesPtr, essentialPtr, possibleLocationsPtr, cat5_lvl] HD(
                                  unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if (possibleTypesPtr[idx] == 4
                     && essentialPtr[possibleLocationsPtr[idx]] == 1)
-                    if (pct75) return thrust::make_pair(true, 0.85f);
-                    else return thrust::make_pair(true, 0.75f); //75%: 0.85
+                    return thrust::make_pair(true, cat5_lvl); //75%: 0.85
             }
             return thrust::make_pair(false, 0.0f);
         };
 
         // Category school workers
-        auto cat_school = [locationOffsetPtr, possibleTypesPtr, locationTypePtr, possibleLocationsPtr] HD(
+        float cat6_lvl = vaccinationGroupLevel[6];
+        auto cat_school = [locationOffsetPtr, possibleTypesPtr, locationTypePtr, possibleLocationsPtr, cat6_lvl] HD(
                               unsigned id) -> thrust::pair<bool, float> {
             for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
                 if (possibleTypesPtr[idx] == 4 && locationTypePtr[possibleLocationsPtr[idx]] == 3) {
-                    if (pct75) return thrust::make_pair(true, 0.8f);
-                    else return thrust::make_pair(true, 0.80f); //75%: 0.8
+                    return thrust::make_pair(true, cat6_lvl); //75%: 0.8
                 }
             }
             return thrust::make_pair(false, 0.0f);
         };
 
         // Category over 18-59
-        auto cat_adult = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
+        float cat7_lvl = vaccinationGroupLevel[7];
+        auto cat_adult = [agentMetaDataPtr, cat7_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() > 17 && agentMetaDataPtr[id].getAge() < 60) {
-                if (pct75) return thrust::make_pair(true, 0.88f);
-                else return thrust::make_pair(true, 0.62f); //75%: 0.88
+                return thrust::make_pair(true, cat7_lvl); //75%: 0.88
             } else
                 return thrust::make_pair(false, 0.0f);
         };
 
         // Category over 12-18
-        auto cat_child = [agentMetaDataPtr] HD(unsigned id) -> thrust::pair<bool, float> {
+        float cat8_lvl = vaccinationGroupLevel[8];
+        auto cat_child = [agentMetaDataPtr, cat8_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
             if (agentMetaDataPtr[id].getAge() >= 12 && agentMetaDataPtr[id].getAge() < 18) {
-                if (pct75) return thrust::make_pair(true, 0.6f);
-                else return thrust::make_pair(true, 0.40f); //75%: 0.6
+                return thrust::make_pair(true, cat8_lvl); //75%: 0.6
+            } else
+                return thrust::make_pair(false, 0.0f);
+        };
+
+        // Category over 5-12
+        float cat9_lvl = vaccinationGroupLevel[9];
+        auto cat_child5 = [agentMetaDataPtr, cat9_lvl] HD(unsigned id) -> thrust::pair<bool, float> {
+            if (agentMetaDataPtr[id].getAge() >= 5 && agentMetaDataPtr[id].getAge() < 12) {
+                return thrust::make_pair(true, cat9_lvl); //75%: 0.4
             } else
                 return thrust::make_pair(false, 0.0f);
         };
@@ -265,6 +291,7 @@ public:
                         cat_elderly_underlying,
                         cat_school,
                         cat_child,
+                        cat_child5,
                         lorder,
                         groupIdx] HD(thrust::tuple<uint8_t&, int> tup) {
                         uint8_t& round = thrust::get<0>(tup);
@@ -350,6 +377,15 @@ public:
                                 round = (uint8_t)-1;
                             return;
                         }
+
+                        ret = cat_child5(id);
+                        if (groupIdx == 9 && ret.first && round == 0) {
+                            if (RandomGenerator::randomUnit() < ret.second)
+                                round = lorder[9];
+                            else
+                                round = (uint8_t)-1;
+                            return;
+                        }
                     });
             }
         }
@@ -360,15 +396,16 @@ public:
         if (timestamp == 0) timestamp++;// First day already immunizing, then we sohuld not set immunizedTimestamp to 0
 
         // Update immunity based on days since immunization
-        float immunizationEfficiencyInfectionLocal[2*MAX_STRAINS];
-        float immunizationEfficiencyProgressionLocal[2*MAX_STRAINS];
+        float immunizationEfficiencyInfectionLocal[3*MAX_STRAINS];
+        float immunizationEfficiencyProgressionLocal[3*MAX_STRAINS];
         float acquired[2*MAX_STRAINS];
         for (int i = 0; i < immunizationEfficiencyInfection.size(); i++) {
             immunizationEfficiencyInfectionLocal[i] = immunizationEfficiencyInfection[i];
             immunizationEfficiencyProgressionLocal[i] = immunizationEfficiencyProgression[i];
             acquired[i] = acquiredMultiplier[i];
         }
-        float waning[] = {0.9, 0.9, 0.9, 0.75, 0.67, 0.44, 0.16};
+        // float waning[] = {1.00,1.00,1.00,0.83,0.74,0.49,0.18};
+        float waning[] = {1.00,1.00,1.00,0.83,0.74,0.65,0.6};
 
         unsigned numVariantsLocal = numVariants;
         thrust::for_each(
@@ -390,28 +427,43 @@ public:
                         unsigned months = (timestamp - thrust::get<1>(tup).infectedTimestamp) / (24 * 60 * 30 / timeStep);
                         if (months > 6) months = 6;
                         for (int i = 0; i < numVariantsLocal; i ++) {
-                            susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]));
-                            thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),acquired[2*i+1]), i);
+                            if (i == thrust::get<1>(tup).variant) {
+                                susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*0.95f));
+                                thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),0.1f), i);
+                            } else {
+                                // if (thrust::get<1>(tup).worstState == 2) {//asymptomatic
+                                //     susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]/2.0f));
+                                //     thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),MIN(1.0,acquired[2*i+1]*2)), i);
+                                // } else {
+                                    susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]));
+                                    thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),acquired[2*i+1]), i);
+                                // }
+                            }
                         }
                 }
 
                 // Otherwise get more immune after days since immunization
                 unsigned daysSinceImmunization = (timestamp - thrust::get<1>(tup).immunizationTimestamp) / (24 * 60 / timeStep);
                 for (int i = 0; i < numVariantsLocal; i ++) {
-                    if (thrust::get<1>(tup).immunizationTimestamp > 0 && 
-                            daysSinceImmunization >= 28) {
-                        unsigned months = daysSinceImmunization < 30 ? 0 : (daysSinceImmunization/30-1);
-                        if (months > 6) months = 6;
-                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*immunizationEfficiencyInfectionLocal[2*i+1]));
-                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i+1]), i);
+                    unsigned months = daysSinceImmunization < 30 ? 0 : (daysSinceImmunization/30-1);
+                    if (months > 6) months = 6;
+
+                    if (thrust::get<1>(tup).immunizationCount > 1 && daysSinceImmunization >=7) {
+                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*immunizationEfficiencyInfectionLocal[3*i+2]));
+                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i+2]), i);
+                    } else if (thrust::get<1>(tup).immunizationTimestamp > 0 && daysSinceImmunization >= 28 || thrust::get<1>(tup).immunizationCount > 1) {
+                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*immunizationEfficiencyInfectionLocal[3*i+1]));
+                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i+1]), i);
+                    } else if (thrust::get<1>(tup).immunizationTimestamp > 0 && daysSinceImmunization >= 12) {
+                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-immunizationEfficiencyInfectionLocal[3*i]);
+                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i]), i);
+                    }
+                }
+
+                if (thrust::get<1>(tup).immunizationCount) {
                         //If agent is infected, make them less infectious TODO: external parameter
                         if (thrust::get<0>(tup).isInfectious() /*&& thrust::get<0>(tup).getVariant() < 2*/)
                             thrust::get<0>(tup).reduceInfectiousness(0.65);
-                    } else if (thrust::get<1>(tup).immunizationTimestamp > 0 &&
-                            daysSinceImmunization >= 12) {
-                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-immunizationEfficiencyInfectionLocal[2*i]);
-                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[2*i]), i);
-                    }
                 }
 
                 for (int i = 0; i < numVariantsLocal; i ++) {
@@ -434,6 +486,7 @@ public:
                     [timeStep, timestamp] HD(
                         thrust::tuple<AgentStats, typename Simulation::PPState_t> tup) {
                         if (thrust::get<0>(tup).immunizationTimestamp > 0 &&
+                            thrust::get<0>(tup).immunizationCount == 1 && //For now, only 1 booster
                             (timestamp - thrust::get<0>(tup).immunizationTimestamp) / (24 * 60 / timeStep) > 4 * 30
                             && thrust::get<1>(tup).getWBState() == states::WBStates::W
                             && (timestamp >= (24 * 60 / timeStep) * 3 * 30
