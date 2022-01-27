@@ -80,6 +80,8 @@ public:
     std::vector<float> infectiousnessMultiplier;
     std::vector<float> diseaseProgressionScaling;
     Timehandler simTime;
+    thrust::device_vector<bool> healthcareWorker;
+    unsigned healthcareWorkerCount;
 
     friend class MovementPolicy<Simulation>;
     friend class InfectionPolicy<Simulation>;
@@ -489,10 +491,57 @@ public:
         stats.push_back((unsigned)susceptib); //TODO: this is just the last one...
         std::cout << out << "\t";
 
+        //count number of health workers who are infected
+        unsigned infectedHCWorker =
+            thrust::count_if(thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.begin(),ppstates.begin())),
+                             thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.end(),ppstates.end())),
+                            []HD(thrust::tuple<bool, PPState> tup) {
+                                return thrust::get<0>(tup) && thrust::get<1>(tup).isInfected();
+                            });
+        //count number of health workers exposed today
+        unsigned exposedHCWorker =
+            thrust::count_if(thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.begin(),agentStats.begin())),
+                             thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.end(),agentStats.end())),
+                            [timestamp, timeStepL]HD(thrust::tuple<bool, AgentStats> tup) {
+                                return thrust::get<0>(tup) && 
+                                    (thrust::get<1>(tup).infectedTimestamp > timestamp - 24 * 60 / timeStepL &&
+                                     thrust::get<1>(tup).infectedTimestamp <= timestamp);
+                            });
+        stats.push_back((unsigned)(infectedHCWorker*100)/healthcareWorkerCount);
+        stats.push_back((unsigned)exposedHCWorker);
+        std::cout << (unsigned)(infectedHCWorker*100)/healthcareWorkerCount << "\t";
+        std::cout << (unsigned)exposedHCWorker << "\t";
+
         std::cout << '\n';
         return stats;
     }
 
+    void flagHealthcareWorkers(){
+        auto& ppstates = agents->PPValues;
+        auto& agentStats = agents->agentStats;
+
+        healthcareWorker.resize(ppstates.size());
+        //Tools to determine if health worker
+        auto* locationOffsetPtr = thrust::raw_pointer_cast(agents->locationOffset.data());
+        auto* possibleTypesPtr = thrust::raw_pointer_cast(agents->possibleTypes.data());
+        auto* locationTypePtr = thrust::raw_pointer_cast(locs->locType.data());
+        auto* possibleLocationsPtr = thrust::raw_pointer_cast(agents->possibleLocations.data());
+        auto healthworker = [locationOffsetPtr, possibleTypesPtr, possibleLocationsPtr, locationTypePtr] HD(
+                                    unsigned id) -> bool {
+            for (unsigned idx = locationOffsetPtr[id]; idx < locationOffsetPtr[id + 1]; idx++) {
+                if (possibleTypesPtr[idx] == 4
+                    && (locationTypePtr[possibleLocationsPtr[idx]] == 12 || locationTypePtr[possibleLocationsPtr[idx]] == 14))
+                    return true;
+            }
+            return false;
+        };
+
+        thrust::transform(thrust::make_counting_iterator(unsigned(0)),
+                            thrust::make_counting_iterator(unsigned(agentStats.size())),
+                            healthcareWorker.begin(), healthworker);
+
+        healthcareWorkerCount = thrust::count(healthcareWorker.begin(),healthcareWorker.end(),true);
+    }
 public:
     explicit Simulation(const cxxopts::ParseResult& result)
         : timeStep(result["deltat"].as<decltype(timeStep)>()),
@@ -530,11 +579,12 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
             immunization->initCategories();
+            flagHealthcareWorkers();
         } catch (const CustomErrors& e) {
             std::cerr << e.what() << '\n';
             succesfullyInitialized = false;
