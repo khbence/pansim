@@ -246,6 +246,7 @@ void HD DynamicPPState::gotInfected(uint8_t v) {
 bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAgentMeta &meta, unsigned simTime, unsigned agentID, unsigned tracked) {
     if (daysBeforeNextState == -2) {
         daysBeforeNextState = getTransition(progressionID).calculateJustDays(state);
+        if (variant==3) daysBeforeNextState = daysBeforeNextState/2 == 0 ? 1 : daysBeforeNextState/2;
     } else if (daysBeforeNextState > 0) {
         --daysBeforeNextState;
         return false;
@@ -258,6 +259,7 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
         state = thrust::get<0>(tmp);
         updateMeta();
         daysBeforeNextState = thrust::get<1>(tmp);
+        if (variant==3 && state < 8) daysBeforeNextState = daysBeforeNextState/2 == 0 ? 1 : daysBeforeNextState/2;
 
         if (thrust::get<2>(tmp)) {// was a bad progression
             stats.worstState = state;
