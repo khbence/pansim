@@ -4,3 +4,5 @@ build
 cmake-build*
 inputRealExample/*.json
 .vscode
+realSzeged.zip
+test.sh
