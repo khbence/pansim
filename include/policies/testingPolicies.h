@@ -325,11 +325,8 @@ public:
             "default method for testing. Can be PCR (default) on antigen. Accuracies are provided in progression json input",
             cxxopts::value<std::string>()->default_value("PCR"));
     }
-    void initializeArgs(const cxxopts::ParseResult& result) {
-        testingDelay = result["testingRepeatDelay"].as<unsigned>();
-        std::string probsString = result["testingProbabilities"].as<std::string>();
+    void updateTestingProbs(const std::string& probsString) {
         std::vector<double> params = splitStringDouble(probsString, ',');
-        
         if (params.size() > 0) testingRandom = params[0];
         if (params.size() > 1) testingHome = params[1];
         if (params.size() > 2) testingWork = params[2];
@@ -338,6 +335,13 @@ public:
         if (params.size() > 5) testingNurseryHome = params[5];
         // printf("testing probabilities: %g %g %g %g %g\n", testingRandom, testingHome, testingWork, testingSchool,
         // testingRandomHospital);
+    }
+
+    void initializeArgs(const cxxopts::ParseResult& result) {
+        testingDelay = result["testingRepeatDelay"].as<unsigned>();
+        std::string probsString = result["testingProbabilities"].as<std::string>();
+        updateTestingProbs(probsString);
+
         try {
             quarantineLength = result["quarantineLength"].as<unsigned>();
         } catch (std::exception& e) { quarantineLength = 14; }

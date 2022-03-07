@@ -429,7 +429,7 @@ public:
     double seasonalityMultiplier(Timehandler& simTime) {
         unsigned simDay = simTime.getTimestamp()/simTime.getStepsPerDay();
         //if (simDay<100) return 1.0;
-        int d = simTime.getStartDate() + simDay+14; //267 sept 23
+        int d = simTime.getStartDate() + simDay; //267 sept 23
         //int d_peak = 30; //assuming origin = feb 1
         //int d_peak = 45; //assuming origin = feb 15
         // int d_peak = 59; //assuming origin = marc 1

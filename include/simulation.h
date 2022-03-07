@@ -338,6 +338,7 @@ public:
         auto& diagnosed = agents->diagnosed;
         unsigned timestamp = simTime.getTimestamp();
         unsigned tracked = locs->tracked;
+        unsigned timeStepL = timeStep;
         float progressionScaling[MAX_STRAINS];
         assert(diseaseProgressionScaling.size()<=MAX_STRAINS);
         for (int i = 0; i < diseaseProgressionScaling.size(); i++)
@@ -354,7 +355,7 @@ public:
                 agentStats.end(),
                 diagnosed.end(),
                 thrust::make_counting_iterator<unsigned>(0) + ppstates.size())),
-            [timestamp, tracked, progressionScaling] HD(thrust::tuple<PPState&, AgentMeta&, AgentStats&, bool&, unsigned> tup) {
+            [timestamp, tracked, progressionScaling, timeStepL] HD(thrust::tuple<PPState&, AgentMeta&, AgentStats&, bool&, unsigned> tup) {
                 auto& ppstate = thrust::get<0>(tup);
                 auto& meta = thrust::get<1>(tup);
                 auto& agentStat = thrust::get<2>(tup);
@@ -366,7 +367,7 @@ public:
                         meta,
                         timestamp,
                         agentID,
-                        tracked);
+                        tracked, timeStepL);
                 if (recovered) diagnosed = false;
             });
     }
@@ -492,11 +493,12 @@ public:
         std::cout << out << "\t";
 
         //count number of health workers who are infected
+        auto& quarantined = agents->quarantined;
         unsigned infectedHCWorker =
-            thrust::count_if(thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.begin(),ppstates.begin())),
-                             thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.end(),ppstates.end())),
-                            []HD(thrust::tuple<bool, PPState> tup) {
-                                return thrust::get<0>(tup) && thrust::get<1>(tup).isInfected();
+            thrust::count_if(thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.begin(),ppstates.begin(),quarantined.begin())),
+                             thrust::make_zip_iterator(thrust::make_tuple(healthcareWorker.end(),ppstates.end(),quarantined.end())),
+                            []HD(thrust::tuple<bool, PPState, bool> tup) {
+                                return thrust::get<0>(tup) && (thrust::get<1>(tup).isInfected() || thrust::get<2>(tup));
                             });
         //count number of health workers exposed today
         unsigned exposedHCWorker =
@@ -627,5 +629,6 @@ public:
     void toggleQuarantineImmune(bool enable) { MovementPolicy<Simulation>::quarantineImmuneActive = enable; }
     void toggleLockdownNonvacc(bool enable) { MovementPolicy<Simulation>::lockdownNonvaccActive = enable; }
     void quarantinePolicy(unsigned newQP) { MovementPolicy<Simulation>::quarantinePolicy = newQP; }
+    void updateTestingProbs(const std::string &probs) {TestingPolicy<Simulation>::updateTestingProbs(probs);};
     Timehandler& getSimTime() { return simTime; }
 };

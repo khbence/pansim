@@ -95,7 +95,7 @@ std::pair<std::string, double> DataProvider::calculateSingleRandomState(unsigned
     auto it = std::find_if(configRandom.stateDistribution.begin(), configRandom.stateDistribution.end(), [age](const auto& e) {
         return (e.ageStart <= age) && (age < e.ageEnd);
     });
-    return randomSelectPair(it->distribution.begin());
+    return randomSelectPair(it->distribution.begin(), it->distribution.end());
 }
 
 
@@ -105,7 +105,7 @@ void DataProvider::randomLocations(unsigned N) {
     for (unsigned i = 0; i < N; ++i) {
         parser::Locations::Place current{};
         current.ID = std::to_string(i);
-        current.type = std::stoi(randomSelect(configRandom.locationTypeDistribution.begin()));
+        current.type = std::stoi(randomSelect(configRandom.locationTypeDistribution.begin(), configRandom.locationTypeDistribution.end()));
         if (current.type == 33) {
             if (typeToLocationMapping.find(3) != typeToLocationMapping.end()) {
                 auto& schools = typeToLocationMapping[3];
@@ -138,11 +138,11 @@ void DataProvider::randomAgents(unsigned N) {
         parser::Agents::Person current{};
         current.age = RandomGenerator::randomUnsigned(90);
         current.sex = (RandomGenerator::randomUnit() < 0.5) ? "M" : "F";
-        current.preCond = randomSelect(configRandom.preCondDistribution.begin());
+        current.preCond = randomSelect(configRandom.preCondDistribution.begin(), configRandom.preCondDistribution.end());
         auto statediag = calculateSingleRandomState(current.age);
         current.state = statediag.first;
         current.diagnosed = RandomGenerator::randomUnit() < statediag.second;
-        current.typeID = std::stoi(randomSelect(configRandom.agentTypeDistribution.begin()));
+        current.typeID = std::stoi(randomSelect(configRandom.agentTypeDistribution.begin(),configRandom.agentTypeDistribution.end()));
         const auto& requestedLocations = aTypeToLocationTypes[current.typeID];
         current.locations.reserve(requestedLocations.size());
         for (const auto& l : requestedLocations) {
@@ -151,7 +151,7 @@ void DataProvider::randomAgents(unsigned N) {
             const auto& irregularLocationChance = typesIrregularChancesMap[std::to_string(currentLoc.typeID)];
             bool foundLocation = false;
             if (RandomGenerator::randomUnit() < irregularLocationChance.chanceForType) {
-                auto irregularTypeID = randomSelect(irregularLocationChance.switchedToWhat.begin());
+                auto irregularTypeID = randomSelect(irregularLocationChance.switchedToWhat.begin(), irregularLocationChance.switchedToWhat.end());
                 auto& newPossibleLocations = typeToLocationMapping[std::stoi(irregularTypeID)];
                 if (newPossibleLocations.empty()) {
                     for (const auto& switcher : irregularLocationChance.switchedToWhat) {

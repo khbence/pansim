@@ -44,24 +44,28 @@ class DataProvider {
     void readClosureRules(const std::string& fileName);
 
     template<typename Iter>
-    [[nodiscard]] auto randomSelect(Iter it) const {
+    [[nodiscard]] auto randomSelect(Iter it, Iter end) const {
+        auto itFirst = it;
         double r = RandomGenerator::randomUnit();
         long double preSum = it->chance;
-        while (preSum < r) {
+        while (preSum < r && it != end) {
             ++it;
             preSum += it->chance;
         }
+        if (it == end) return itFirst->value;
         return it->value;
     }
 
     template<typename Iter>
-    [[nodiscard]] auto randomSelectPair(Iter it) const {
+    [[nodiscard]] auto randomSelectPair(Iter it, Iter end) const {
+        auto itFirst = it;
         double r = RandomGenerator::randomUnit();
         long double preSum = it->chance;
-        while (preSum < r) {
+        while (preSum < r && it != end) {
             ++it;
             preSum += it->chance;
         }
+        if (it == end) return std::make_pair(itFirst->value, itFirst->diagnosedChance);;
         return std::make_pair(it->value, it->diagnosedChance);
     }
 

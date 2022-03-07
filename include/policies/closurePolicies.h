@@ -105,7 +105,7 @@ public:
                 && !rule.name.compare("HolidayMode") == 0 && !rule.name.compare("SchoolAgeRestriction") == 0
                 && !rule.name.compare("ExposeToMutation") == 0 && !rule.name.compare("ReduceMovement") == 0
                 && !rule.name.compare("QuarantinePolicy")==0 && !rule.name.compare("QuarantineImmune")==0
-                && !rule.name.compare("LockdownNonvacc")==0)
+                && !rule.name.compare("LockdownNonvacc")==0 && !rule.name.compare("TestingProb")==0)
                 continue;
 
             // Create condition
@@ -405,6 +405,19 @@ public:
                         r->previousOpenState = shouldBeOpen;
                         if (diags > 0)
                             printf("Reduced movement %s with %g multiplier\n", (int)shouldBeOpen ? "off" : "on", fraction);
+                    }
+                });
+            } else if (rule.name.compare("TestingProb") == 0) {
+                // Curfew
+                std::string testingProbs(rule.parameter);
+                std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, realThis, diags, testingProbs](Rule* r) {
+                    bool change = true;
+                    for (GlobalCondition* c : r->conditions) { change = change && c->active; }
+                    if (change) {
+                        realThis->updateTestingProbs(testingProbs);
+                        if (diags > 0) printf("Changing testing rates to %s\n", testingProbs);
                     }
                 });
             } else {// Not masks, curfew, holiday

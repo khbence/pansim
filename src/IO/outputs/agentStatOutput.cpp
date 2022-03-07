@@ -22,6 +22,7 @@ AgentStatOutput::AgentStatOutput(const thrust::host_vector<AgentStats>& data) {
             currentAgent.AddMember("hospitalizedUntilTime", e.hospitalizedUntilTimestamp, allocator);
             currentAgent.AddMember("immunizationTimestamp", e.immunizationTimestamp, allocator);
             currentAgent.AddMember("immunizationCount", e.immunizationCount, allocator);
+            currentAgent.AddMember("recoveredTimestamp", e.recoveredTimestamp, allocator);
             rapidjson::Value worst(rapidjson::kObjectType);
             worst.AddMember("name", stringToObject(names[e.worstState]), allocator);
             worst.AddMember("begin", e.worstStateTimestamp, allocator);

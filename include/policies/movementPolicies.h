@@ -174,9 +174,12 @@ namespace RealMovementOps {
 #endif
         void
         quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until, bool quarantineImmuneActive) {
+        //No quarantining
         if (a.quarantinePolicy == 0) return;
+        //No quarantine: If "immune" due to previous diagnosis, and we are not quarantining immune
         if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false && quarantineImmuneActive == false) return;
-        if (a.agentStatsPtr[i].immunizationTimestamp > 0 && quarantineImmuneActive == false) return;
+        //No quarantine: If "immune" due to vaccination, not currently diagnosed, and we are not quarantining immune
+        if (!a.diagnosedPtr[i] && a.agentStatsPtr[i].immunizationTimestamp > 0 && quarantineImmuneActive == false) return;
         a.quarantinedPtr[i] = true;
         a.agentStatsPtr[i].quarantinedTimestamp = a.timestamp;
         unsigned previousQuarantineUntil = a.agentStatsPtr[i].quarantinedUntilTimestamp;
@@ -984,7 +987,7 @@ namespace RealMovementOps {
 
 
         // Diagnosis-related operations
-        if (newLocationType == a.hospitalType || newLocationType == a.doctorType) {
+        if (newLocationType == a.hospitalType || (newLocationType == a.doctorType && RandomGenerator::randomReal(1.0)<0.7)) {
             // If previously undiagnosed and
             if (!a.diagnosedPtr[i] && a.agentStatesPtr[i].isInfectious()) {
                 a.diagnosedPtr[i] = true;

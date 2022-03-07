@@ -15,6 +15,7 @@ public:
     unsigned hospitalizedTimestamp = 0;
     unsigned hospitalizedUntilTimestamp = 0;
     unsigned immunizationTimestamp = 0;
+    unsigned recoveredTimestamp = std::numeric_limits<unsigned>::max();
     uint8_t immunizationCount = 0;
     uint8_t variant = 0;
     uint8_t infectedCount = 0;

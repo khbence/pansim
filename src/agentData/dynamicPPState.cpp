@@ -243,10 +243,10 @@ void HD DynamicPPState::gotInfected(uint8_t v) {
     updateMeta();
 }
 
-bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAgentMeta &meta, unsigned simTime, unsigned agentID, unsigned tracked) {
+bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAgentMeta &meta, unsigned simTime, unsigned agentID, unsigned tracked, unsigned timeStep) {
     if (daysBeforeNextState == -2) {
         daysBeforeNextState = getTransition(progressionID).calculateJustDays(state);
-        if (variant==3) daysBeforeNextState = daysBeforeNextState/2 == 0 ? 1 : daysBeforeNextState/2;
+        if (variant>=3) daysBeforeNextState = daysBeforeNextState*0.7 == 0 ? 1 : daysBeforeNextState*0.7;
     } else if (daysBeforeNextState > 0) {
         --daysBeforeNextState;
         return false;
@@ -255,15 +255,22 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
     if (daysBeforeNextState == 0) {
         states::WBStates oldWBState = this->getWBState();
         auto oldState = state;
+        bool wasInfected = this->isInfected();
         auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptoms);
         state = thrust::get<0>(tmp);
         updateMeta();
         daysBeforeNextState = thrust::get<1>(tmp);
-        if (variant==3 && state < 8) daysBeforeNextState = daysBeforeNextState/2 == 0 ? 1 : daysBeforeNextState/2;
+        if (variant>=3 && state < 8) {
+            float mul;
+            if (state < 6) mul = 0.7;
+            else mul = 0.5;
+            daysBeforeNextState = daysBeforeNextState*mul == 0 ? 1 : daysBeforeNextState*mul;
+        }
 
         if (thrust::get<2>(tmp)) {// was a bad progression
             stats.worstState = state;
             stats.worstStateTimestamp = simTime;
+            stats.worstStateEndTimestamp = simTime + daysBeforeNextState * 60 * 24 / timeStep;
             if (agentID == tracked) {
                 printf(
                     "Agent %d bad progression %d->%d WBState: %d->%d for %d "
@@ -277,16 +284,17 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
             }
         } else if (oldState != state) {// if (oldWBState != states::WBStates::W) this will record any
             // good progression!
-            stats.worstStateEndTimestamp = simTime;
+            
             if (agentID == tracked) {
-                printf("Agent %d good progression %d->%d WBState: %d->%d\n",
+                printf("Agent %d progression %d->%d WBState: %d->%d\n",
                     agentID,
                     static_cast<int>(oldState),
                     static_cast<int>(state),
                     static_cast<int>(oldWBState),
                     static_cast<int>(this->getWBState()));
             }
-            if (!this->isInfected()) {
+            if (wasInfected && !this->isInfected()) {
+                stats.recoveredTimestamp = simTime;
                 return true;// recovered
             }
         }

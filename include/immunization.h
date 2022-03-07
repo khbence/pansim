@@ -427,7 +427,7 @@ public:
                         unsigned months = (timestamp - thrust::get<1>(tup).infectedTimestamp) / (24 * 60 * 30 / timeStep);
                         if (months > 6) months = 6;
                         for (int i = 0; i < numVariantsLocal; i ++) {
-                            if (i == thrust::get<1>(tup).variant) {
+                            if (i == thrust::get<1>(tup).variant || ((i==3 || i==4) && (thrust::get<1>(tup).variant==3 || thrust::get<1>(tup).variant==4))) {
                                 susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*0.95f));
                                 thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),0.1f), i);
                             } else {

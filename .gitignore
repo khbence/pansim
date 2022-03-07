@@ -6,3 +6,8 @@ inputRealExample/*.json
 .vscode
 realSzeged.zip
 test.sh
+inputConfigFiles/closure*.json
+inputConfigFiles/article*.json
+articleTest
+articleTest/*
+article_*

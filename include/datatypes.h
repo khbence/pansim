@@ -14,5 +14,5 @@
 #include <thrust/sort.h>
 #include <thrust/sequence.h>
 
-#define MAX_STRAINS 4
+#define MAX_STRAINS 6
 #define MIN(a, b) (a) < (b) ? (a) : (b)
