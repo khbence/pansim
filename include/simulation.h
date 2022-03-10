@@ -77,8 +77,8 @@ public:
     std::string statesHeader;
     int enableOtherDisease = 1;
     Immunization<Simulation>* immunization;
-    std::vector<float> mutationMultiplier;
-    std::vector<float> mutationProgressionScaling;
+    std::vector<float> infectiousnessMultiplier;
+    std::vector<float> diseaseProgressionScaling;
     Timehandler simTime;
 
     friend class MovementPolicy<Simulation>;
@@ -90,15 +90,15 @@ public:
         options.add_options()("otherDisease",
             "Enable (1) or disable (0) non-COVID related hospitalization and sudden death ",
             cxxopts::value<int>()->default_value("1"))
-            ("mutationMultiplier",
-            "infectiousness multiplier for mutated virus ",
-            cxxopts::value<std::string>()->default_value(""))
-            ("mutationProgressionScaling",
-            "disease progression scaling for mutated virus ",
-            cxxopts::value<std::string>()->default_value(""))
+            ("infectiousnessMultiplier",
+            "infectiousness multiplier for original strain and variants ",
+            cxxopts::value<std::string>()->default_value("1.0,1.72,2.58"))
+            ("diseaseProgressionScaling",
+            "disease progression scaling for original strain and variants ",
+            cxxopts::value<std::string>()->default_value("1.0,1.27,1.73"))
             ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
-            cxxopts::value<unsigned>()->default_value("0"))
+            cxxopts::value<unsigned>()->default_value("2"))
             ("startDate",
             "days into the year the simulation starts with (Jan 1 is 0) ",
             cxxopts::value<unsigned>()->default_value("267"));
@@ -337,9 +337,9 @@ public:
         unsigned timestamp = simTime.getTimestamp();
         unsigned tracked = locs->tracked;
         float progressionScaling[MAX_STRAINS];
-        assert(mutationProgressionScaling.size()<=MAX_STRAINS);
-        for (int i = 0; i < mutationProgressionScaling.size(); i++)
-            progressionScaling[i] = mutationProgressionScaling[i];
+        assert(diseaseProgressionScaling.size()<=MAX_STRAINS);
+        for (int i = 0; i < diseaseProgressionScaling.size(); i++)
+            progressionScaling[i] = diseaseProgressionScaling[i];
 
         // Update states
         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(ppstates.begin(),
@@ -359,7 +359,7 @@ public:
                 auto& diagnosed = thrust::get<3>(tup);
                 unsigned agentID = thrust::get<4>(tup);
                 bool recovered =
-                    ppstate.update(meta.getScalingSymptoms(ppstate.getVariant()) * (ppstate.getVariant() > 0 ? progressionScaling[ppstate.getVariant()-1] : 1.0),
+                    ppstate.update(meta.getScalingSymptoms(ppstate.getVariant()) * progressionScaling[ppstate.getVariant()],
                         agentStat,
                         meta,
                         timestamp,
@@ -373,7 +373,7 @@ public:
         //        PROFILE_FUNCTION();
         // COVID
         auto result = locs->refreshAndGetStatistic();
-        for (auto val : result) { std::cout << val << "\t"; }
+        // for (auto val : result) { std::cout << val << "\t"; }
         // non-COVID hospitalization
         auto& ppstates = agents->PPValues;
         auto& diagnosed = agents->diagnosed;
@@ -396,26 +396,26 @@ public:
         unsigned stayedHome = thrust::count(agents->stayedHome.begin(), agents->stayedHome.end(), true);
         std::vector<unsigned> stats(result);
         stats.push_back(hospitalized);
-        std::cout << hospitalized << "\t";
+        // std::cout << hospitalized << "\t";
         // Testing
         auto tests = TestingPolicy<Simulation>::getStats();
-        std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t" << thrust::get<2>(tests) << "\t";
+        // std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t" << thrust::get<2>(tests) << "\t";
         stats.push_back(thrust::get<0>(tests));
         stats.push_back(thrust::get<1>(tests));
         stats.push_back(thrust::get<2>(tests));
         // Quarantine stats
         auto quarant = agents->getQuarantineStats(timestamp);
-        std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t" << thrust::get<2>(quarant) << "\t";
+        // std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t" << thrust::get<2>(quarant) << "\t";
         stats.push_back(thrust::get<0>(quarant));
         stats.push_back(thrust::get<1>(quarant));
         stats.push_back(thrust::get<2>(quarant));
 
-        if (mutationMultiplier.size() > 0) {
+        if (infectiousnessMultiplier.size() > 1) {
             unsigned allInfected =
                 thrust::count_if(ppstates.begin(), ppstates.end(), [] HD(PPState state) { return state.isInfected(); });
-            std::vector<unsigned> variantcounts(mutationMultiplier.size());
+            std::vector<unsigned> variantcounts(infectiousnessMultiplier.size()-1);
             std::string out;
-            for (int variant = 0; variant < mutationMultiplier.size(); variant++) {
+            for (int variant = 0; variant < infectiousnessMultiplier.size()-1; variant++) {
                 variantcounts[variant] = thrust::count_if(ppstates.begin(), ppstates.end(), [variant] HD(PPState state) {
                     return state.isInfected() && state.getVariant() == variant+1;
                 });
@@ -425,21 +425,21 @@ public:
                 else
                     out = std::to_string(variantcounts[variant]);
             }
-            std::cout << out << "\t";
+            // std::cout << out << "\t";
             stats.push_back(variantcounts[0]); //TODO: this is just the first one...
         } else {
-            std::cout << unsigned(0) << "\t";
+            // std::cout << unsigned(0) << "\t";
             stats.push_back(unsigned(0));
         }
 
         // Stayed home count
         stayedHome = stayedHome - stats[10] - stats[11];// Subtract dead
-        std::cout << stayedHome << "\t";
+        // std::cout << stayedHome << "\t";
         stats.push_back(stayedHome);
 
         // Number of immunized
         stats.push_back(immunization->immunizedToday);
-        std::cout << immunization->immunizedToday << "\t";
+        // std::cout << immunization->immunizedToday << "\t";
 
         // Number of new infections
         unsigned timeStepL = timeStep;
@@ -449,25 +449,47 @@ public:
                     agentStat.infectedTimestamp > timestamp - 24 * 60 / timeStepL && agentStat.infectedTimestamp <= timestamp);
             });
         stats.push_back(newInfected);
-        std::cout << newInfected << "\t";
+        // std::cout << newInfected << "\t";
 
-        //Number of cumulative infections so far
+        //Number of people infected at least once
         unsigned infectionCount =
             thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
-                return agentStat.infectedCount;
+                return agentStat.infectedCount>0;
             });
         stats.push_back(infectionCount);
-        std::cout << infectionCount << "\t";
+        // std::cout << infectionCount << "\t";
 
         //Number of reinfections so far
         unsigned reinfectionCount =
-            thrust::count_if(agentStats.begin(), agentStats.end(), [] HD(AgentStats agentStat) {
-                return agentStat.infectedCount > 1;
-            });
+            thrust::transform_reduce(agentStats.begin(), agentStats.end(), 
+                                     [] HD(AgentStats agentStat) {return unsigned(agentStat.infectedCount > 1 ? agentStat.infectedCount-1 : 0);},
+                                     (unsigned)0, thrust::plus<unsigned>());
         stats.push_back(reinfectionCount);
-        std::cout << reinfectionCount << "\t";
+        // std::cout << reinfectionCount << "\t";
 
-        std::cout << '\n';
+        //Cumulative number of boosters
+        unsigned boosters =
+            thrust::transform_reduce(agentStats.begin(), agentStats.end(), 
+                                     [] HD(AgentStats agentStat) {return unsigned(agentStat.immunizationCount > 1 ? agentStat.immunizationCount-1 : 0);},
+                                     (unsigned)0, thrust::plus<unsigned>());
+        stats.push_back(boosters);
+        // std::cout << boosters << "\t";
+
+        //Level of immunity in the population
+        std::string out;
+        float susceptib;
+        for (int variant = 0; variant < infectiousnessMultiplier.size(); variant++) {
+            susceptib =
+            thrust::transform_reduce(ppstates.begin(), ppstates.end(), 
+                                    [variant] HD(PPState state) {return 1.0f-state.getSusceptible(variant);},
+                                    0.0f, thrust::plus<float>());
+            if (variant == 0) out = std::to_string(unsigned(susceptib));
+            else out = out + "," + std::to_string(unsigned(susceptib));
+        }
+        stats.push_back((unsigned)susceptib); //TODO: this is just the last one...
+        // std::cout << out << "\t";
+
+        // std::cout << '\n';
         return stats;
     }
 
@@ -479,8 +501,8 @@ public:
         //        PROFILE_FUNCTION();
         outAgentStat = result["outAgentStat"].as<std::string>();
         enableOtherDisease = result["otherDisease"].as<int>();
-        mutationMultiplier = splitStringFloat(result["mutationMultiplier"].as<std::string>(),',');
-        mutationProgressionScaling = splitStringFloat(result["mutationProgressionScaling"].as<std::string>(),',');
+        infectiousnessMultiplier = splitStringFloat(result["infectiousnessMultiplier"].as<std::string>(),',');
+        diseaseProgressionScaling = splitStringFloat(result["diseaseProgressionScaling"].as<std::string>(),',');
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
         TestingPolicy<Simulation>::initializeArgs(result);
@@ -491,7 +513,7 @@ public:
         DataProvider data{ result };
         try {
             std::string header = PPState_t::initTransitionMatrix(
-                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), mutationMultiplier);
+                data.acquireProgressionMatrices(), data.acquireProgressionConfig(), infectiousnessMultiplier);
             agents->initAgentMeta(data.acquireParameters());
             locs->initLocationTypes(data.acquireLocationTypes());
             auto tmp = locs->initLocations(data.acquireLocations(), data.acquireLocationTypes());
@@ -508,7 +530,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
@@ -536,9 +558,8 @@ public:
             }
             MovementPolicy<Simulation>::movement(simTime, timeStep);
             ClosurePolicy<Simulation>::step(simTime, timeStep);
-            InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, 0);
-            for (int variant = 0; variant < mutationMultiplier.size(); variant++)
-                InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, variant+1);
+            for (int variant = 0; variant < infectiousnessMultiplier.size(); variant++)
+                InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, variant);
             ++simTime;
         }
         agents->printAgentStatJSON(outAgentStat);
@@ -553,6 +574,8 @@ public:
     }
     void setSchoolAgeRestriction(unsigned limit) { MovementPolicy<Simulation>::schoolAgeRestriction = limit; }
     void toggleHolidayMode(bool enable) { MovementPolicy<Simulation>::holidayModeActive = enable; }
+    void toggleQuarantineImmune(bool enable) { MovementPolicy<Simulation>::quarantineImmuneActive = enable; }
+    void toggleLockdownNonvacc(bool enable) { MovementPolicy<Simulation>::lockdownNonvaccActive = enable; }
     void quarantinePolicy(unsigned newQP) { MovementPolicy<Simulation>::quarantinePolicy = newQP; }
     Timehandler& getSimTime() { return simTime; }
 };

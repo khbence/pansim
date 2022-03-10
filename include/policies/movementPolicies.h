@@ -161,10 +161,13 @@ namespace RealMovementOps {
         unsigned workType;
         LocationType* locationTypePtr;
         uint8_t* noWorkAgentPtr;
+        uint8_t* essentialLocPtr;
         unsigned curfewBegin;
         unsigned curfewEnd;
         bool enableCurfew;
         unsigned schoolAgeRestriction;
+        bool quarantineImmuneActive;
+        bool lockdownNonvaccActive;
     };
 
     template<typename PPState, typename AgentMeta, typename LocationType>
@@ -172,10 +175,10 @@ namespace RealMovementOps {
     __device__
 #endif
         void
-        quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until) {
+        quarantineAgent(unsigned i, MovementArguments<PPState, AgentMeta, LocationType>& a, unsigned until, bool quarantineImmuneActive) {
         if (a.quarantinePolicy == 0) return;
-        if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false) return;
-        if (a.agentStatsPtr[i].immunizationTimestamp > 0) return;
+        if (a.agentStatsPtr[i].diagnosedTimestamp > 0 && a.agentStatesPtr[i].isInfected() == false && quarantineImmuneActive == false) return;
+        if (a.agentStatsPtr[i].immunizationTimestamp > 0 && quarantineImmuneActive == false) return;
         a.quarantinedPtr[i] = true;
         a.agentStatsPtr[i].quarantinedTimestamp = a.timestamp;
         unsigned previousQuarantineUntil = a.agentStatsPtr[i].quarantinedUntilTimestamp;
@@ -319,6 +322,7 @@ namespace RealMovementOps {
             return;
         }
 
+        //Check if quarantine is over
         if (a.agentStatsPtr[i].quarantinedUntilTimestamp <= a.timestamp) { a.quarantinedPtr[i] = false; }
 
         states::WBStates wBState = a.agentStatesPtr[i].getWBState();
@@ -408,7 +412,7 @@ namespace RealMovementOps {
                                                             // being counted as random test in
                                                             // TestingPolicy
 
-                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);
+                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);
             }
             checkLarger(i, a);
             return;
@@ -433,7 +437,7 @@ namespace RealMovementOps {
                         a.simTime.getMinutes() % 60,
                         a.agentLocationsPtr[i],
                         a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
-                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
+                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]], a.quarantineImmuneActive);
             }
             // if now quarantined
             if (a.quarantinedPtr[i] == true) {
@@ -496,7 +500,7 @@ namespace RealMovementOps {
 
             // Diagnosed, but not yet quarantined
             if (a.quarantinePolicy > 0 && !a.quarantinedPtr[i]) {
-                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);
+                RealMovementOps::quarantineAgent(i, a, a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);
                 if (i == a.tracked && a.quarantinedPtr[i]) {
                     printf(
                         "Agent %d of type %d day %d at %d:%d WBState %d was "
@@ -676,9 +680,11 @@ namespace RealMovementOps {
             unsigned wasClosed = std::numeric_limits<unsigned>::max();
             bool schoolAndTooOld = (newLocationType == a.schoolType || newLocationType == a.classroomType)
                                    && a.agentMetaDataPtr[i].getAge() >= a.schoolAgeRestriction;
-            if (schoolAndTooOld
+            if (schoolAndTooOld //school is closed for student
                 || ((a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
-                    && newLocationType != a.workType)) {
+                    && newLocationType != a.workType) //or destination is closed and it's not agent's workplace
+                || (a.lockdownNonvaccActive && a.agentStatsPtr[i].immunizationTimestamp==0)) //or non-immune should be locked down, and this is nonessential
+                {
                 // If closed, but there is another option to go to different type location, try that
                 if (numPotentialEvents > 1) {
                     double rand = RandomGenerator::randomReal(1.0);
@@ -712,8 +718,9 @@ namespace RealMovementOps {
                                             && a.agentMetaDataPtr[i].getAge() >= a.schoolAgeRestriction;
                     // is that closed too?
                     if (schoolAndTooOld
-                        || (a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
-                               && newLocationType != a.workType) {
+                        || ((a.locationStatesPtr[newLocation] == false || a.closedUntilPtr[newLocation] > a.timestamp)
+                               && newLocationType != a.workType)
+                        || (a.lockdownNonvaccActive && a.agentStatsPtr[i].immunizationTimestamp==0)) {
                         wasClosed = newLocation;
                         newLocation = RealMovementOps::findActualLocationForType(i,
                             a.homeType,
@@ -897,7 +904,7 @@ namespace RealMovementOps {
                 || a.locationTypePtr[a.agentLocationsPtr[i]] == a.workType)) {
             // if not currently under quarantine
             if (!a.quarantinedPtr[i]) {
-                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]]);
+                RealMovementOps::quarantineAgent(i, a, a.locationQuarantineUntilPtr[a.agentLocationsPtr[i]], a.quarantineImmuneActive);
 
                 if (i == a.tracked && a.quarantinedPtr[i])
                     printf(
@@ -993,7 +1000,7 @@ namespace RealMovementOps {
 
                 RealMovementOps::quarantineAgent(i,
                     a,
-                    a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep);// TODO: quarantine period
+                    a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);// TODO: quarantine period
 
                 // We are not moving the agent - stay here for full duration,
                 // potentially infect others when moving next, he will go into
@@ -1014,8 +1021,9 @@ namespace RealMovementOps {
     __global__ void doMovementDriver(unsigned numberOfAgents, MovementArguments<PPState, AgentMeta, LocationType> a) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
         if (i < numberOfAgents) {
+            auto from = a.agentLocationsPtr[i];
             RealMovementOps::doMovement(i, a);
-            // a.movement[i] = thrust::make_tuple(i, from, a.agentLocationsPtr[i]);
+            a.movement[i] = thrust::make_tuple(i, from, a.agentLocationsPtr[i]);
         }
 
     }
@@ -1313,6 +1321,7 @@ class RealMovement {
     unsigned school;
     unsigned classroom;
     unsigned work;
+    double perfRatio;
     std::string dumpLocationAgentList;
     bool needLocationAgentList;
 
@@ -1323,6 +1332,8 @@ public:
     bool curfewTimeConverted = false;
     unsigned schoolAgeRestriction = 99;
     bool holidayModeActive = false;
+    bool quarantineImmuneActive = false;
+    bool lockdownNonvaccActive = false;
     unsigned quarantinePolicy;
     // add program parameters if we need any, this function got called already
     // from Simulation
@@ -1339,13 +1350,14 @@ public:
             "Dump per-location list of agents at each iteration",
             cxxopts::value<std::string>()->default_value(""))(
                 "threshold", "threshold to switch between sort or set solution", cxxopts::value<double>()->default_value("0.0")
-            );
+            )("performanceRatio", "Ratio for performance, ask Bence for details", cxxopts::value<double>()->default_value("0.25"));
     }
     void initializeArgs(const cxxopts::ParseResult& result) {
         tracked = result["trace"].as<unsigned>();
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
         dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
+        perfRatio = result["performanceRatio"].as<double>();
         // auto dumpInf = result["dumpLocationInfections"].as<int>();
         // auto dumInfList = result["dumpLocationInfectiousList"].as<std::string>();
         // needLocationAgentList = !((dumpLocationAgentList == "") && (dumpInf == 0) && (dumInfList == ""));
@@ -1583,6 +1595,8 @@ public:
         a.curfewBegin = curfewBegin;
         a.curfewEnd = curfewEnd;
         a.schoolAgeRestriction = schoolAgeRestriction;
+        a.quarantineImmuneActive = quarantineImmuneActive;
+        a.lockdownNonvaccActive = lockdownNonvaccActive;
 
         // Location-based data
         thrust::device_vector<unsigned>& locationAgentList = realThis->locs->locationAgentList;
@@ -1601,6 +1615,7 @@ public:
         a.locationQuarantineUntilPtr = thrust::raw_pointer_cast(locationQuarantineUntil.data());
         thrust::device_vector<typename SimulationType::TypeOfLocation_t>& locationTypes = realThis->locs->locType;
         a.locationTypePtr = thrust::raw_pointer_cast(locationTypes.data());
+        a.essentialLocPtr = thrust::raw_pointer_cast(realThis->locs->essential.data());
 
         // Agent-based data
         thrust::device_vector<unsigned>& agentLocations = realThis->agents->location;
@@ -1640,6 +1655,7 @@ public:
         thrust::device_vector<AgentTypeList::Event>& events = realThis->agents->agentTypes.events;
         a.eventsPtr = thrust::raw_pointer_cast(events.data());
 
+
         unsigned numberOfAgents = agentLocations.size();
         unsigned numberOfLocations = locationListOffsets.size() - 1;
 
@@ -1663,7 +1679,8 @@ public:
             auto moved = thrust::count_if(movement.begin(), movement.end(), [] HD(const thrust::tuple<unsigned, unsigned, unsigned>& e){
                 return thrust::get<1>(e) != thrust::get<2>(e);
             });
-            if(static_cast<double>(moved) / static_cast<double>(movement.size()) < 0.25) {
+            // std::cout << static_cast<double>(moved) << ", " << static_cast<double>(movement.size()) << std::endl;
+            if(static_cast<double>(moved) / static_cast<double>(movement.size()) < perfRatio) {
                 Util::updatePerLocationAgentListsSet(agentLocations, realThis->locs->locationPartAgentList, realThis->locs->scanResult, realThis->locs->flags, movement, realThis->locs->copyOfPairs);
             } else {
                 Util::updatePerLocationAgentListsSort(agentLocations, locationIdsOfAgents, locationAgentList, realThis->locs->locationPartAgentList, locationListOffsets);

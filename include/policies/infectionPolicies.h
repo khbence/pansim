@@ -10,6 +10,8 @@ class BasicInfection {
 private:
     double k;
     unsigned dumpToFile = 0;
+    double c0_offset;
+    int d_offset, d_peak_offset;
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
@@ -35,7 +37,8 @@ private:
             infectiousAgentOffsets.push_back(0);
         }
         void insert(unsigned _timestamp, unsigned _variant, thrust::host_vector<unsigned> _locationIds,
-                    thrust::host_vector<unsigned> _infectedAgentsAtLocation, thrust::host_vector<unsigned> _infectiousAgents,
+                    thrust::host_vector<unsigned> _infectedAgentsAtLocation, thrust::host_vector<unsigned> _peopleOffsetsByLocation,
+                    thrust::host_vector<unsigned> _infectiousAgents,
                     thrust::host_vector<float> _infectiousnessOfAgents) {
                         timestamp.push_back(_timestamp);
                         variant.push_back(_variant);
@@ -43,8 +46,10 @@ private:
                         locationOffsets.push_back(locationIds.size());
                         infectedAgentsAtLocation.insert(infectedAgentsAtLocation.end(), _infectedAgentsAtLocation.begin(), _infectedAgentsAtLocation.end());
                         infectedAgentOffsets.push_back(infectedAgentsAtLocation.size());
+                        unsigned prevsize = infectiousAgentsAtLocation.size();
+                        thrust::transform(_peopleOffsetsByLocation.begin(), _peopleOffsetsByLocation.end(), _peopleOffsetsByLocation.begin(), [prevsize](unsigned in){return in+prevsize;});
+                        infectiousAgentOffsets.insert(infectiousAgentOffsets.end(),_peopleOffsetsByLocation.begin()+1, _peopleOffsetsByLocation.end());
                         infectiousAgentsAtLocation.insert(infectiousAgentsAtLocation.end(), _infectiousAgents.begin(), _infectiousAgents.end());
-                        infectiousAgentOffsets.push_back(infectiousAgentsAtLocation.size());
                         infectiousnessOfAgents.insert(infectiousnessOfAgents.end(), _infectiousnessOfAgents.begin(), _infectiousnessOfAgents.end());
         }
         void write(std::string fname) {
@@ -80,11 +85,20 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("k,infectionCoefficient",
             "Infection: >0 :infectiousness coefficient ",
-            cxxopts::value<double>()->default_value("0.000362213"))("dumpLocationInfections",// 291642
+            cxxopts::value<double>()->default_value("0.000347"))("dumpLocationInfections",// 291642
             "Dump per-location statistics every N timestep ",
             cxxopts::value<unsigned>()->default_value("0"))("dumpLocationInfectiousList",
             "Dump per-location list of infectious people ",
-            cxxopts::value<std::string>()->default_value(""));
+            cxxopts::value<std::string>()->default_value(""))
+            ("d_offset",
+            "seasonality day offset ",
+            cxxopts::value<int>()->default_value("-5"))
+            ("d_peak_offset",
+            "seasonality peak day offset ",
+            cxxopts::value<int>()->default_value("0"))
+            ("c0",
+            "seasonality c0 value ",
+            cxxopts::value<double>()->default_value("3.08"));
     }
 
     void finalize() {
@@ -98,6 +112,9 @@ protected:
         this->k = result["infectionCoefficient"].as<double>();
         dumpToFile = result["dumpLocationInfections"].as<unsigned>();
         dumpDirectory = result["dumpLocationInfectiousList"].as<std::string>();
+        d_offset = result["d_offset"].as<int>();
+        d_peak_offset = result["d_peak_offset"].as<int>();
+        c0_offset = result["c0"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
     }
@@ -405,7 +422,7 @@ public:
         file << "\n";
         file.close();*/
         dumpstore->insert(simTime.getTimestamp(), variant, outLocationIds,
-                    newlyInfectedPeopleIds, peopleIds,
+                    newlyInfectedPeopleIds, locationLength, peopleIds,
                     infectiousness);
     }
 
@@ -418,14 +435,20 @@ public:
         // int d_peak = 59; //assuming origin = marc 1
         int d_peak = 59+21+6; //assuming origin = mar 27
         // int d_peak = 90;
-        double c0 = 2.5; //0.8;
+        double c0 = 3.08; //0.8;
+
+        if (simDay > 250 && simDay < 450) {
+            d += d_offset;
+            d_peak += d_peak_offset;
+            c0 = c0_offset;
+        }
         int d_mod = d % 366;
         if (d_mod > 366 / 2)
             d_mod = 366 - d_mod;
         double normed_value = 
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * c0))/
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * c0));
-        double calc_val = std::min(std::max(normed_value, 0.6/*trunc_val*/), 1.0);
+        double calc_val = std::min(std::max(normed_value, 0.5/*trunc_val*/), 1.0);
         if (d_mod < d_peak)
             return 1.0;
         else

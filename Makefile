@@ -10,6 +10,9 @@ buildGPU:
 	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=ON
 	cd build; make -j
 
+runGPU: buildGPU
+	./
+
 dbuildBaseCPU:
 	docker build . -f Dockerfile.baseCPU -t khbence/covid_ppcu:base_cpu
 
