@@ -347,7 +347,7 @@ public:
                 std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
                 auto realThis = static_cast<SimulationType*>(this);
                 double fraction = std::stod(rule.parameter);
-                variantIdx++;
+                variantIdx = threshold2;
                 if (variantIdx >= realThis->infectiousnessMultiplier.size()) {
                     throw CustomErrors("More ExposeToMutation events defined than infectiousnessMultiplier specified on the command line");
                 }
