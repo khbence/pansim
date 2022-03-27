@@ -117,6 +117,7 @@ protected:
         c0_offset = result["c0"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
+        if (dumpToFile || flagInfectionAtLocations) Util::needAgentsSortedByLocation = 1;
     }
 
 public:
@@ -457,7 +458,7 @@ public:
 
 
     void infectionsAtLocations(Timehandler& simTime, unsigned timeStep, uint8_t variant) {
-        //        PROFILE_FUNCTION();
+        PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
         thrust::device_vector<unsigned>& locationListOffsets =
             realThis->locs->locationListOffsets;// offsets into locationAgentList and locationIdsOfAgents

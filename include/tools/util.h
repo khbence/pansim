@@ -4,6 +4,7 @@
 
 class Util {
 public:
+    static int needAgentsSortedByLocation;
     static void updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
         thrust::device_vector<unsigned>& locationIdsOfAgents,
         thrust::device_vector<unsigned>& locationAgentList,
@@ -51,7 +52,7 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
     unsigned* locationAgentListPtr = thrust::raw_pointer_cast(locationAgentList.data());
     unsigned numAgents = PPValues.size();
 
-    //    PROFILE_FUNCTION();
+    PROFILE_FUNCTION();
 
     if (numLocations == 1) {
         fullInfectedCounts[0] = thrust::reduce(thrust::make_transform_iterator(PPValues.begin(), lam),

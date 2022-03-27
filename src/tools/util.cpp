@@ -2,6 +2,12 @@
 #include "timing.h"
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+int Util::needAgentsSortedByLocation = 0;
+#else
+int Util::needAgentsSortedByLocation = 1;
+#endif
+
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 __global__ void extractOffsets_kernel(unsigned* locOfAgents, unsigned* locationListOffsets, unsigned length, unsigned nLocs) {
     unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i == 0)
@@ -36,17 +42,20 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
     thrust::device_vector<unsigned>& locationIdsOfAgents,
     thrust::device_vector<unsigned>& locationAgentList,
     thrust::device_vector<unsigned>& locationListOffsets) {
-    //    PROFILE_FUNCTION();
+    PROFILE_FUNCTION();
 
     // Make a copy of locationOfAgents
     thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), locationIdsOfAgents.begin());
     thrust::sequence(locationAgentList.begin(), locationAgentList.end());
     // Now sort by location, so locationAgentList contains agent IDs sorted by
     // location
-    // BEGIN_PROFILING("sort")
-    thrust::stable_sort_by_key(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), locationAgentList.begin());
-    // END_PROFILING("sort")
+    if (Util::needAgentsSortedByLocation) {
+        BEGIN_PROFILING("sort")
+        thrust::stable_sort_by_key(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), locationAgentList.begin());
+        END_PROFILING("sort")
+    }
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+    #if 1
     // Count number of people at any given location
     thrust::fill(locationListOffsets.begin(), locationListOffsets.end(), 0);
     reduce_by_location(locationListOffsets,
@@ -58,6 +67,9 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
             return unsigned(1);
         });// This locationOfAgents maybe should be locationIdsOfAgents??
     thrust::exclusive_scan(locationListOffsets.begin(), locationListOffsets.end(), locationListOffsets.begin());
+    #else
+
+    #endif
 #else
     // Now extract offsets into locationAgentList where locations begin
     unsigned* locationIdsOfAgentsPtr = thrust::raw_pointer_cast(locationIdsOfAgents.data());

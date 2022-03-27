@@ -41,7 +41,7 @@ public:
     }
 
     void movement(Timehandler simTime, unsigned timeStep) {
-        //        PROFILE_FUNCTION();
+        PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
         thrust::device_vector<unsigned>& locationAgentList = realThis->locs->locationAgentList;
         thrust::device_vector<unsigned>& locationListOffsets = realThis->locs->locationListOffsets;
@@ -1350,6 +1350,7 @@ public:
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
         dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
+        if (dumpLocationAgentList.length()>0) Util::needAgentsSortedByLocation = 1;
     }
     void init(const parser::LocationTypes& data, unsigned cemeteryID) {
         publicSpace = data.publicSpace;
@@ -1363,7 +1364,7 @@ public:
     }
 
     void planLocations(Timehandler simTime, unsigned timeStep) {
-        //        PROFILE_FUNCTION();
+        PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
         thrust::device_vector<unsigned>& agentLocations = realThis->agents->location;
         unsigned numberOfAgents = agentLocations.size();
@@ -1558,7 +1559,7 @@ public:
     }
 
     void movement(Timehandler simTime, unsigned timeStep) {
-        //        PROFILE_FUNCTION();
+        PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
 
         RealMovementOps::MovementArguments<typename SimulationType::PPState_t,

@@ -8,7 +8,7 @@ void Timing::reportWithParent(int parent, const std::string& indentation) {
     for (const auto& element : loops) {
         const LoopData& l = element.second;
         if (l.parent == parent) {
-            std::cout << indentation + element.first + ": " + std::to_string(l.time) + " seconds\n";
+            std::cerr << indentation + element.first + ": " + std::to_string(l.time) + " seconds\n";
             reportWithParent(l.index, indentation + "  ");
         }
     }
@@ -45,7 +45,7 @@ void Timing::report() {
     for (const auto& element : loops) {
         const LoopData& l = element.second;
         if (l.parent == parent) {
-            std::cout << indentation + element.first + ": " + std::to_string(l.time) + " seconds\n";
+            std::cerr << indentation + element.first + ": " + std::to_string(l.time) + " seconds\n";
             reportWithParent(l.index, indentation + "  ");
         }
     }
