@@ -310,7 +310,7 @@ public:
     }
 
     const auto& refreshAndGetStatistic() {
-        std::pair<unsigned, unsigned> agents{ locationListOffsets[0], locationListOffsets.back() };
-        return globalStats.refreshandGetAfterMidnight(agents, locationAgentList);
+        //std::pair<unsigned, unsigned> agents{ locationListOffsets[0], locationListOffsets.back() };
+        return globalStats.refreshandGetAfterMidnight();
     }
 };
