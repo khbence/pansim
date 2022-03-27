@@ -20,6 +20,9 @@ private:
     std::ofstream file;
     thrust::device_vector<unsigned> susceptible1;
 
+    thrust::device_vector<double> infectionRatios;
+    thrust::device_vector<float> fullInfectedCounts;
+
     class DumpStore {
         std::vector<unsigned> timestamp;
         std::vector<unsigned> variant;
@@ -468,9 +471,10 @@ public:
         auto& ppstates = realThis->agents->PPValues;
         auto& infectiousness = realThis->locs->infectiousness;
 
-        thrust::device_vector<double> infectionRatios(locationListOffsets.size() - 1, 0.0);
-        thrust::device_vector<float> fullInfectedCounts(locationListOffsets.size() - 1, 0);
-
+        infectionRatios.resize(locationListOffsets.size() - 1);
+        fullInfectedCounts.resize(locationListOffsets.size() - 1);
+        thrust::fill(infectionRatios.begin(), infectionRatios.end(), 0.0);
+        thrust::fill(fullInfectedCounts.begin(), fullInfectedCounts.end(), 0.0f);
 
         if (flagInfectionAtLocations) {
             if (infectionFlagAtLocations.size() == 0) infectionFlagAtLocations.resize(infectiousness.size());
