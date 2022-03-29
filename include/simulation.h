@@ -572,7 +572,9 @@ public:
         immunization = new Immunization<Simulation>(this);
         immunization->initializeArgs(result);
         agents->initializeArgs(result);
+        BEGIN_PROFILING("DataProvider");
         DataProvider data{ result };
+        END_PROFILING("DataProvider");
         try {
             std::string header = PPState_t::initTransitionMatrix(
                 data.acquireProgressionMatrices(), data.acquireProgressionConfig(), infectiousnessMultiplier);

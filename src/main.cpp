@@ -66,7 +66,9 @@ int main(int argc, char** argv) {
         return EXIT_SUCCESS;
     }
 
+    BEGIN_PROFILING("Device/RNG init");
     RandomGenerator::init(omp_get_max_threads());
+    END_PROFILING("Device/RNG init");
     try {
         config::Simulation_t s{ result };
         END_PROFILING("init");
