@@ -428,7 +428,7 @@ public:
                         if (months > 6) months = 6;
                         for (int i = 0; i < numVariantsLocal; i ++) {
                             if (i == thrust::get<1>(tup).variant || ((i==3 || i==4) && (thrust::get<1>(tup).variant==3 || thrust::get<1>(tup).variant==4))) {
-                                float mul = (i == thrust::get<1>(tup).variant) ? 0.95 : 0.65;
+                                float mul = (i == thrust::get<1>(tup).variant) ? 0.95 : 0.75;
                                 susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*mul));
                                 thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),0.1f), i);
                             } else {

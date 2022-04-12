@@ -1,0 +1,154 @@
+#!python
+import re
+import threading
+import subprocess
+import time
+import os
+import json
+from tokenize import String
+
+tmpdirPath = '/home/reguly/pansim/tmpdirs'
+panSimPath = '/home/reguly/pansim/'
+submitScriptPath = tmpdirPath+'/submit_gpu.sh'
+binaryPath = panSimPath+'/build_a100/panSim'
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+class uniqueIDProvider:
+    lock = threading.Lock()
+    counter = 0
+    @staticmethod
+    def getUniqueID() -> int:
+        with uniqueIDProvider.lock:
+            uniqueIDProvider.counter = uniqueIDProvider.counter+1
+            return uniqueIDProvider.counter
+
+
+class Instance:
+    def __init__(self, globalConfig, parameters, manager) -> None:
+        self.completed = False
+        self.globalConfig = globalConfig
+        self.parameters = parameters
+        self.uniqueID = uniqueIDProvider.getUniqueID()
+        self.slurmID = -1
+        self.workdir = tmpdirPath+'/'+str(self.uniqueID)
+        self.manager = manager
+
+    def prepare(self) -> None:
+        
+        #create tmpdir
+        if os.path.exists(self.workdir):
+            print('Warning, path '+self.workdir+' already exists')
+        else:
+            os.mkdir(self.workdir)
+        
+        for key in self.parameters:
+            idx = next((i for i, x in enumerate(self.globalConfig) if x==key), None)
+            if idx:
+                if len(self.globalConfig)>idx+2:
+                    self.globalConfig = self.globalConfig[:idx]+self.globalConfig[idx+2:]
+                else:
+                    self.globalConfig = self.globalConfig[:idx]
+
+
+        #copy in/create any files/params in "parameters"
+        self.localConfig = self.manager.convertParams(self.parameters, self.workdir)
+        #assemble command line - use defaults for files/params in "globalConfig"
+        # globalC = ' '.join(self.globalConfig)
+        # localC = ' '.join(self.localConfig)
+        # self.cmd = binaryPath + ' ' + globalC + ' ' + localC
+        self.cmd = [binaryPath] + self.globalConfig + self.localConfig
+
+
+    def run(self) -> None:
+        self.prepare()
+        #submit job
+        fullcmd = ['sbatch',submitScriptPath]+self.cmd
+        print(' '.join(fullcmd))
+        a = subprocess.run(fullcmd,capture_output=True)
+        if len(a.stderr)>0 or not ('Submitted batch job' in str(a.stdout)):
+            print(f'Error submitting job {self.uniqueID}')
+            return
+        self.slurmID = int(a.stdout[len('Submitted batch job '):])
+        self.poll()
+
+    def poll(self) -> None:
+        a = subprocess.run(['squeue'],capture_output=True)
+        while not (re.search(r'\b'+str(self.slurmID)+r'\b',str(a.stdout)) is None):
+            time.sleep(5)
+            a = subprocess.run(['squeue'],capture_output=True)
+        #parse results
+        self.completed = True
+
+class Manager:
+    def __init__(self, globalConfig) -> None:
+        f = open('defaultargs.json')
+        self.argsDefaults = json.load(f)
+        f.close()
+        if type(globalConfig) is dict:
+            self.globalConfig = globalConfig
+        else:
+            if os.path.exists(globalConfig):
+                f.open(globalConfig)
+                self.globalConfig = json.load(f)
+                f.close()
+        self.globalArgs = self.convertParams(self.globalConfig, tmpdirPath)
+
+    def convertParams(self, paramlist, directory):
+        argstr = []
+        #check for consistency, and if some args are dicts, write them to json, concat arg to str
+        for key in paramlist:
+            if not key in self.argsDefaults:
+                print(f'argument {key} not recognized, dropping...')
+            else:
+                is_a = isinstance(paramlist[key], (int, float)) or is_number(paramlist[key])
+                is_b = isinstance(self.argsDefaults[key], (int, float)) or is_number(self.argsDefaults[key])
+                if is_a and is_b:
+                    argstr = argstr + [key] + [str(paramlist[key])]
+                elif (not is_a) and (not is_b):
+                    #if the value is a dict, write to json
+                    if type(paramlist[key]) is dict:
+                        #if the default parameter string is not a file (or the file doesn't exist, but it should)
+                        if not os.path.exists(panSimPath+'/'+self.argsDefaults[key]):
+                            print(f'got a dictionary as an argument to {key}, but that argument does not take a file as an argument')
+                        #if json, write json
+                        if 'json' in self.argsDefaults[key]:
+                            with open(directory+f'argsFor{key}.json', 'w') as outfile:
+                                json.dump(paramlist[key], outfile)
+                        else: #otherwise just write as string
+                            with open(directory+f'argsFor{key}.json', 'w') as outfile:
+                                outfile.write(paramlist[key])
+                        argstr = argstr + [key] + [directory+f'argsFor{key}.json']
+                    else: #otherwise just string arg
+                        argstr = argstr + [key] + [paramlist[key]]
+                else:
+                    print(f'mistmatch for key {key} between argument types: {paramlist[key]} ({type(paramlist[key])}) and {self.argsDefaults[key]} ({type(self.argsDefaults[key])}), dropping key')
+        return argstr
+
+    def createInstance(self, parameters) -> Instance:
+        instanceArgs = self.convertParams(parameters, tmpdirPath)
+        instance = Instance(self.globalArgs, parameters, self)
+        return instance
+
+
+def main():
+    manager = Manager({'-w':2, '-r': ' ',
+                        '--infectiousnessMultiplier': '1.05,1.94,2.6,3.2,4.16',
+                        '--diseaseProgressionScaling': '0.8,0.98,1.1,0.7,0.7',
+                        '--diseaseProgressionDeathScaling': '1.0,1.15,1.25,0.6,0.6',
+                        '--acquiredMultiplier': '0.9,0.22,0.8,0.22,0.85,0.15,0.30,0.5,0.30,0.5',
+                        '--immunizationEfficiencyInfection': '0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91,0.01,0.3,0.54,0.01,0.3,0.54',
+                        '--immunizationEfficiencyProgression': '1.0,1.0,1.0,0.4,0.22,0.1,0.4,0.22,0.1,0.67,0.6,0.35,0.67,0.6,0.35'})
+    a = manager.createInstance({})
+    x = threading.Thread(target=a.run)
+    x.start()
+    x.join()
+    print(f'finished {a.completed}')
+
+if __name__ == "__main__":
+    main()
