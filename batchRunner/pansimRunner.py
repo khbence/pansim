@@ -6,6 +6,7 @@ import time
 import os
 import json
 from tokenize import String
+import util_funs as uf
 
 tmpdirPath = '/home/reguly/pansim/tmpdirs'
 panSimPath = '/home/reguly/pansim/'
@@ -30,7 +31,7 @@ class uniqueIDProvider:
 
 
 class Instance:
-    def __init__(self, globalConfig, parameters, manager) -> None:
+    def __init__(self, nruns, globalConfig, parameters, manager) -> None:
         self.completed = False
         self.globalConfig = globalConfig
         self.parameters = parameters
@@ -38,6 +39,8 @@ class Instance:
         self.slurmID = -1
         self.workdir = tmpdirPath+'/'+str(self.uniqueID)
         self.manager = manager
+        self.nruns = nruns
+        self.results = {}
 
     def prepare(self) -> None:
         
@@ -68,7 +71,9 @@ class Instance:
     def run(self) -> None:
         self.prepare()
         #submit job
-        fullcmd = ['sbatch',submitScriptPath]+self.cmd
+        fullcmd = ['sbatch',submitScriptPath,str(self.nruns),self.workdir]+self.cmd
+        with open(self.workdir+f'/runProperties.txt', 'w') as outfile:
+            outfile.write(' '.join(fullcmd))
         print(' '.join(fullcmd))
         a = subprocess.run(fullcmd,capture_output=True)
         if len(a.stderr)>0 or not ('Submitted batch job' in str(a.stdout)):
@@ -84,6 +89,8 @@ class Instance:
             a = subprocess.run(['squeue'],capture_output=True)
         #parse results
         self.completed = True
+        for i in range(0,self.nruns):
+            self.results[i] = uf.std_txt_reader(self.workdir+f'/result_{i+1}.txt')
 
 class Manager:
     def __init__(self, globalConfig) -> None:
@@ -130,9 +137,9 @@ class Manager:
                     print(f'mistmatch for key {key} between argument types: {paramlist[key]} ({type(paramlist[key])}) and {self.argsDefaults[key]} ({type(self.argsDefaults[key])}), dropping key')
         return argstr
 
-    def createInstance(self, parameters) -> Instance:
+    def createInstance(self, nruns, parameters) -> Instance:
         instanceArgs = self.convertParams(parameters, tmpdirPath)
-        instance = Instance(self.globalArgs, parameters, self)
+        instance = Instance(nruns, self.globalArgs, parameters, self)
         return instance
 
 
@@ -144,7 +151,7 @@ def main():
                         '--acquiredMultiplier': '0.9,0.22,0.8,0.22,0.85,0.15,0.30,0.5,0.30,0.5',
                         '--immunizationEfficiencyInfection': '0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91,0.01,0.3,0.54,0.01,0.3,0.54',
                         '--immunizationEfficiencyProgression': '1.0,1.0,1.0,0.4,0.22,0.1,0.4,0.22,0.1,0.67,0.6,0.35,0.67,0.6,0.35'})
-    a = manager.createInstance({})
+    a = manager.createInstance(2,{})
     x = threading.Thread(target=a.run)
     x.start()
     x.join()
