@@ -7,6 +7,7 @@ import os
 import json
 from tokenize import String
 import util_funs as uf
+import pandas as pd
 
 tmpdirPath = '/home/reguly/pansim/tmpdirs'
 panSimPath = '/home/reguly/pansim/'
@@ -90,7 +91,13 @@ class Instance:
         #parse results
         self.completed = True
         for i in range(0,self.nruns):
-            self.results[i] = uf.std_txt_reader(self.workdir+f'/result_{i+1}.txt')
+            self.results[i] = pd.DataFrame(uf.std_txt_reader(self.workdir+f'/result_{i+1}.txt'))
+        result = self.results[0]
+        for i in range(1,self.nruns):
+            result = pd.concat((result, self.results[i]))
+        by_row_index = result.groupby(result.index)
+        self.result_avg = by_row_index.mean()
+        self.result_std = by_row_index.std()
 
 class Manager:
     def __init__(self, globalConfig) -> None:
