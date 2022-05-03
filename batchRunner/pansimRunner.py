@@ -15,6 +15,8 @@ submitScriptPath = tmpdirPath+'/submit_gpu.sh'
 binaryPath = panSimPath+'/build_a100/panSim'
 
 def is_number(s):
+    if isinstance(s,dict):
+        return False
     try:
         float(s)
         return True
@@ -132,12 +134,12 @@ class Manager:
                             print(f'got a dictionary as an argument to {key}, but that argument does not take a file as an argument')
                         #if json, write json
                         if 'json' in self.argsDefaults[key]:
-                            with open(directory+f'argsFor{key}.json', 'w') as outfile:
+                            with open(directory+f'/argsFor{key}.json', 'w') as outfile:
                                 json.dump(paramlist[key], outfile)
                         else: #otherwise just write as string
-                            with open(directory+f'argsFor{key}.json', 'w') as outfile:
+                            with open(directory+f'/argsFor{key}.json', 'w') as outfile:
                                 outfile.write(paramlist[key])
-                        argstr = argstr + [key] + [directory+f'argsFor{key}.json']
+                        argstr = argstr + [key] + [directory+f'/argsFor{key}.json']
                     else: #otherwise just string arg
                         argstr = argstr + [key] + [paramlist[key]]
                 else:
@@ -149,6 +151,19 @@ class Manager:
         instance = Instance(nruns, self.globalArgs, parameters, self)
         return instance
 
+    def runBatch(self, nruns, parameters):
+        batchsize = len(parameters)
+        threads = []
+        instances = []
+        print(f'Starting batch of {batchsize}')
+        for i in range(0,batchsize):
+            instances = instances + [self.createInstance(nruns,parameters[i])]
+            threads = threads + [threading.Thread(target=instances[i].run)]
+            threads[i].start()
+        for i in range(0,batchsize):
+            threads[i].join()
+        return instances
+
 
 def main():
     manager = Manager({'-w':2, '-r': ' ',
@@ -158,11 +173,45 @@ def main():
                         '--acquiredMultiplier': '0.9,0.22,0.8,0.22,0.85,0.15,0.30,0.5,0.30,0.5',
                         '--immunizationEfficiencyInfection': '0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91,0.01,0.3,0.54,0.01,0.3,0.54',
                         '--immunizationEfficiencyProgression': '1.0,1.0,1.0,0.4,0.22,0.1,0.4,0.22,0.1,0.67,0.6,0.35,0.67,0.6,0.35'})
-    a = manager.createInstance(2,{})
-    x = threading.Thread(target=a.run)
-    x.start()
-    x.join()
-    print(f'finished {a.completed}')
+    # a = manager.createInstance(2,{})
+    # x = threading.Thread(target=a.run)
+    # x.start()
+    # x.join()
+    insts = manager.runBatch(2,[{
+        '--closures':{'rules': [ { 
+      'name': 'sept_23_nov_11', 
+      'conditionType': 'afterDays', 
+      'threshold': 0, 
+      'threshold2': 0, 
+      'openAfter': 49, 
+      'closeAfter': -1, 
+      'parameter': 0,
+      'locationTypesToClose': [6,22]
+    }]}},
+    {
+        '--closures':{'rules': [ { 
+      'name': 'sept_23_nov_1', 
+      'conditionType': 'afterDays', 
+      'threshold': 0, 
+      'threshold2': 0, 
+      'openAfter': 39, 
+      'closeAfter': -1, 
+      'parameter': 0,
+      'locationTypesToClose': [6,22]
+    }]}},
+    {
+        '--closures':{'rules': [ { 
+      'name': 'sept_23_nov_21', 
+      'conditionType': 'afterDays', 
+      'threshold': 0, 
+      'threshold2': 0, 
+      'openAfter': 59, 
+      'closeAfter': -1, 
+      'parameter': 0,
+      'locationTypesToClose': [6,22]
+    }]}}
+        ])
+    print(f'finished {insts[0].completed}')
 
 if __name__ == "__main__":
     main()
