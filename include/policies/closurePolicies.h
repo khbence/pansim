@@ -101,11 +101,11 @@ public:
         for (const parser::ClosureRules::Rule& rule : rules.rules) {
 
             // check if masks/closures are enabled
-            if (!enableClosures && !rule.name.compare("Masks") == 0 && !rule.name.compare("Curfew") == 0
-                && !rule.name.compare("HolidayMode") == 0 && !rule.name.compare("SchoolAgeRestriction") == 0
-                && !rule.name.compare("ExposeToMutation") == 0 && !rule.name.compare("ReduceMovement") == 0
-                && !rule.name.compare("QuarantinePolicy")==0 && !rule.name.compare("QuarantineImmune")==0
-                && !rule.name.compare("LockdownNonvacc")==0 && !rule.name.compare("TestingProb")==0)
+            if (!enableClosures && !(rule.name.compare("Masks") == 0) && !(rule.name.compare("Curfew") == 0)
+                && !(rule.name.compare("HolidayMode") == 0) && !(rule.name.compare("SchoolAgeRestriction") == 0)
+                && !(rule.name.compare("ExposeToMutation") == 0) && !(rule.name.compare("ReduceMovement") == 0)
+                && !(rule.name.compare("QuarantinePolicy")==0) && !(rule.name.compare("QuarantineImmune")==0)
+                && !(rule.name.compare("LockdownNonvacc")==0) && !(rule.name.compare("TestingProb")==0))
                 continue;
 
             // Create condition

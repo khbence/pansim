@@ -369,10 +369,10 @@ public:
                 auto& diagnosed = thrust::get<3>(tup);
                 unsigned agentID = thrust::get<4>(tup);
                 float progScaling;
-                if (ppstate.getStateIdx()==7) progScaling = deathScaling[ppstate.getVariant()]/meta.getScalingSymptoms(ppstate.getVariant());
+                if (ppstate.getStateIdx()==7) progScaling = deathScaling[ppstate.getVariant()]/meta.getScalingSymptoms(ppstate.getVariant(),ppstate.getStateIdx());
                 else progScaling = progressionScaling[ppstate.getVariant()];
                 bool recovered =
-                    ppstate.update(meta.getScalingSymptoms(ppstate.getVariant()) * progScaling,
+                    ppstate.update(meta.getScalingSymptoms(ppstate.getVariant(),ppstate.getStateIdx()) * progScaling,
                         agentStat,
                         meta,
                         timestamp,
@@ -524,6 +524,13 @@ public:
         std::cout << (unsigned)(infectedHCWorker*100)/healthcareWorkerCount << "\t";
         std::cout << (unsigned)exposedHCWorker << "\t";
 
+        //Number of vaccinated but not previously infected
+        unsigned vaccNotInf =
+            thrust::count_if(agentStats.begin(), agentStats.end(), 
+                                     [] HD(AgentStats agentStat) {return agentStat.infectedCount == 0 && agentStat.immunizationCount>0;});
+        stats.push_back(vaccNotInf);
+        std::cout << vaccNotInf;
+
         std::cout << '\n';
         return stats;
     }
@@ -594,7 +601,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tVNI";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();

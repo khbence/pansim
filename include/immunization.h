@@ -4,6 +4,8 @@
 #include <string>
 #include "agentType.h"
 #include <map>
+#include <array>
+#include <numeric>
 #include "parametersFormat.h"
 #include "agentTypesFormat.h"
 #include "customExceptions.h"
@@ -27,13 +29,25 @@ class Immunization {
 #define numberOfCategories 10
     std::vector<int> vaccinationOrder;
     std::vector<float> vaccinationGroupLevel;
-    std::vector<float> immunizationEfficiencyInfection;
-    std::vector<float> immunizationEfficiencyProgression;
-    std::vector<float> acquiredMultiplier;
+    // std::vector<float> immunizationEfficiencyInfection;
+    // std::vector<float> immunizationEfficiencyProgression;
+    // std::vector<float> acquiredMultiplier;
+    std::vector<float> protectionInfection;
+    std::vector<float> protectionInfectionWaning;
+    std::vector<float> protectionSymptomatic;
+    std::vector<float> protectionSymptomaticWaning;
+    std::vector<float> protectionHospitalization;
+    std::vector<float> protectionHospitalizationWaning;
     std::vector<float> vaccPerWeek;
-    std::vector<float> boosterPerWeek;
+    unsigned boosterRounds;
+    std::vector<std::vector<float>> boosterPerWeek;
+    std::vector<std::vector<float>> boosterAgePercent;
+    unsigned initializedAgeGroups = 0;
+    std::vector<std::array<unsigned, 10>> ageGroupSize;
+    std::vector<std::array<float, 10>> ageGroupFrac;
     unsigned startAfterDay = 0;
-    unsigned boosterStartAfterDay = 0;
+    std::vector<int> boosterStartAfterDay;
+    //unsigned boosterStartAfterDay = 0;
     unsigned dailyDoses = 0;
     unsigned dailyBoosters = 0;
     unsigned diagnosticLevel = 0;
@@ -57,13 +71,13 @@ class Immunization {
             return 0;
     }
 
-    unsigned numberOfBoostersToday(Timehandler& simTime) {
+    unsigned numberOfBoostersToday(Timehandler& simTime, unsigned round) {
         // float availPerWeek[] = {955, 1433, 1190, 1911, 2095, 1966, 1856, 1819, 1672, 1746, 1856, 1984, 1856, 3234, 4263, 5707, 10580, 5050, 4128, 4128, 4128, 4128, 4128, 0, 0};
-        if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= boosterStartAfterDay) {
-            if (boosterPerWeek.size() == 0) return dailyBoosters;
-            unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-boosterStartAfterDay;
+        if (simTime.getTimestamp() / (24 * 60 / simTime.getTimeStep()) >= boosterStartAfterDay[round]) {
+            if (boosterPerWeek[round].size() == 0) return dailyBoosters;
+            unsigned day = simTime.getTimestamp()/(24*60/simTime.getTimeStep())-boosterStartAfterDay[round];
             unsigned week = day/7;
-            return boosterPerWeek[week>=boosterPerWeek.size()?boosterPerWeek.size()-1:week]/7.0;
+            return boosterPerWeek[round][week>=boosterPerWeek[round].size()?boosterPerWeek[round].size()-1:week]/7.0;
         } else
             return 0;
     }
@@ -78,7 +92,7 @@ public:
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(96))))
             ("boosterStart",
             "number of days into simulation when booster immunizations starts",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(315))))("immunizationsPerWeek",
+            cxxopts::value<std::string>()->default_value("315"))("immunizationsPerWeek",
             "number of immunizations per week - number or file with comma separated values for each week",
             cxxopts::value<std::string>()->default_value("inputConfigFiles/vaccPerWeek.txt"))
             ("boostersPerWeek",
@@ -92,7 +106,21 @@ public:
             ("vaccinationGroupLevel",
             "Immunization level in different groups in the order listed in immunizationOrder's description",
             cxxopts::value<std::string>()->default_value("0.9,0.85,0.9,0.82,0.8,0.75,0.8,0.67,0.4,0.2")) //75%: "0.9,0.85,0.9,0.89,0.95,0.85,0.8,0.88,0.6,0.4"
-            ("immunizationEfficiencyInfection",
+            
+            ("protectionInfection","Efficiency vs. infection of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.85,0.5,0.77,0.4,0.85,0.63,0.9,0.65,0.92,0.7"))
+            ("protectionInfectionWaning","Waning per week of efficiency vs. infection of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.003,0.006,0.01,0.02,0.005,0.02,0.002,0.004,0.002,0.004"))
+            ("protectionSymptomatic","Efficiency vs. symptomatic infection of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.9,0.55,0.8,0.6,0.95,0.69,0.92,0.7,0.94,0.77"))
+            ("protectionSymptomaticWaning","Waning per week of efficiency vs. symptomatic infection of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.003,0.006,0.01,0.02,0.005,0.02,0.002,0.004,0.002,0.004"))
+            ("protectionHospitalization","Efficiency vs. hospitalization of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.92,0.85,0.95,0.9,0.97,0.92,0.974,0.93,0.98,0.97"))
+            ("protectionHospitalizationWaning","Waning per week of efficiency vs. hospitalization of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
+                    cxxopts::value<std::string>()->default_value("0.0021,0.006,0.006,0.006,0.003,0.003,0.0014,0.003,0.0014,0.003"));
+
+            /*("immunizationEfficiencyInfection",
             "Efficiency of immunization against infection after 12 days, 28 days, and after booster (pairs of comma-separated values for different strains)",
             cxxopts::value<std::string>()->default_value("0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91"))
             ("immunizationEfficiencyProgression",
@@ -100,12 +128,15 @@ public:
             cxxopts::value<std::string>()->default_value("1.0,1.0,1.0,0.4,0.22,0.1,0.4,0.22,0.1"))
             ("acquiredMultiplier",
             "susceptibility vs. reinfection and progression weight with acquired immunity ",
-            cxxopts::value<std::string>()->default_value("0.9,0.22,0.8,0.22,0.8,0.22"));
+            cxxopts::value<std::string>()->default_value("0.9,0.22,0.8,0.22,0.8,0.22"));*/
     }
 
     void initializeArgs(const cxxopts::ParseResult& result) {
         startAfterDay = result["immunizationStart"].as<unsigned>();
-        boosterStartAfterDay = result["boosterStart"].as<unsigned>();
+        boosterStartAfterDay = splitStringInt(result["boosterStart"].as<std::string>(),',');
+        boosterRounds = boosterStartAfterDay.size();
+        boosterPerWeek.resize(boosterRounds);
+        boosterAgePercent.resize(boosterRounds);
         std::string immStr = result["immunizationsPerWeek"].as<std::string>();
         char *endptr = nullptr;
         dailyDoses = strtoul(immStr.c_str(), &endptr, 10)/7;
@@ -119,16 +150,33 @@ public:
         dailyBoosters = strtoul(bstrStr.c_str(), &endptr, 10)/7;
         if (endptr != bstrStr.c_str()+bstrStr.length()) {
             std::ifstream t(bstrStr.c_str());
-            std::stringstream buffer;
-            buffer << t.rdbuf();
-            boosterPerWeek = splitStringFloat(buffer.str(), ',');
+            std::string buffer;
+            int localBoosterRounds = 0;
+            while(std::getline(t, buffer)) {
+                if (buffer.length()==0 || buffer.at(0) == '#')
+                    continue;
+                boosterPerWeek[localBoosterRounds] = splitStringFloat(buffer, ',');
+                if (std::getline(t, buffer)) {
+                    boosterAgePercent[localBoosterRounds] = splitStringFloat(buffer, ',');
+                }
+                localBoosterRounds++;
+                if (localBoosterRounds == boosterRounds) break;
+            }
+            if (boosterRounds != localBoosterRounds) throw CustomErrors("booster rounds size mismatch");
         }
+        ageGroupSize.resize(boosterRounds);
+        ageGroupFrac.resize(boosterRounds);
+
+        // for (int boosterRound = 0; boosterRound < boosterRounds; boosterRound++) {
+        //     std::copy( boosterPerWeek[boosterRound].begin(), boosterPerWeek[boosterRound].end(), std::ostream_iterator<float>( std::cout, " "));
+        //     std::cout << "\n";
+        //     std::copy( boosterAgePercent[boosterRound].begin(), boosterAgePercent[boosterRound].end(), std::ostream_iterator<float>( std::cout, " "));
+        //     std::cout << "\n";
+        // }
         
         try {
             diagnosticLevel = result["diags"].as<unsigned>();
         } catch (std::exception& e) {}
-
-        acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
 
         std::string orderString = result["immunizationOrder"].as<std::string>();
         vaccinationOrder = splitStringInt(orderString, ',');
@@ -140,15 +188,23 @@ public:
                 throw CustomErrors(
                     "immunizationOrder values have to be  less or equal to " + std::to_string(numberOfCategories));
         
-        immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
-        immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
+        protectionInfection = splitStringFloat(result["protectionInfection"].as<std::string>(), ',');
+        protectionInfectionWaning = splitStringFloat(result["protectionInfectionWaning"].as<std::string>(), ',');
+        protectionSymptomatic = splitStringFloat(result["protectionSymptomatic"].as<std::string>(), ',');
+        protectionSymptomaticWaning = splitStringFloat(result["protectionSymptomaticWaning"].as<std::string>(), ',');
+        protectionHospitalization = splitStringFloat(result["protectionHospitalization"].as<std::string>(), ',');
+        protectionHospitalizationWaning = splitStringFloat(result["protectionHospitalizationWaning"].as<std::string>(), ',');
+
+        // acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
+        // immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
+        // immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
         vaccinationGroupLevel = splitStringFloat(result["vaccinationGroupLevel"].as<std::string>(), ',');
         numVariants = sim ->infectiousnessMultiplier.size();
-        if (immunizationEfficiencyInfection.size() < 3 * numVariants ||
-            immunizationEfficiencyProgression.size() < 3 * numVariants) {
-                throw CustomErrors(
-                    "immunizationEfficiency parameters have to be at least of size 3x the number of strains");
-            }
+        // if (immunizationEfficiencyInfection.size() < 3 * numVariants ||
+        //     immunizationEfficiencyProgression.size() < 3 * numVariants) {
+        //         throw CustomErrors(
+        //             "immunizationEfficiency parameters have to be at least of size 3x the number of strains");
+        //     }
     }
 
     void initCategories() {
@@ -391,144 +447,341 @@ public:
         }
         for (unsigned i = 0; i < numberOfCategories; i++) vaccinationOrder[i] = -1 * vaccinationOrder[i];
     }
+
+    void initAgeGroups() {
+        initializedAgeGroups = 1;
+        for (int boosterRound = 0; boosterRound < boosterRounds; boosterRound++) {
+            for (int agegroup = 0; agegroup < 10; agegroup++) {
+                unsigned low = agegroup*10;
+                unsigned high = agegroup*10+10;
+                if (agegroup == 9) high = 200;
+                ageGroupSize[boosterRound][agegroup] = thrust::count_if(sim->agents->agentMetaData.begin(),
+                                                    sim->agents->agentMetaData.end(),
+                    [low, high] HD(typename Simulation::AgentMeta_t meta) {
+                        if (meta.getAge()>=low && meta.getAge()<high) {
+                            return true;
+                        }
+                        return false;
+                    });
+                ageGroupSize[boosterRound][agegroup] = (float)ageGroupSize[boosterRound][agegroup] * boosterAgePercent[boosterRound][agegroup];
+            }
+            unsigned sum = std::accumulate(ageGroupSize[boosterRound].begin(), ageGroupSize[boosterRound].end(), (unsigned)0);
+            for (int agegroup = 0; agegroup < 10; agegroup++)
+                ageGroupFrac[boosterRound][agegroup] = (float)ageGroupSize[boosterRound][agegroup]/(float)sum;
+        }
+    }
     void update(Timehandler& simTime, unsigned timeStep) {
+        if (initializedAgeGroups == 0) initAgeGroups();
+
         unsigned timestamp = simTime.getTimestamp();
         if (timestamp == 0) timestamp++;// First day already immunizing, then we sohuld not set immunizedTimestamp to 0
 
-        // Update immunity based on days since immunization
-        float immunizationEfficiencyInfectionLocal[3*MAX_STRAINS];
-        float immunizationEfficiencyProgressionLocal[3*MAX_STRAINS];
-        float acquired[2*MAX_STRAINS];
-        for (int i = 0; i < immunizationEfficiencyInfection.size(); i++) {
-            immunizationEfficiencyInfectionLocal[i] = immunizationEfficiencyInfection[i];
-            immunizationEfficiencyProgressionLocal[i] = immunizationEfficiencyProgression[i];
-            acquired[i] = acquiredMultiplier[i];
-        }
-        // float waning[] = {1.00,1.00,1.00,0.83,0.74,0.49,0.18};
-        float waning[] = {1.00,1.00,1.00,0.83,0.74,0.65,0.6};
+        // protectionInfection 0.85,0.5,0.77,0.4,0.85,0.63,0.9,0.65,0.92,0.7
+        // protectionInfectionWaning -0.003,-0.006,-0.01,-0.02,-0.005,-0.02,-0.002,-0.004,-0.002,-0.004
+        // protectionSymptomatic 0.9,0.55,0.8,0.6,0.95,0.69,0.92,0.7,0.94,0.77
+        // protectionSymptomaticWaning -0.003,-0.006,-0.01,-0.02,-0.005,-0.02,-0.002,-0.004,-0.002,-0.004
+        // protectionHospitalization 0.92,0.85,0.95,0.9,0.97,0.92,0.974,0.93,0.98,0.97
+        // protectionHospitalizationWaning -0.0021,-0.006,-0.006,-0.006,-0.003,-0.003,-0.0014,-0.003,-0.0014,-0.003
+        
+        // Update immunity based on weeks since immunization
+        /*
+        thrust::pair<float,float> efficiencyInf[6] =    {{protectionInfectionWaning[0], protectionInfection[0]},
+                                                         {protectionSymptomaticWaning[0], protectionSymptomatic[0]},
+                                                         {protectionHospitalizationWaning[0], protectionHospitalization[0]},
+                                                         {protectionInfectionWaning[1], protectionInfection[1]},
+                                                         {protectionSymptomaticWaning[1], protectionSymptomatic[1]},
+                                                         {protectionHospitalizationWaning[1], protectionHospitalization[1]}};
+        thrust::pair<float,float> efficiency2Dose[6] =  {{protectionInfectionWaning[2], protectionInfection[2]},
+                                                        {protectionSymptomaticWaning[2], protectionSymptomatic[2]},
+                                                        {protectionHospitalizationWaning[2], protectionHospitalization[2]},
+                                                         {protectionInfectionWaning[3], protectionInfection[3]},
+                                                         {protectionSymptomaticWaning[3], protectionSymptomatic[3]},
+                                                         {protectionHospitalizationWaning[3], protectionHospitalization[3]}};
+        thrust::pair<float,float> efficiency3Dose[6] =  {{protectionInfectionWaning[4], protectionInfection[4]},
+                                                        {protectionSymptomaticWaning[4], protectionSymptomatic[4]},
+                                                        {protectionHospitalizationWaning[4], protectionHospitalization[4]},
+                                                         {protectionInfectionWaning[5], protectionInfection[5]},
+                                                         {protectionSymptomaticWaning[5], protectionSymptomatic[5]},
+                                                         {protectionHospitalizationWaning[5], protectionHospitalization[5]}};
+        thrust::pair<float,float> efficiencyI2Dose[6] = {{protectionInfectionWaning[6], protectionInfection[6]},
+                                                        {protectionSymptomaticWaning[6], protectionSymptomatic[6]},
+                                                        {protectionHospitalizationWaning[6], protectionHospitalization[6]},
+                                                         {protectionInfectionWaning[7], protectionInfection[7]},
+                                                         {protectionSymptomaticWaning[7], protectionSymptomatic[7]},
+                                                         {protectionHospitalizationWaning[7], protectionHospitalization[7]}};
+        thrust::pair<float,float> efficiencyI3Dose[6] = {{protectionInfectionWaning[8], protectionInfection[8]},
+                                                        {protectionSymptomaticWaning[8], protectionSymptomatic[8]},
+                                                        {protectionHospitalizationWaning[8], protectionHospitalization[8]},
+                                                         {protectionInfectionWaning[9], protectionInfection[9]},
+                                                         {protectionSymptomaticWaning[9], protectionSymptomatic[9]},
+                                                         {protectionHospitalizationWaning[9], protectionHospitalization[9]}};
+*/
 
+        thrust::pair<float,float> efficiencyInf[6] =    {{0.003, 0.85},{0.003, 0.9 },{0.0021, 0.92},
+                                                         {0.006, 0.5 },{0.006, 0.55},{0.006,  0.85}};
+        thrust::pair<float,float> efficiency2Dose[6] =  {{0.01,  0.77},{0.01,  0.8 },{0.006,  0.95},
+                                                         {0.02,  0.4 },{0.02,  0.6 },{0.006,  0.9}};
+        thrust::pair<float,float> efficiency3Dose[6] =  {{0.005, 0.85},{0.005, 0.95},{0.003,  0.97},
+                                                         {0.02,  0.63},{0.02,  0.69},{0.003,  0.92}};
+        thrust::pair<float,float> efficiencyI2Dose[6] = {{0.002, 0.9 },{0.002, 0.92},{0.0014, 0.974},
+                                                         {0.004, 0.65},{0.004, 0.7 },{0.003,  0.93}};
+        thrust::pair<float,float> efficiencyI3Dose[6] = {{0.002, 0.92},{0.002, 0.94},{0.0014, 0.98},
+                                                         {0.004, 0.7 },{0.004, 0.77},{0.003,  0.97}};
+                                                         
+        //Wild,Alpha,Delta similar to each other BA1,BA2,BAX different from wild, but similar to each other
+        int variantSimilarity[6] = {0,0,0,1,1,1}; 
         unsigned numVariantsLocal = numVariants;
         thrust::for_each(
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin())),
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end())),
-            [timeStep, timestamp, immunizationEfficiencyInfectionLocal, immunizationEfficiencyProgressionLocal, numVariantsLocal, waning, acquired] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
-                if (thrust::get<0>(tup).isInfectious() > 0 &&
-                    thrust::get<1>(tup).infectedCount > 1 /*&&
-                    thrust::get<0>(tup).getVariant() < 2*/) {
-                        thrust::get<0>(tup).reduceInfectiousness(0.65);
-                }
+            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarity] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
+                //Current assumption: no reduced infectiousness from prior inf/vacc
+                // if (thrust::get<0>(tup).isInfectious() > 0 &&
+                //     thrust::get<1>(tup).infectedCount > 1 /*&&
+                //     thrust::get<0>(tup).getVariant() < 2*/) {
+                //         thrust::get<0>(tup).reduceInfectiousness(0.65);
+                // }
                 float susceptibilityLocal[MAX_STRAINS];
                 for (int i = 0; i < numVariantsLocal; i ++) {
                     susceptibilityLocal[i] = 1.0;
                 }
-                //Acquired immunity with waning
-                if (thrust::get<0>(tup).getStateIdx() == 0 && //susceptible
-                    thrust::get<1>(tup).infectedCount > 0) {
-                        unsigned months = (timestamp - thrust::get<1>(tup).infectedTimestamp) / (24 * 60 * 30 / timeStep);
-                        if (months > 6) months = 6;
+
+                unsigned weeksSinceImmunization = (timestamp - thrust::get<1>(tup).immunizationTimestamp) / (7 * 24 * 60 / timeStep);
+                unsigned weeksSinceInfection    = (timestamp - thrust::get<1>(tup).infectedTimestamp) / (7 * 24 * 60 / timeStep);
+
+                //Case 1: prior infection, but no vaccination (or vacc within 4 weeks)
+                if (thrust::get<1>(tup).infectedCount > 0 && 
+                    (thrust::get<1>(tup).immunizationCount == 0 ||
+                    (thrust::get<1>(tup).immunizationCount == 1 && weeksSinceImmunization<4))) {
+                        auto priorType = thrust::get<1>(tup).variant;
                         for (int i = 0; i < numVariantsLocal; i ++) {
-                            if (i == thrust::get<1>(tup).variant || ((i==3 || i==4) && (thrust::get<1>(tup).variant==3 || thrust::get<1>(tup).variant==4))) {
-                                float mul = (i == thrust::get<1>(tup).variant) ? 0.95 : 0.75;
-                                susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*mul));
-                                thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),0.1f), i);
-                            } else {
-                                // if (thrust::get<1>(tup).worstState == 2) {//asymptomatic
-                                //     susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]/2.0f));
-                                //     thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),MIN(1.0,acquired[2*i+1]*2)), i);
-                                // } else {
-                                    susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*acquired[2*i]));
-                                    thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),acquired[2*i+1]), i);
-                                // }
-                            }
+                            int similar = (thrust::get<1>(tup).infectedCount > 1) || (variantSimilarity[priorType] == variantSimilarity[i]);
+                            float vsInf = -1.0f * efficiencyInf[(1-similar)*3+0].first * weeksSinceInfection + ((i==priorType) ? 0.95 : efficiencyInf[(1-similar)*3+0].second);
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 1/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceInfection);
+                            float vsSympt = -1.0f * efficiencyInf[(1-similar)*3+1].first * weeksSinceInfection + efficiencyInf[(1-similar)*3+1].second;
+                            float vsHosp = -1.0f * efficiencyInf[(1-similar)*3+2].first * weeksSinceInfection + efficiencyInf[(1-similar)*3+2].second;
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
                         }
                 }
-
-                // Otherwise get more immune after days since immunization
-                unsigned daysSinceImmunization = (timestamp - thrust::get<1>(tup).immunizationTimestamp) / (24 * 60 / timeStep);
-                for (int i = 0; i < numVariantsLocal; i ++) {
-                    unsigned months = daysSinceImmunization < 30 ? 0 : (daysSinceImmunization/30-1);
-                    if (months > 6) months = 6;
-
-                    if (thrust::get<1>(tup).immunizationCount > 1 && daysSinceImmunization >=7) {
-                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*immunizationEfficiencyInfectionLocal[3*i+2]));
-                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i+2]), i);
-                    } else if (thrust::get<1>(tup).immunizationTimestamp > 0 && daysSinceImmunization >= 28 || thrust::get<1>(tup).immunizationCount > 1) {
-                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-(waning[months]*immunizationEfficiencyInfectionLocal[3*i+1]));
-                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i+1]), i);
-                    } else if (thrust::get<1>(tup).immunizationTimestamp > 0 && daysSinceImmunization >= 12) {
-                        susceptibilityLocal[i] = MIN(susceptibilityLocal[i],1.0f-immunizationEfficiencyInfectionLocal[3*i]);
-                        thrust::get<2>(tup).setScalingSymptoms(MIN(thrust::get<2>(tup).getScalingSymptoms(i),immunizationEfficiencyProgressionLocal[3*i]), i);
+                //Case 2: vaccination, no prior infection
+                else if (thrust::get<1>(tup).infectedCount == 0 && 
+                    thrust::get<1>(tup).immunizationCount > 0) {
+                    for (int i = 0; i < numVariantsLocal; i ++) {
+                        int similar = variantSimilarity[i] == 0;//vaccines are for type 0
+                        //No protection in 7 days after 1st dose
+                        if (thrust::get<1>(tup).immunizationCount == 1 && weeksSinceImmunization==0) continue;
+                        //Half protection 7-28 days after 1st dose
+                        else if (thrust::get<1>(tup).immunizationCount == 1 && weeksSinceImmunization<4) {
+                            float vsInf = (-1.0f * efficiency2Dose[(1-similar)*3+0].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+0].second)/2.0f;
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 2/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceImmunization);
+                            float vsSympt = (-1.0f * efficiency2Dose[(1-similar)*3+1].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+1].second)/2.0f;
+                            float vsHosp = (-1.0f * efficiency2Dose[(1-similar)*3+2].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+2].second)/2.0f;
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsSympt)/(1.0f-vsInf), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 5, i); //multiplier from state I4 (#5)
+                        }
+                        //Waning protection 28+ days after 1st dose (2nd dose)
+                        else if (thrust::get<1>(tup).immunizationCount == 1) {
+                            float vsInf = -1.0f * efficiency2Dose[(1-similar)*3+0].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+0].second;
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 2/2  var %d %g weeks: %d %d %d %d\n", i, susceptibilityLocal[i], weeksSinceImmunization, timestamp, thrust::get<1>(tup).immunizationTimestamp, thrust::get<1>(tup).immunizationCount);
+                            float vsSympt = -1.0f * efficiency2Dose[(1-similar)*3+1].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+1].second;
+                            float vsHosp = -1.0f * efficiency2Dose[(1-similar)*3+2].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+2].second;
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsSympt)/(1.0f-vsInf), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 5, i); //multiplier from state I4 (#5)
+                        }
+                        //Waning protection after 3rd (or more) dose
+                        else if (thrust::get<1>(tup).immunizationCount > 1) {
+                            float vsInf = -1.0f * efficiency3Dose[(1-similar)*3+0].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+0].second;
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 2/3 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceImmunization);
+                            float vsSympt = -1.0f * efficiency3Dose[(1-similar)*3+1].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+1].second;
+                            float vsHosp = -1.0f * efficiency3Dose[(1-similar)*3+2].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+2].second;
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsSympt)/(1.0f-vsInf), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 5, i); //multiplier from state I4 (#5)
+                        }
                     }
                 }
-
-                if (thrust::get<1>(tup).immunizationCount) {
-                        //If agent is infected, make them less infectious TODO: external parameter
-                        if (thrust::get<0>(tup).isInfectious() /*&& thrust::get<0>(tup).getVariant() < 2*/)
-                            thrust::get<0>(tup).reduceInfectiousness(0.65);
+                //Case 3: vaccination, and prior infection
+                else if (thrust::get<1>(tup).infectedCount > 0 && 
+                    thrust::get<1>(tup).immunizationCount > 0) {
+                    auto priorType = thrust::get<1>(tup).variant;
+                    unsigned weeksSince = MIN(weeksSinceInfection, weeksSinceImmunization);
+                    for (int i = 0; i < numVariantsLocal; i ++) {
+                        //We consider similarity based on prior infection, despite potentially no similarity in vaccination
+                        // int similar = variantSimilarity[priorType] == variantSimilarity[i];
+                        int similar = (thrust::get<1>(tup).infectedCount > 1) || (variantSimilarity[priorType] == variantSimilarity[i]);
+                        if (thrust::get<1>(tup).immunizationCount == 1) {
+                            float vsInf = -1.0f * efficiencyI2Dose[(1-similar)*3+0].first * weeksSince + ((i==priorType) ? 0.95 : efficiencyI2Dose[(1-similar)*3+0].second);
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 3/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSince);
+                            float vsSympt = -1.0f * efficiencyI2Dose[(1-similar)*3+1].first * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second;
+                            float vsHosp = -1.0f * efficiencyI2Dose[(1-similar)*3+2].first * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second;
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
+                        }
+                        //Waning protection after 3rd (or more) dose
+                        else if (thrust::get<1>(tup).immunizationCount > 1) {
+                            float vsInf = -1.0f * efficiencyI3Dose[(1-similar)*3+0].first * weeksSince + ((i==priorType) ? 0.95 : efficiencyI3Dose[(1-similar)*3+0].second);
+                            susceptibilityLocal[i] = 1.0f - vsInf;
+                            //if (susceptibilityLocal[i]>1.0) printf("case 3/2 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSince);
+                            float vsSympt = -1.0f * efficiencyI3Dose[(1-similar)*3+1].first * weeksSince + efficiencyI3Dose[(1-similar)*3+1].second;
+                            float vsHosp = -1.0f * efficiencyI3Dose[(1-similar)*3+2].first * weeksSince + efficiencyI3Dose[(1-similar)*3+2].second;
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
+                            thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
+                        }
+                    }
                 }
 
                 for (int i = 0; i < numVariantsLocal; i ++) {
                     if (thrust::get<0>(tup).getStateIdx() == 0) //susceptible
                     //TODO: can suscxeptibility set anywhere else?
-                        thrust::get<0>(tup).setSusceptible(susceptibilityLocal[i],i);
+                    if (susceptibilityLocal[i] < 0) printf("Too small %g\n",susceptibilityLocal[i]);
+                    thrust::get<0>(tup).setSusceptible(MIN(1.0f, susceptibilityLocal[i]),i);
                 }
 
             });
 
-        //boosters - fully random distribution
-        if (numberOfBoostersToday(simTime)) {
-            unsigned available = numberOfBoostersToday(simTime);
-            //Count how many people eligible (4 months since last infection or previous vaccine)
-            unsigned count = thrust::count_if(
-                    thrust::make_zip_iterator(thrust::make_tuple(
-                        sim->agents->agentStats.begin(), sim->agents->PPValues.begin())),
-                    thrust::make_zip_iterator(thrust::make_tuple(
-                        sim->agents->agentStats.end(), sim->agents->PPValues.end())),
-                    [timeStep, timestamp] HD(
-                        thrust::tuple<AgentStats, typename Simulation::PPState_t> tup) {
-                        if (thrust::get<0>(tup).immunizationTimestamp > 0 &&
-                            thrust::get<0>(tup).immunizationCount == 1 && //For now, only 1 booster
-                            (timestamp - thrust::get<0>(tup).immunizationTimestamp) / (24 * 60 / timeStep) > 4 * 30
-                            && thrust::get<1>(tup).getWBState() == states::WBStates::W
-                            && (timestamp >= (24 * 60 / timeStep) * 3 * 30
-                                    && thrust::get<0>(tup).diagnosedTimestamp < timestamp - (24 * 60 / timeStep) * 4 * 30)) {
-                            return true;
-                        }
-                        return false;
-                    });
+        for (int boosterRound = 0; boosterRound < boosterRounds; boosterRound++) {
+            //boosters - fully random distribution
+            if (numberOfBoostersToday(simTime, boosterRound)) {
 
-            // Probability of each getting vaccinated today
-            float prob;
-            if (count < available)
-                prob = 1.0;
-            else
-                prob = (float)available / (float)count;
-            
-            thrust::for_each(
-                    thrust::make_zip_iterator(thrust::make_tuple(
-                        sim->agents->agentStats.begin(), sim->agents->PPValues.begin())),
-                    thrust::make_zip_iterator(thrust::make_tuple(
-                        sim->agents->agentStats.end(), sim->agents->PPValues.end())),
-                    [timeStep, timestamp, prob] HD(
-                        thrust::tuple<AgentStats&, typename Simulation::PPState_t&> tup) {
-                        if (thrust::get<0>(tup).immunizationTimestamp > 0 &&
-                            (timestamp - thrust::get<0>(tup).immunizationTimestamp) / (24 * 60 / timeStep) > 120 
-                            && thrust::get<1>(tup).getWBState() == states::WBStates::W
-                            && (timestamp >= (24 * 60 / timeStep) * 3 * 30
-                                    && thrust::get<0>(tup).diagnosedTimestamp < timestamp - (24 * 60 / timeStep) * 4 * 30)) {
-                            if (prob == 1.0f || RandomGenerator::randomUnit() < prob) {
-                                thrust::get<0>(tup).immunizationTimestamp = timestamp;
-                                thrust::get<0>(tup).immunizationCount++;
+                unsigned available = numberOfBoostersToday(simTime, boosterRound);
+                //Count how many people eligible (4 months since last infection or previous vaccine)
+                std::array<unsigned, 10> counts;
+                for (int agegroup = 0; agegroup < 10; agegroup++) {
+                    unsigned low = agegroup*10;
+                    unsigned high = agegroup*10+10;
+                    if (agegroup == 9) high = 200;
+                    counts[agegroup] = thrust::count_if(
+                        thrust::make_zip_iterator(thrust::make_tuple(
+                            sim->agents->agentStats.begin(), sim->agents->PPValues.begin(), sim->agents->agentMetaData.begin())),
+                        thrust::make_zip_iterator(thrust::make_tuple(
+                            sim->agents->agentStats.end(), sim->agents->PPValues.end(), sim->agents->agentMetaData.end())),
+                        [timeStep, timestamp, low, high] HD(
+                            thrust::tuple<AgentStats, typename Simulation::PPState_t, typename Simulation::AgentMeta_t> tup) {
+                            if (thrust::get<2>(tup).getAge()>=low && thrust::get<2>(tup).getAge()<high &&
+                                thrust::get<0>(tup).immunizationTimestamp > 0 &&
+                                thrust::get<0>(tup).immunizationCount >= 1 && //at least initial double-dose required to qualify for booster
+                                (timestamp - thrust::get<0>(tup).immunizationTimestamp) / (24 * 60 / timeStep) > 4 * 30
+                                && thrust::get<1>(tup).getWBState() == states::WBStates::W
+                                && (timestamp >= (24 * 60 / timeStep) * 3 * 30
+                                        && thrust::get<0>(tup).diagnosedTimestamp < timestamp - (24 * 60 / timeStep) * 4 * 30)) {
+                                return true;
                             }
-                        }
-                    });
+                            return false;
+                        });
+                }
+                
+                // //Total eligible for boosters today
+                // unsigned total = std::accumulate(counts.begin(), counts.end(), (unsigned)0);
+
+                // //distribute boosters among age groups equally, and scale by willingness of each age group
+                // std::array<float, 10> probs;
+                // for (int agegroup = 0; agegroup < 10; agegroup++)
+                //     probs[agegroup] = ((float)counts[agegroup]/(float)total) * boosterAgePercent[agegroup];
+
+                // //scale back up so all available today are used
+                // float sum = std::accumulate(probs.begin(), probs.end(), 0.0f);
+                // for (int agegroup = 0; agegroup < 10; agegroup++)
+                //     if (counts[agegroup] > 0)
+                //         probs[agegroup] = 1.0f/sum * probs[agegroup] * ((float)available / (float)counts[agegroup]);
+                //     else
+                //         probs[agegroup] = 0.0f;
+
+                // float sum2 = std::accumulate(probs.begin(), probs.end(), 0.0f);
+
+                
+                for (int agegroup = 0; agegroup < 10; agegroup++) {
+                    unsigned availableForGroup = (float)available * ageGroupFrac[boosterRound][agegroup];
+                    // Probability of each getting vaccinated today
+                    float prob;
+                    if (counts[agegroup] < availableForGroup)
+                        prob = 1.0;
+                    else
+                        prob = (float)availableForGroup/(float)counts[agegroup];
+                    
+                    unsigned low = agegroup*10;
+                    unsigned high = agegroup*10+10;
+                    if (agegroup == 9) high = 200;
+                    thrust::for_each(
+                            thrust::make_zip_iterator(thrust::make_tuple(
+                                sim->agents->agentStats.begin(), sim->agents->PPValues.begin(), sim->agents->agentMetaData.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(
+                                sim->agents->agentStats.end(), sim->agents->PPValues.end(), sim->agents->agentMetaData.end())),
+                            [timeStep, timestamp, prob, low, high] HD(
+                                thrust::tuple<AgentStats&, typename Simulation::PPState_t&, typename Simulation::AgentMeta_t&> tup) {
+                                if (thrust::get<2>(tup).getAge()>=low && thrust::get<2>(tup).getAge()<high &&
+                                    thrust::get<0>(tup).immunizationTimestamp > 0 &&
+                                    thrust::get<0>(tup).immunizationCount >= 1 &&
+                                    (timestamp - thrust::get<0>(tup).immunizationTimestamp) / (24 * 60 / timeStep) > 120 
+                                    && thrust::get<1>(tup).getWBState() == states::WBStates::W
+                                    && (timestamp >= (24 * 60 / timeStep) * 3 * 30
+                                            && thrust::get<0>(tup).diagnosedTimestamp < timestamp - (24 * 60 / timeStep) * 4 * 30)) {
+                                    if (prob == 1.0f || RandomGenerator::randomUnit() < prob) {
+                                        thrust::get<0>(tup).immunizationTimestamp = timestamp;
+                                        thrust::get<0>(tup).immunizationCount++;
+                                    }
+                                }
+                            });
+                }
+
+                // for (int agegroup = 0; agegroup < 10; agegroup++) {
+                //     unsigned low = agegroup*10;
+                //     unsigned high = agegroup*10+10;
+                //     if (agegroup == 9) high = 200;
+                //     counts[agegroup] = thrust::count_if(sim->agents->agentMetaData.begin(),
+                //                                         sim->agents->agentMetaData.end(),
+                //         [low, high] HD(typename Simulation::AgentMeta_t meta) {
+                //             if (meta.getAge()>=low && meta.getAge()<high) {
+                //                 return true;
+                //             }
+                //             return false;
+                //         });
+                // }
+                // std::copy( counts.begin(), counts.end(), std::ostream_iterator<unsigned>( std::cout, " "));
+                // std::cout << "\n";
+                // for (int agegroup = 0; agegroup < 10; agegroup++) {
+                //     unsigned low = agegroup*10;
+                //     unsigned high = agegroup*10+10;
+                //     if (agegroup == 9) high = 200;
+                //     counts[agegroup] = thrust::count_if(
+                //         thrust::make_zip_iterator(thrust::make_tuple(
+                //             sim->agents->agentStats.begin(), sim->agents->PPValues.begin(), sim->agents->agentMetaData.begin())),
+                //         thrust::make_zip_iterator(thrust::make_tuple(
+                //             sim->agents->agentStats.end(), sim->agents->PPValues.end(), sim->agents->agentMetaData.end())),
+                //         [timeStep, timestamp, low, high] HD(
+                //             thrust::tuple<AgentStats, typename Simulation::PPState_t, typename Simulation::AgentMeta_t> tup) {
+                //             if (thrust::get<2>(tup).getAge()>=low && thrust::get<2>(tup).getAge()<high &&
+                //                 thrust::get<0>(tup).immunizationCount == 2) {
+                //                 return true;
+                //             }
+                //             return false;
+                //         });
+                // }
+                // std::copy( counts.begin(), counts.end(), std::ostream_iterator<unsigned>( std::cout, " "));
+                // std::cout << "\n";
+            }
         }
+
+        // unsigned count2 = thrust::count_if(sim->agents->agentStats.begin(), sim->agents->agentStats.end(),
+        //                  [timestamp] HD (AgentStats s){return s.immunizationCount == 1;});
+        // std::cout << "middle " << count2 << "\n";
 
         this->immunizedToday = 0;
         // no vaccines today, or everybody already immunized, return
-        if (numberOfVaccinesToday(simTime) == 0 || currentCategory > numberOfCategories) return;
+        // if (numberOfVaccinesToday(simTime) == 0 || currentCategory > numberOfCategories) return;
 
         unsigned available = numberOfVaccinesToday(simTime);
+
         while (available > 0 && currentCategory < numberOfCategories) {
             // Count number of eligible in current group
             unsigned count = 0;
@@ -543,7 +796,7 @@ public:
                     [currentCategoryLocal, numberOfCategoriesLocal, timeStep, timestamp] HD(
                         thrust::tuple<uint8_t, AgentStats, typename Simulation::PPState_t> tup) {
                         if ((thrust::get<0>(tup) == currentCategoryLocal || currentCategoryLocal==numberOfCategoriesLocal) &&
-                            thrust::get<1>(tup).immunizationTimestamp == 0
+                            thrust::get<1>(tup).immunizationCount == 0
                             && thrust::get<2>(tup).getWBState() == states::WBStates::W
                             && ((timestamp < (24 * 60 / timeStep) * 3 * 30 && thrust::get<1>(tup).diagnosedTimestamp == 0)
                                 || (timestamp >= (24 * 60 / timeStep) * 3 * 30
@@ -573,14 +826,15 @@ public:
                 [currentCategoryLocal, timeStep, timestamp, prob] HD(
                     thrust::tuple<uint8_t&, AgentStats&, typename Simulation::PPState_t&> tup) {
                     if (thrust::get<0>(tup) == currentCategoryLocal &&// TODO how many days since diagnosis?
-                        thrust::get<1>(tup).immunizationTimestamp == 0
+                        thrust::get<1>(tup).immunizationCount == 0
                         && thrust::get<2>(tup).getWBState() == states::WBStates::W
                         && ((timestamp < (24 * 60 / timeStep) * 3 * 30 && thrust::get<1>(tup).diagnosedTimestamp == 0)
                             || (timestamp >= (24 * 60 / timeStep) * 3 * 30
                                 && thrust::get<1>(tup).diagnosedTimestamp < timestamp - (24 * 60 / timeStep) * 3 * 30))) {
-                        if (prob == 1.0f || RandomGenerator::randomUnit() < prob)
+                        if (prob == 1.0f || RandomGenerator::randomUnit() < prob) {
                             thrust::get<1>(tup).immunizationTimestamp = timestamp;
                             thrust::get<1>(tup).immunizationCount = 1;
+                        }
                     }
                 });
             if (diagnosticLevel > 0) {
@@ -596,5 +850,8 @@ public:
             else
                 available = 0;
         }
+        this->immunizedToday = thrust::count_if(sim->agents->agentStats.begin(), sim->agents->agentStats.end(),
+                          [timestamp] HD (AgentStats s){return s.immunizationTimestamp == timestamp;});
+        //  std::cout << "end " << count2 << "\n";
     }
 };

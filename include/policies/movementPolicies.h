@@ -269,7 +269,7 @@ namespace RealMovementOps {
             bool deadOrHospitalized = (wBState == states::WBStates::D || wBState == states::WBStates::S);
             bool hospitalizedWithNonCOVID = (a.agentStatsPtr[i].hospitalizedTimestamp <= a.timestamp
                                              && a.agentStatsPtr[i].hospitalizedUntilTimestamp > a.timestamp);
-            if (!deadOrHospitalized && !hospitalizedWithNonCOVID)
+            if (!deadOrHospitalized && !hospitalizedWithNonCOVID) {
                 if (agentType + 1 == 7) {// afternoon shift worker
                     // if currently at work, do nothing
                     unsigned workplace = RealMovementOps::findActualLocationForType(i,
@@ -317,6 +317,7 @@ namespace RealMovementOps {
                             a.agentLocationsPtr[i]);
                     return;
                 }
+            }
         }
 
         if (a.stepsUntilMovePtr[i] > 0) {

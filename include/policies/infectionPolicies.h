@@ -437,7 +437,10 @@ public:
         //int d_peak = 30; //assuming origin = feb 1
         //int d_peak = 45; //assuming origin = feb 15
         // int d_peak = 59; //assuming origin = marc 1
-        int d_peak = 59+21+6; //assuming origin = mar 27
+        // int d_peak = 59+21+6; //assuming origin = mar 27
+        int d_peak = 59+22; //assuming origin = mar 22
+        d += 6; //offset by 6 //10 better?
+
         // int d_peak = 90;
         double c0 = 3.08; //0.8;
 

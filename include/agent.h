@@ -16,7 +16,7 @@ public:
     //[[nodiscard]] auto& getPPState() { return agentList->PPValues[id]; }
     void gotInfected() { agentList->PPValues[id].gotInfected(); }
     void progressDisease(float additionalFactor = 1.0) {
-        float scalingFactor = additionalFactor * agentList->agentMetaData[id].getScalingSymptoms(agentList->PPValues[id].getVariant());
+        float scalingFactor = additionalFactor * agentList->agentMetaData[id].getScalingSymptoms(agentList->PPValues[id].getVariant(),0); //TODO: remove
         agentList->PPValues[id].update(scalingFactor);
     }
 };
