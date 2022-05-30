@@ -524,6 +524,18 @@ public:
         std::cout << (unsigned)(infectedHCWorker*100)/healthcareWorkerCount << "\t";
         std::cout << (unsigned)exposedHCWorker << "\t";
 
+        //Number of people infected with different variants
+        unsigned countInf;
+        for (int variant = 0; variant < infectiousnessMultiplier.size(); variant++) {
+            countInf =
+            thrust::count_if(agentStats.begin(), agentStats.end(), 
+                                    [variant] HD(AgentStats stats) {return ((1<<variant) & stats.variant) ? true : false;});
+            if (variant == 0) out = std::to_string(unsigned(countInf));
+            else out = out + "," + std::to_string(unsigned(countInf));
+        }
+        stats.push_back((unsigned)countInf); //TODO: this is just the last one...
+        std::cout << out << "\t";
+
         //Number of vaccinated but not previously infected
         unsigned vaccNotInf =
             thrust::count_if(agentStats.begin(), agentStats.end(), 
@@ -601,7 +613,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tVNI";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tINFV\tVNI";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
@@ -635,12 +647,12 @@ public:
                 BEGIN_PROFILING("midnight")
                 if (simTime.getTimestamp() > 0) TestingPolicy<Simulation>::performTests(simTime, timeStep);
                 if (simTime.getTimestamp() > 0) updateAgents(simTime);// No disease progression at launch
+                immunization->update(simTime, timeStep);
                 if (enableOtherDisease) otherDisease(simTime, timeStep);
                 auto stats = refreshAndPrintStatistics(simTime);
                 ClosurePolicy<Simulation>::midnight(simTime, timeStep, stats);
                 MovementPolicy<Simulation>::planLocations(simTime, timeStep);
-                immunization->update(simTime, timeStep);
-                variantCounts = countVariantCases();
+                variantCounts = countVariantCases(); //TODO: we do this multiple times
                 END_PROFILING("midnight")
             }
             MovementPolicy<Simulation>::movement(simTime, timeStep);

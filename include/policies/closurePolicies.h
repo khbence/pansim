@@ -379,7 +379,7 @@ public:
                                     agentStat.infectedCount++;
                                     agentStat.worstState = state.getStateIdx();
                                     agentStat.worstStateTimestamp = timestamp;
-                                    agentStat.variant = variantIdx;
+                                    agentStat.variant |= 1<<variantIdx;
                                     exposed = 1;
                                 }
                             });

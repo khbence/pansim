@@ -484,7 +484,7 @@ public:
         // protectionHospitalizationWaning -0.0021,-0.006,-0.006,-0.006,-0.003,-0.003,-0.0014,-0.003,-0.0014,-0.003
         
         // Update immunity based on weeks since immunization
-        /*
+
         thrust::pair<float,float> efficiencyInf[6] =    {{protectionInfectionWaning[0], protectionInfection[0]},
                                                          {protectionSymptomaticWaning[0], protectionSymptomatic[0]},
                                                          {protectionHospitalizationWaning[0], protectionHospitalization[0]},
@@ -515,32 +515,30 @@ public:
                                                          {protectionInfectionWaning[9], protectionInfection[9]},
                                                          {protectionSymptomaticWaning[9], protectionSymptomatic[9]},
                                                          {protectionHospitalizationWaning[9], protectionHospitalization[9]}};
-*/
 
-        thrust::pair<float,float> efficiencyInf[6] =    {{0.003, 0.85},{0.003, 0.9 },{0.0021, 0.92},
-                                                         {0.006, 0.5 },{0.006, 0.55},{0.006,  0.85}};
-        thrust::pair<float,float> efficiency2Dose[6] =  {{0.01,  0.77},{0.01,  0.8 },{0.006,  0.95},
-                                                         {0.02,  0.4 },{0.02,  0.6 },{0.006,  0.9}};
-        thrust::pair<float,float> efficiency3Dose[6] =  {{0.005, 0.85},{0.005, 0.95},{0.003,  0.97},
-                                                         {0.02,  0.63},{0.02,  0.69},{0.003,  0.92}};
-        thrust::pair<float,float> efficiencyI2Dose[6] = {{0.002, 0.9 },{0.002, 0.92},{0.0014, 0.974},
-                                                         {0.004, 0.65},{0.004, 0.7 },{0.003,  0.93}};
-        thrust::pair<float,float> efficiencyI3Dose[6] = {{0.002, 0.92},{0.002, 0.94},{0.0014, 0.98},
-                                                         {0.004, 0.7 },{0.004, 0.77},{0.003,  0.97}};
+
+        // thrust::pair<float,float> efficiencyInf[6] =    {{0.003, 0.85},{0.003, 0.9 },{0.0021, 0.92},
+        //                                                  {0.006, 0.5 },{0.006, 0.55},{0.006,  0.85}};
+        // thrust::pair<float,float> efficiency2Dose[6] =  {{0.01,  0.77},{0.01,  0.8 },{0.006,  0.95},
+        //                                                  {0.02,  0.4 },{0.02,  0.6 },{0.006,  0.9}};
+        // thrust::pair<float,float> efficiency3Dose[6] =  {{0.005, 0.85},{0.005, 0.95},{0.003,  0.97},
+        //                                                  {0.02,  0.63},{0.02,  0.69},{0.003,  0.92}};
+        // thrust::pair<float,float> efficiencyI2Dose[6] = {{0.002, 0.9 },{0.002, 0.92},{0.0014, 0.974},
+        //                                                  {0.004, 0.65},{0.004, 0.7 },{0.003,  0.93}};
+        // thrust::pair<float,float> efficiencyI3Dose[6] = {{0.002, 0.92},{0.002, 0.94},{0.0014, 0.98},
+        //                                                  {0.004, 0.7 },{0.004, 0.77},{0.003,  0.97}};
                                                          
         //Wild,Alpha,Delta similar to each other BA1,BA2,BAX different from wild, but similar to each other
         int variantSimilarity[6] = {0,0,0,1,1,1}; 
         unsigned numVariantsLocal = numVariants;
         thrust::for_each(
-            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin())),
-            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end())),
-            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarity] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&> tup) {
+            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin(), thrust::make_counting_iterator<unsigned>(0))),
+            thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end(), thrust::make_counting_iterator<unsigned>(0)+sim->agents->agentMetaData.size())),
+            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarity] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&, unsigned> tup) {
                 //Current assumption: no reduced infectiousness from prior inf/vacc
-                // if (thrust::get<0>(tup).isInfectious() > 0 &&
-                //     thrust::get<1>(tup).infectedCount > 1 /*&&
-                //     thrust::get<0>(tup).getVariant() < 2*/) {
-                //         thrust::get<0>(tup).reduceInfectiousness(0.65);
-                // }
+                //If needed, shoud add here
+                if (thrust::get<0>(tup).getStateIdx() != 0) return;
+                
                 float susceptibilityLocal[MAX_STRAINS];
                 for (int i = 0; i < numVariantsLocal; i ++) {
                     susceptibilityLocal[i] = 1.0;
@@ -555,8 +553,10 @@ public:
                     (thrust::get<1>(tup).immunizationCount == 1 && weeksSinceImmunization<4))) {
                         auto priorType = thrust::get<1>(tup).variant;
                         for (int i = 0; i < numVariantsLocal; i ++) {
-                            int similar = (thrust::get<1>(tup).infectedCount > 1) || (variantSimilarity[priorType] == variantSimilarity[i]);
-                            float vsInf = -1.0f * efficiencyInf[(1-similar)*3+0].first * weeksSinceInfection + ((i==priorType) ? 0.95 : efficiencyInf[(1-similar)*3+0].second);
+                            //Check priorType bit flags to see if had a similar infection before to this type
+                            int similar = 0;
+                            for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarity[i] == variantSimilarity[j]);
+                            float vsInf = -1.0f * efficiencyInf[(1-similar)*3+0].first * weeksSinceInfection + (((1<<i) & priorType) ? 0.95 : efficiencyInf[(1-similar)*3+0].second);
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             //if (susceptibilityLocal[i]>1.0) printf("case 1/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceInfection);
                             float vsSympt = -1.0f * efficiencyInf[(1-similar)*3+1].first * weeksSinceInfection + efficiencyInf[(1-similar)*3+1].second;
@@ -614,13 +614,14 @@ public:
                     auto priorType = thrust::get<1>(tup).variant;
                     unsigned weeksSince = MIN(weeksSinceInfection, weeksSinceImmunization);
                     for (int i = 0; i < numVariantsLocal; i ++) {
+                        //Check priorType bit flags to see if had a similar infection before to this type
                         //We consider similarity based on prior infection, despite potentially no similarity in vaccination
-                        // int similar = variantSimilarity[priorType] == variantSimilarity[i];
-                        int similar = (thrust::get<1>(tup).infectedCount > 1) || (variantSimilarity[priorType] == variantSimilarity[i]);
+                        int similar = 0;
+                        for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarity[i] == variantSimilarity[j]);
+                            
                         if (thrust::get<1>(tup).immunizationCount == 1) {
-                            float vsInf = -1.0f * efficiencyI2Dose[(1-similar)*3+0].first * weeksSince + ((i==priorType) ? 0.95 : efficiencyI2Dose[(1-similar)*3+0].second);
+                            float vsInf = -1.0f * efficiencyI2Dose[(1-similar)*3+0].first * weeksSince + (((1<<i) & priorType) ? 0.95 : efficiencyI2Dose[(1-similar)*3+0].second);
                             susceptibilityLocal[i] = 1.0f - vsInf;
-                            //if (susceptibilityLocal[i]>1.0) printf("case 3/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSince);
                             float vsSympt = -1.0f * efficiencyI2Dose[(1-similar)*3+1].first * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second;
                             float vsHosp = -1.0f * efficiencyI2Dose[(1-similar)*3+2].first * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second;
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
@@ -629,9 +630,8 @@ public:
                         }
                         //Waning protection after 3rd (or more) dose
                         else if (thrust::get<1>(tup).immunizationCount > 1) {
-                            float vsInf = -1.0f * efficiencyI3Dose[(1-similar)*3+0].first * weeksSince + ((i==priorType) ? 0.95 : efficiencyI3Dose[(1-similar)*3+0].second);
+                            float vsInf = -1.0f * efficiencyI3Dose[(1-similar)*3+0].first * weeksSince + (((1<<i) & priorType) ? 0.95 : efficiencyI3Dose[(1-similar)*3+0].second);
                             susceptibilityLocal[i] = 1.0f - vsInf;
-                            //if (susceptibilityLocal[i]>1.0) printf("case 3/2 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSince);
                             float vsSympt = -1.0f * efficiencyI3Dose[(1-similar)*3+1].first * weeksSince + efficiencyI3Dose[(1-similar)*3+1].second;
                             float vsHosp = -1.0f * efficiencyI3Dose[(1-similar)*3+2].first * weeksSince + efficiencyI3Dose[(1-similar)*3+2].second;
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
@@ -641,11 +641,12 @@ public:
                     }
                 }
 
+
                 for (int i = 0; i < numVariantsLocal; i ++) {
-                    if (thrust::get<0>(tup).getStateIdx() == 0) //susceptible
-                    //TODO: can suscxeptibility set anywhere else?
-                    if (susceptibilityLocal[i] < 0) printf("Too small %g\n",susceptibilityLocal[i]);
-                    thrust::get<0>(tup).setSusceptible(MIN(1.0f, susceptibilityLocal[i]),i);
+                    if (thrust::get<0>(tup).getStateIdx() == 0) {//susceptible
+                        if (susceptibilityLocal[i] < 0) printf("Too small %g\n",susceptibilityLocal[i]);
+                        thrust::get<0>(tup).setSusceptible(MIN(1.0f, susceptibilityLocal[i]),i);
+                    }
                 }
 
             });

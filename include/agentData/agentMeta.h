@@ -21,7 +21,7 @@ class BasicAgentMeta {
         [[nodiscard]] float getTransmission() const;
     };
 
-    float scalingSymptoms[6*MAX_STRAINS] = {0.0};
+    float scalingSymptoms[7*MAX_STRAINS] = {0.0};
     float scalingAgeSex = 1.0;
     uint8_t age = 0;
     uint8_t preCondIdx = 0;

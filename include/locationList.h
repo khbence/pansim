@@ -288,7 +288,7 @@ public:
                     agentStat.infectedLocation = agentLocation;
                     agentStat.worstState = ppstate.getStateIdx();
                     agentStat.worstStateTimestamp = timestamp;
-                    agentStat.variant = variant;
+                    agentStat.variant |= 1<<variant;
                     if (flagInfectionsAtLocation) {
                         infectionAtLocation = true;
                         newlyInfectedAgent = 1;

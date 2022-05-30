@@ -52,6 +52,7 @@ infectiousList[9] = [float(s) for s in infectiousList[9][0:-1].split(' ')]
 agentId = people[1]['ID']
 infLocation = people[1]['InfectionLoc']
 infTime = people[1]['infectionTime']
+#TODO: variant is now flags!
 variant = people[1]['variant']
 
 [IDList, InfList] = getContactList(agentId, infLocation, infTime, variant, infectiousList)

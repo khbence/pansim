@@ -75,13 +75,13 @@ BasicAgentMeta::BasicAgentMeta(char gender, unsigned age, std::string preConditi
     preCondIdx = std::stoi(preCondition);
     scalingAgeSex *= itMap->second;
 
-    for (int i = 0; i < MAX_STRAINS*6; i++) {
+    for (int i = 0; i < MAX_STRAINS*7; i++) {
         scalingSymptoms[i] = scalingAgeSex;
     }
 }
 
-void HD BasicAgentMeta::setScalingSymptoms(float scaling, uint8_t state, uint8_t variant) { scalingSymptoms[variant*6+state] = scalingAgeSex * scaling; }
-float HD BasicAgentMeta::getScalingSymptoms(uint8_t variant, uint8_t state) const { return scalingSymptoms[variant*6+state]; }
+void HD BasicAgentMeta::setScalingSymptoms(float scaling, uint8_t state, uint8_t variant) { scalingSymptoms[variant*7+MAX(6,state)] = scalingAgeSex * scaling; }
+float HD BasicAgentMeta::getScalingSymptoms(uint8_t variant, uint8_t state) const { return scalingSymptoms[variant*7+MAX(6,state)]; }
 
 uint8_t HD BasicAgentMeta::getAge() const { return age; }
 
