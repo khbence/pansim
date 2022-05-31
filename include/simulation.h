@@ -95,13 +95,13 @@ public:
             cxxopts::value<int>()->default_value("1"))
             ("infectiousnessMultiplier",
             "infectiousness multiplier for original strain and variants ",
-            cxxopts::value<std::string>()->default_value("1.0,1.72,2.58"))
+            cxxopts::value<std::string>()->default_value("1.03,1.79,2.45,2.7,3.6"))
             ("diseaseProgressionScaling",
             "disease progression scaling for original strain and variants ",
-            cxxopts::value<std::string>()->default_value("1.0,1.27,1.73"))
+            cxxopts::value<std::string>()->default_value("0.9,1.05,0.9,0.8,0.8"))
             ("diseaseProgressionDeathScaling",
             "disease progression scaling for death for original strain and variants ",
-            cxxopts::value<std::string>()->default_value("1.0,1.0,1.0"))
+            cxxopts::value<std::string>()->default_value("1.0,1.03,1.3,0.6,0.6"))
             ("startDay",
             "day of the week to start the simulation with (Monday is 0) ",
             cxxopts::value<unsigned>()->default_value("2"))

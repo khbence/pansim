@@ -38,6 +38,7 @@ class Immunization {
     std::vector<float> protectionSymptomaticWaning;
     std::vector<float> protectionHospitalization;
     std::vector<float> protectionHospitalizationWaning;
+    std::vector<int> variantSimilarity;
     std::vector<float> vaccPerWeek;
     unsigned boosterRounds;
     std::vector<std::vector<float>> boosterPerWeek;
@@ -118,8 +119,9 @@ public:
             ("protectionHospitalization","Efficiency vs. hospitalization of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
                     cxxopts::value<std::string>()->default_value("0.92,0.85,0.95,0.9,0.97,0.92,0.974,0.93,0.98,0.97"))
             ("protectionHospitalizationWaning","Waning per week of efficiency vs. hospitalization of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
-                    cxxopts::value<std::string>()->default_value("0.0021,0.006,0.006,0.006,0.003,0.003,0.0014,0.003,0.0014,0.003"));
-
+                    cxxopts::value<std::string>()->default_value("0.0021,0.006,0.006,0.006,0.003,0.003,0.0014,0.003,0.0014,0.003"))
+            ("variantSimilarity","Variant similarity vs. immunization",
+            cxxopts::value<std::string>()->default_value("0,0,0,1,1,1,1"));
             /*("immunizationEfficiencyInfection",
             "Efficiency of immunization against infection after 12 days, 28 days, and after booster (pairs of comma-separated values for different strains)",
             cxxopts::value<std::string>()->default_value("0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91"))
@@ -195,6 +197,7 @@ public:
         protectionHospitalization = splitStringFloat(result["protectionHospitalization"].as<std::string>(), ',');
         protectionHospitalizationWaning = splitStringFloat(result["protectionHospitalizationWaning"].as<std::string>(), ',');
 
+        variantSimilarity = splitStringInt(result["variantSimilarity"].as<std::string>(), ',');
         // acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
         // immunizationEfficiencyInfection = splitStringFloat(result["immunizationEfficiencyInfection"].as<std::string>(), ',');
         // immunizationEfficiencyProgression = splitStringFloat(result["immunizationEfficiencyProgression"].as<std::string>(), ',');
@@ -529,12 +532,14 @@ public:
         //                                                  {0.004, 0.7 },{0.004, 0.77},{0.003,  0.97}};
                                                          
         //Wild,Alpha,Delta similar to each other BA1,BA2,BAX different from wild, but similar to each other
-        int variantSimilarity[6] = {0,0,0,1,1,1}; 
+        int variantSimilarityLocal[MAX_STRAINS];
+        for (int i = 0; i < MIN(MAX_STRAINS,variantSimilarity.size()); i++) variantSimilarityLocal[i] = variantSimilarity[i];
+
         unsigned numVariantsLocal = numVariants;
         thrust::for_each(
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin(), thrust::make_counting_iterator<unsigned>(0))),
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end(), thrust::make_counting_iterator<unsigned>(0)+sim->agents->agentMetaData.size())),
-            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarity] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&, unsigned> tup) {
+            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarityLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&, unsigned> tup) {
                 //Current assumption: no reduced infectiousness from prior inf/vacc
                 //If needed, shoud add here
                 if (thrust::get<0>(tup).getStateIdx() != 0) return;
@@ -555,7 +560,7 @@ public:
                         for (int i = 0; i < numVariantsLocal; i ++) {
                             //Check priorType bit flags to see if had a similar infection before to this type
                             int similar = 0;
-                            for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarity[i] == variantSimilarity[j]);
+                            for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarityLocal[i] == variantSimilarityLocal[j]);
                             float vsInf = -1.0f * efficiencyInf[(1-similar)*3+0].first * weeksSinceInfection + (((1<<i) & priorType) ? 0.95 : efficiencyInf[(1-similar)*3+0].second);
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             //if (susceptibilityLocal[i]>1.0) printf("case 1/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceInfection);
@@ -570,7 +575,7 @@ public:
                 else if (thrust::get<1>(tup).infectedCount == 0 && 
                     thrust::get<1>(tup).immunizationCount > 0) {
                     for (int i = 0; i < numVariantsLocal; i ++) {
-                        int similar = variantSimilarity[i] == 0;//vaccines are for type 0
+                        int similar = variantSimilarityLocal[i] == 0;//vaccines are for type 0
                         //No protection in 7 days after 1st dose
                         if (thrust::get<1>(tup).immunizationCount == 1 && weeksSinceImmunization==0) continue;
                         //Half protection 7-28 days after 1st dose
@@ -617,7 +622,7 @@ public:
                         //Check priorType bit flags to see if had a similar infection before to this type
                         //We consider similarity based on prior infection, despite potentially no similarity in vaccination
                         int similar = 0;
-                        for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarity[i] == variantSimilarity[j]);
+                        for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarityLocal[i] == variantSimilarityLocal[j]);
                             
                         if (thrust::get<1>(tup).immunizationCount == 1) {
                             float vsInf = -1.0f * efficiencyI2Dose[(1-similar)*3+0].first * weeksSince + (((1<<i) & priorType) ? 0.95 : efficiencyI2Dose[(1-similar)*3+0].second);
