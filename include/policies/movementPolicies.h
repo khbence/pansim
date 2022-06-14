@@ -363,6 +363,22 @@ namespace RealMovementOps {
                 a.workType,
                 0,
                 nullptr);
+            //Diagnose with COVID if infected
+            if (!a.diagnosedPtr[i] && a.agentStatesPtr[i].isInfectious()) {
+                a.diagnosedPtr[i] = true;
+                a.agentStatsPtr[i].diagnosedTimestamp = a.timestamp;
+                if (a.simTime.getStepsUntilMidnight(a.timeStep) == 24 * 60 / a.timeStep)// is it midnight
+                    a.agentStatsPtr[i].diagnosedTimestamp++;// shift timestamp by 1 to avoid
+                                                            // being counted as random test in
+                                                            // TestingPolicy
+
+                if (i == a.tracked) printf("\tDiagnosed at location %d\n", a.agentLocationsPtr[i]);
+
+                RealMovementOps::quarantineAgent(i,
+                    a,
+                    a.timestamp + a.quarantineLength * 24 * 60 / a.timeStep, a.quarantineImmuneActive);
+            }
+
             if (i == a.tracked) {
                 printf(
                     "Agent %d of type %d day %d at %d:%d WBState %d in hospital %d due to non-COVID hospitalization between "

@@ -76,6 +76,7 @@ public:
     std::string outAgentStat;
     std::string statesHeader;
     int enableOtherDisease = 1;
+    unsigned hospitalType;
     Immunization<Simulation>* immunization;
     std::vector<float> infectiousnessMultiplier;
     std::vector<float> diseaseProgressionScaling;
@@ -536,6 +537,16 @@ public:
         stats.push_back((unsigned)countInf); //TODO: this is just the last one...
         std::cout << out << "\t";
 
+        //Number of people in hospital with active infection
+        unsigned hospitalTypeLocal = hospitalType;
+        unsigned infInHosp = thrust::count_if(thrust::make_zip_iterator(
+            thrust::make_tuple(ppstates.begin(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.begin()))),
+                                              thrust::make_zip_iterator(
+            thrust::make_tuple(ppstates.end(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.end()))),
+            [hospitalTypeLocal] HD (thrust::tuple<PPState, unsigned> tup) {return (thrust::get<0>(tup).isInfected() && thrust::get<1>(tup)==hospitalTypeLocal);});
+        stats.push_back(infInHosp); //TODO: this is just the last one...
+        std::cout << infInHosp << "\t";
+
         //Number of vaccinated but not previously infected
         unsigned vaccNotInf =
             thrust::count_if(agentStats.begin(), agentStats.end(), 
@@ -604,6 +615,7 @@ public:
             auto locationMapping = tmp.second;
             locs->initializeArgs(result);
             MovementPolicy<Simulation>::init(data.acquireLocationTypes(), cemeteryID);
+            this->hospitalType = data.acquireLocationTypes().hospital;
             TestingPolicy<Simulation>::init(data.acquireLocationTypes());
             auto agentTypeMapping = agents->initAgentTypes(data.acquireAgentTypes());
             agents->initAgents(data.acquireAgents(),
@@ -613,7 +625,7 @@ public:
                 data.acquireProgressionMatrices(),
                 data.acquireLocationTypes());
             RandomGenerator::resize(agents->PPValues.size());
-            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tINFV\tVNI";
+            statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tINFV\tINFH\tVNI";
             std::cout << statesHeader << '\n';
             ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
             locs->initialize();
