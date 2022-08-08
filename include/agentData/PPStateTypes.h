@@ -7,6 +7,7 @@
 class PPStateSIRAbstract {
 protected:
     states::SIRD state;
+    uint8_t variant = 0;
 
 public:
     static HD unsigned getNumberOfStates() { return 0; };
@@ -16,7 +17,7 @@ public:
     HD explicit PPStateSIRAbstract(states::SIRD s);
     states::SIRD parseState(const std::string& input);
     virtual HD void update(float scalingSymptons) = 0;
-    virtual HD void gotInfected();
+    virtual HD void gotInfected(uint8_t variant);
     [[nodiscard]] HD states::SIRD getSIRD() const;
     [[nodiscard]] HD states::WBStates getWBState() const;
     virtual HD char getStateIdx() const = 0;
@@ -53,7 +54,7 @@ public:
     HD PPStateSIRextended();
     explicit HD PPStateSIRextended(states::SIRD s);
     explicit HD PPStateSIRextended(char idx_p);
-    void HD gotInfected() override;
+    void HD gotInfected(uint8_t variant) override;
     [[nodiscard]] char HD getSubState() { return subState; }
     static void initTransitionMatrix(const std::string& inputFile);
     void HD update(float scalingSymptons) override;

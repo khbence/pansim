@@ -117,9 +117,9 @@ MultiBadMatrix* MultiBadMatrix::upload() const {
 }
 #endif
 
-thrust::tuple<unsigned, int, bool> HD MultiBadMatrix::calculateNextState(unsigned currentState, float scalingSymptons) const {
+thrust::tuple<unsigned, int, bool> HD MultiBadMatrix::calculateNextState(unsigned currentState, float scalingSymptons, int variant) const {
     thrust::pair<unsigned, bool> ret = transitions[currentState].selectNext(scalingSymptons);
     unsigned nextState = ret.first;
-    int days = lengths[nextState].calculateDays();
+    int days = lengths[nextState].calculateDays(variant);
     return thrust::make_tuple<unsigned, int, bool>(nextState, days, ret.second);
 }

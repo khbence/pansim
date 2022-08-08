@@ -219,7 +219,7 @@ std::vector<std::string> DynamicPPState::getStateNames() {
 }
 
 DynamicPPState::DynamicPPState() : progressionID(0), state(0), 
-            daysBeforeNextState(getTransition(progressionID).calculateJustDays(state)) {
+            daysBeforeNextState(getTransition(progressionID).calculateJustDays(state, 0)) {
     for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 1.0f;
     updateMeta();
 };
@@ -227,7 +227,7 @@ DynamicPPState::DynamicPPState() : progressionID(0), state(0),
 DynamicPPState::DynamicPPState(const std::string& name, unsigned progressionID_p)
     : progressionID(progressionID_p),
       state(detail::DynamicPPState::nameIndexMap.find(name)->second),
-      daysBeforeNextState(getTransition(progressionID).calculateJustDays(state)) {
+      daysBeforeNextState(getTransition(progressionID).calculateJustDays(state, 0)) {
     for (int i = 0; i < MAX_STRAINS; i++) susceptible[i] = 1.0f;
     updateMeta();
 }
@@ -245,7 +245,7 @@ void HD DynamicPPState::gotInfected(uint8_t v) {
 
 bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAgentMeta &meta, unsigned simTime, unsigned agentID, unsigned tracked, unsigned timeStep) {
     if (daysBeforeNextState == -2) {
-        daysBeforeNextState = getTransition(progressionID).calculateJustDays(state);
+        daysBeforeNextState = getTransition(progressionID).calculateJustDays(state, variant);
         if (variant>=3) daysBeforeNextState = daysBeforeNextState*0.7 == 0 ? 1 : daysBeforeNextState*0.7;
     } else if (daysBeforeNextState > 0) {
         --daysBeforeNextState;
@@ -256,7 +256,7 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
         states::WBStates oldWBState = this->getWBState();
         auto oldState = state;
         bool wasInfected = this->isInfected();
-        auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptoms);
+        auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptoms, variant);
         state = thrust::get<0>(tmp);
         updateMeta();
         daysBeforeNextState = thrust::get<1>(tmp);

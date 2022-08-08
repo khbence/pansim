@@ -4,17 +4,17 @@
 class BasicLengthAbstract {
 protected:
     class LengthOfState {
-        int avgLength;
-        int maxLength;
-        double p;
+        float avgLength[MAX_STRAINS];
+        float maxLength[MAX_STRAINS];
+        double p[MAX_STRAINS];
 
-        [[nodiscard]] static double expectedLength(double p, unsigned max);
-        [[nodiscard]] double calculateModifiedP() const;
+        [[nodiscard]] static double expectedLength(double p, float max);
+        [[nodiscard]] static double calculateModifiedP(double p, float avgLength, float maxLength);
 
     public:
         LengthOfState() = default;
-        LengthOfState(int avgLength_p, int maxLength_p);
-        [[nodiscard]] HD int calculateDays() const;
+        LengthOfState(std::vector<float> avgLength_p, std::vector<float> maxLength_p);
+        [[nodiscard]] HD int calculateDays(int variant) const;
     };
 
     BasicLengthAbstract(std::size_t n);
@@ -23,5 +23,5 @@ public:
     LengthOfState* lengths;
     unsigned numStates;
 
-    [[nodiscard]] HD int calculateJustDays(unsigned state) const;
+    [[nodiscard]] HD int calculateJustDays(unsigned state, int variant) const;
 };

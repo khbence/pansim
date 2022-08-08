@@ -35,7 +35,7 @@ states::SIRD PPStateSIRAbstract::parseState(const std::string& input) {
     }
 }
 
-void PPStateSIRAbstract::gotInfected() { this->state = states::SIRD::I; }
+void PPStateSIRAbstract::gotInfected(uint8_t variant) { this->state = states::SIRD::I; this->variant = variant;}
 
 [[nodiscard]] HD states::SIRD PPStateSIRAbstract::getSIRD() const { return state; }
 
@@ -95,27 +95,28 @@ void PPStateSIRextended::printHeader() {
 HD PPStateSIRextended::PPStateSIRextended() : PPStateSIRAbstract(states::SIRD::S) {}
 HD PPStateSIRextended::PPStateSIRextended(states::SIRD s) : PPStateSIRAbstract(s) {
     idx = static_cast<char>(state);
-    daysBeforeNextState = getTransition().calculateJustDays(idx);
+    daysBeforeNextState = getTransition().calculateJustDays(idx, 0);
 }
 
 HD PPStateSIRextended::PPStateSIRextended(char idx_p) : PPStateSIRAbstract(states::SIRD::S), idx(idx_p) {
     applyNewIdx();
-    daysBeforeNextState = getTransition().calculateJustDays(idx);
+    daysBeforeNextState = getTransition().calculateJustDays(idx, 0);
 }
 
-HD void PPStateSIRextended::gotInfected() {
+HD void PPStateSIRextended::gotInfected(uint8_t variant_p) {
     idx = 1;
     applyNewIdx();
     daysBeforeNextState = -2;
+    variant = variant_p;
     // std::cout << "From " << 0 << " -> " << (int)idx<<"\n";
 }
 
 HD void PPStateSIRextended::update(float scalingSymptons) {
     // the order of the first two is intentional
-    if (daysBeforeNextState == -2) { daysBeforeNextState = getTransition().calculateJustDays(idx); }
+    if (daysBeforeNextState == -2) { daysBeforeNextState = getTransition().calculateJustDays(idx, variant); }
     if (daysBeforeNextState > 0) { --daysBeforeNextState; }
     if (daysBeforeNextState == 0) {
-        auto tmp = getTransition().calculateNextState(idx, scalingSymptons);
+        auto tmp = getTransition().calculateNextState(idx, scalingSymptons, variant);
         auto stateIdx = tmp.first;
         auto days = tmp.second;
         daysBeforeNextState = days;

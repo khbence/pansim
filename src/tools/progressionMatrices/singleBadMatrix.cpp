@@ -117,8 +117,8 @@ SingleBadTransitionMatrix* SingleBadTransitionMatrix::upload() const {
 #endif
 
 thrust::pair<unsigned, int> HD SingleBadTransitionMatrix::calculateNextState(unsigned currentState,
-    float scalingSymptons) const {
+    float scalingSymptons, int variant) const {
     unsigned nextState = transitions[currentState].selectNext(scalingSymptons);
-    int days = lengths[nextState].calculateDays();
+    int days = lengths[nextState].calculateDays(variant);
     return thrust::make_pair(nextState, days);
 }

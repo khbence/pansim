@@ -38,6 +38,7 @@ class Immunization {
     std::vector<float> protectionSymptomaticWaning;
     std::vector<float> protectionHospitalization;
     std::vector<float> protectionHospitalizationWaning;
+    std::vector<float> variantSimilarMultiplier;
     std::vector<int> variantSimilarity;
     std::vector<float> vaccPerWeek;
     unsigned boosterRounds;
@@ -121,7 +122,9 @@ public:
             ("protectionHospitalizationWaning","Waning per week of efficiency vs. hospitalization of prior inf x(similar/different) strain, 2 dose, 3 dose, inf+2 dose, inf+3 dose", 
                     cxxopts::value<std::string>()->default_value("0.0021,0.006,0.006,0.006,0.003,0.003,0.0014,0.003,0.0014,0.003"))
             ("variantSimilarity","Variant similarity vs. immunization",
-            cxxopts::value<std::string>()->default_value("0,0,0,1,1,1,1"));
+            cxxopts::value<std::string>()->default_value("0,0,0,1,1,1,1"))
+            ("variantSimilarMultiplier","immunity level weight between similar(0.0)/immune-evading(1.0) for similar strain",
+            cxxopts::value<std::string>()->default_value("0.0,0.0,0.0,0.0,0.0,0.0,0.0"));
             /*("immunizationEfficiencyInfection",
             "Efficiency of immunization against infection after 12 days, 28 days, and after booster (pairs of comma-separated values for different strains)",
             cxxopts::value<std::string>()->default_value("0.52,0.96,0.99,0.2,0.82,0.95,0.09,0.71,0.91"))
@@ -196,6 +199,8 @@ public:
         protectionSymptomaticWaning = splitStringFloat(result["protectionSymptomaticWaning"].as<std::string>(), ',');
         protectionHospitalization = splitStringFloat(result["protectionHospitalization"].as<std::string>(), ',');
         protectionHospitalizationWaning = splitStringFloat(result["protectionHospitalizationWaning"].as<std::string>(), ',');
+        variantSimilarMultiplier = splitStringFloat(result["variantSimilarMultiplier"].as<std::string>(), ',');
+        
 
         variantSimilarity = splitStringInt(result["variantSimilarity"].as<std::string>(), ',');
         // acquiredMultiplier = splitStringFloat(result["acquiredMultiplier"].as<std::string>(),',');
@@ -520,6 +525,7 @@ public:
                                                          {protectionHospitalizationWaning[9], protectionHospitalization[9]}};
 
 
+
         // thrust::pair<float,float> efficiencyInf[6] =    {{0.003, 0.85},{0.003, 0.9 },{0.0021, 0.92},
         //                                                  {0.006, 0.5 },{0.006, 0.55},{0.006,  0.85}};
         // thrust::pair<float,float> efficiency2Dose[6] =  {{0.01,  0.77},{0.01,  0.8 },{0.006,  0.95},
@@ -534,12 +540,14 @@ public:
         //Wild,Alpha,Delta similar to each other BA1,BA2,BAX different from wild, but similar to each other
         int variantSimilarityLocal[MAX_STRAINS];
         for (int i = 0; i < MIN(MAX_STRAINS,variantSimilarity.size()); i++) variantSimilarityLocal[i] = variantSimilarity[i];
+        float variantSimilarMultiplierLocal[MAX_STRAINS];
+        for (int i = 0; i < MIN(MAX_STRAINS,variantSimilarMultiplier.size()); i++) variantSimilarMultiplierLocal[i] = variantSimilarMultiplier[i];
 
         unsigned numVariantsLocal = numVariants;
         thrust::for_each(
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.begin(), sim->agents->agentStats.begin(), sim->agents->agentMetaData.begin(), thrust::make_counting_iterator<unsigned>(0))),
             thrust::make_zip_iterator(thrust::make_tuple(sim->agents->PPValues.end(), sim->agents->agentStats.end(), sim->agents->agentMetaData.end(), thrust::make_counting_iterator<unsigned>(0)+sim->agents->agentMetaData.size())),
-            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarityLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&, unsigned> tup) {
+            [timeStep, timestamp, numVariantsLocal, efficiencyInf, efficiency2Dose, efficiency3Dose,efficiencyI2Dose,efficiencyI3Dose,variantSimilarityLocal, variantSimilarMultiplierLocal] HD(thrust::tuple<typename Simulation::PPState_t&, AgentStats&, typename Simulation::AgentMeta_t&, unsigned> tup) {
                 //Current assumption: no reduced infectiousness from prior inf/vacc
                 //If needed, shoud add here
                 if (thrust::get<0>(tup).getStateIdx() != 0) return;
@@ -562,10 +570,16 @@ public:
                             int similar = 0;
                             for (int j = 0; j < numVariantsLocal; j++) similar = similar || ((priorType & (1<<j)) && variantSimilarityLocal[i] == variantSimilarityLocal[j]);
                             float vsInf = -1.0f * efficiencyInf[(1-similar)*3+0].first * weeksSinceInfection + (((1<<i) & priorType) ? 0.95 : efficiencyInf[(1-similar)*3+0].second);
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsInf = -1.0f * (efficiencyInf[(1-similar)*3+0].first + (efficiencyInf[similar*3+0].first-efficiencyInf[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSinceInfection + efficiencyInf[(1-similar)*3+0].second + (efficiencyInf[(similar)*3+0].second-efficiencyInf[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             //if (susceptibilityLocal[i]>1.0) printf("case 1/1 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceInfection);
                             float vsSympt = -1.0f * efficiencyInf[(1-similar)*3+1].first * weeksSinceInfection + efficiencyInf[(1-similar)*3+1].second;
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsSympt = -1.0f * (efficiencyInf[(1-similar)*3+1].first + (efficiencyInf[similar*3+1].first-efficiencyInf[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSinceInfection + efficiencyInf[(1-similar)*3+1].second + (efficiencyInf[(similar)*3+1].second-efficiencyInf[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiencyInf[(1-similar)*3+2].first * weeksSinceInfection + efficiencyInf[(1-similar)*3+2].second;
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsHosp = -1.0f * (efficiencyInf[(1-similar)*3+2].first + (efficiencyInf[similar*3+2].first-efficiencyInf[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSinceInfection + efficiencyInf[(1-similar)*3+2].second + (efficiencyInf[(similar)*3+2].second-efficiencyInf[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
@@ -592,10 +606,16 @@ public:
                         //Waning protection 28+ days after 1st dose (2nd dose)
                         else if (thrust::get<1>(tup).immunizationCount == 1) {
                             float vsInf = -1.0f * efficiency2Dose[(1-similar)*3+0].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+0].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsInf = -1.0f * (efficiency2Dose[(1-similar)*3+0].first + (efficiency2Dose[similar*3+0].first-efficiency2Dose[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+0].second + (efficiency2Dose[(similar)*3+0].second-efficiency2Dose[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             //if (susceptibilityLocal[i]>1.0) printf("case 2/2  var %d %g weeks: %d %d %d %d\n", i, susceptibilityLocal[i], weeksSinceImmunization, timestamp, thrust::get<1>(tup).immunizationTimestamp, thrust::get<1>(tup).immunizationCount);
                             float vsSympt = -1.0f * efficiency2Dose[(1-similar)*3+1].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+1].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsSympt = -1.0f * (efficiency2Dose[(1-similar)*3+1].first + (efficiency2Dose[similar*3+1].first-efficiency2Dose[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+1].second + (efficiency2Dose[(similar)*3+1].second-efficiency2Dose[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiency2Dose[(1-similar)*3+2].first * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+2].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsHosp = -1.0f * (efficiency2Dose[(1-similar)*3+2].first + (efficiency2Dose[similar*3+2].first-efficiency2Dose[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency2Dose[(1-similar)*3+2].second + (efficiency2Dose[(similar)*3+2].second-efficiency2Dose[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsSympt)/(1.0f-vsInf), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 4, i); //multiplier from state I3 (#4)
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 5, i); //multiplier from state I4 (#5)
@@ -603,10 +623,16 @@ public:
                         //Waning protection after 3rd (or more) dose
                         else if (thrust::get<1>(tup).immunizationCount > 1) {
                             float vsInf = -1.0f * efficiency3Dose[(1-similar)*3+0].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+0].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsInf = -1.0f * (efficiency3Dose[(1-similar)*3+0].first + (efficiency3Dose[similar*3+0].first-efficiency3Dose[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+0].second + (efficiency3Dose[(similar)*3+0].second-efficiency3Dose[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             //if (susceptibilityLocal[i]>1.0) printf("case 2/3 var %d %g weeks: %d\n", i, susceptibilityLocal[i], weeksSinceImmunization);
                             float vsSympt = -1.0f * efficiency3Dose[(1-similar)*3+1].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+1].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsSympt = -1.0f * (efficiency3Dose[(1-similar)*3+1].first + (efficiency3Dose[similar*3+1].first-efficiency3Dose[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+1].second + (efficiency3Dose[(similar)*3+1].second-efficiency3Dose[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiency3Dose[(1-similar)*3+2].first * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+2].second;
+                            if (similar && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsHosp = -1.0f * (efficiency3Dose[(1-similar)*3+2].first + (efficiency3Dose[similar*3+2].first-efficiency3Dose[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSinceImmunization + efficiency3Dose[(1-similar)*3+2].second + (efficiency3Dose[(similar)*3+2].second-efficiency3Dose[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsSympt)/(1.0f-vsInf), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 4, i); //multiplier from state I3 (#4)
                             thrust::get<2>(tup).setScalingSymptoms((1.0f-vsHosp)/(1.0f-vsSympt), 5, i); //multiplier from state I4 (#5)
@@ -626,9 +652,15 @@ public:
                             
                         if (thrust::get<1>(tup).immunizationCount == 1) {
                             float vsInf = -1.0f * efficiencyI2Dose[(1-similar)*3+0].first * weeksSince + (((1<<i) & priorType) ? 0.95 : efficiencyI2Dose[(1-similar)*3+0].second);
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsInf = -1.0f * (efficiencyI2Dose[(1-similar)*3+0].first + (efficiencyI2Dose[similar*3+0].first-efficiencyI2Dose[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+0].second + (efficiencyI2Dose[(similar)*3+0].second-efficiencyI2Dose[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             float vsSympt = -1.0f * efficiencyI2Dose[(1-similar)*3+1].first * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second;
+                            if (similar && !efficiencyI2Dose && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsSympt = -1.0f * (efficiencyI2Dose[(1-similar)*3+1].first + (efficiencyI2Dose[similar*3+1].first-efficiencyI2Dose[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second + (efficiencyI2Dose[(similar)*3+1].second-efficiencyI2Dose[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiencyI2Dose[(1-similar)*3+2].first * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second;
+                            if (similar && !efficiencyI2Dose && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsHosp = -1.0f * (efficiencyI2Dose[(1-similar)*3+2].first + (efficiencyI2Dose[similar*3+2].first-efficiencyI2Dose[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second + (efficiencyI2Dose[(similar)*3+2].second-efficiencyI2Dose[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
@@ -636,9 +668,15 @@ public:
                         //Waning protection after 3rd (or more) dose
                         else if (thrust::get<1>(tup).immunizationCount > 1) {
                             float vsInf = -1.0f * efficiencyI3Dose[(1-similar)*3+0].first * weeksSince + (((1<<i) & priorType) ? 0.95 : efficiencyI3Dose[(1-similar)*3+0].second);
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsInf = -1.0f * (efficiencyI3Dose[(1-similar)*3+0].first + (efficiencyI3Dose[similar*3+0].first-efficiencyI3Dose[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI3Dose[(1-similar)*3+0].second + (efficiencyI3Dose[(similar)*3+0].second-efficiencyI3Dose[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             float vsSympt = -1.0f * efficiencyI3Dose[(1-similar)*3+1].first * weeksSince + efficiencyI3Dose[(1-similar)*3+1].second;
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsSympt = -1.0f * (efficiencyI3Dose[(1-similar)*3+1].first + (efficiencyI3Dose[similar*3+1].first-efficiencyI3Dose[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI3Dose[(1-similar)*3+1].second + (efficiencyI3Dose[(similar)*3+1].second-efficiencyI3Dose[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiencyI3Dose[(1-similar)*3+2].first * weeksSince + efficiencyI3Dose[(1-similar)*3+2].second;
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
+                                vsHosp = -1.0f * (efficiencyI3Dose[(1-similar)*3+2].first + (efficiencyI3Dose[similar*3+2].first-efficiencyI3Dose[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI3Dose[(1-similar)*3+2].second + (efficiencyI3Dose[(similar)*3+2].second-efficiencyI3Dose[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 5, i); //multiplier from state I4 (#5)
