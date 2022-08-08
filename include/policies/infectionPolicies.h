@@ -10,7 +10,7 @@ class BasicInfection {
 private:
     double k;
     unsigned dumpToFile = 0;
-    double c0_offset;
+    double c0_offset, trunc;
     int d_offset, d_peak_offset;
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
@@ -101,7 +101,10 @@ public:
             cxxopts::value<int>()->default_value("0"))
             ("c0",
             "seasonality c0 value ",
-            cxxopts::value<double>()->default_value("3.08"));
+            cxxopts::value<double>()->default_value("3.08"))
+            ("trunc",
+            "seasonality truncation value for Omicron ",
+            cxxopts::value<double>()->default_value("0.5"));
     }
 
     void finalize() {
@@ -118,6 +121,7 @@ protected:
         d_offset = result["d_offset"].as<int>();
         d_peak_offset = result["d_peak_offset"].as<int>();
         c0_offset = result["c0"].as<double>();
+        trunc = result["trunc"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
         if (dumpToFile || flagInfectionAtLocations) Util::needAgentsSortedByLocation = 1;
@@ -443,11 +447,14 @@ public:
 
         // int d_peak = 90;
         double c0 = 3.08; //0.8;
+        double trunc_val = 0.5;
 
         if (simDay > 250 && simDay < 450) {
             d += d_offset;
             d_peak += d_peak_offset;
             c0 = c0_offset;
+        } else if (simDay > 600) {
+            trunc_val = trunc;
         }
         int d_mod = d % 366;
         if (d_mod > 366 / 2)
@@ -455,7 +462,7 @@ public:
         double normed_value = 
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_mod - d_peak)/366.0) + (1.0 - 0.5 * c0))/
             (0.5 * c0 * cos (2.0 * M_PI * (double)(d_peak - d_peak)/366.0) + (1.0 - 0.5 * c0));
-        double calc_val = std::min(std::max(normed_value, 0.5/*trunc_val*/), 1.0);
+        double calc_val = std::min(std::max(normed_value, trunc_val), 1.0);
         if (d_mod < d_peak)
             return 1.0;
         else
