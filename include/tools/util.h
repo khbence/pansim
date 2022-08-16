@@ -2,14 +2,6 @@
 #include "datatypes.h"
 #include "timing.h"
 
-class Util {
-public:
-    static int needAgentsSortedByLocation;
-    static void updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
-        thrust::device_vector<unsigned>& locationIdsOfAgents,
-        thrust::device_vector<unsigned>& locationAgentList,
-        thrust::device_vector<unsigned>& locationListOffsets);
-};
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 template<typename UnaryFunction, typename Count_t, typename PPState_t>
@@ -37,12 +29,28 @@ __global__ void reduce_by_location_kernel_atomics(const unsigned* agentLocations
 }
 
 #endif
+
+class Util {
+public:
+    static int needAgentsSortedByLocation;
+    static thrust::device_vector<unsigned> reduced_keys;
+    static thrust::device_vector<unsigned> reduced_values_unsigned;
+    static thrust::device_vector<float> reduced_values_float;
+    template <typename Count_t>
+    static thrust::device_vector<Count_t>& getBuffer(Count_t valtype);
+    static void updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
+        thrust::device_vector<unsigned>& locationIdsOfAgents,
+        thrust::device_vector<unsigned>& locationAgentList,
+        thrust::device_vector<unsigned>& locationListOffsets);
+
+
 template<typename UnaryFunction, typename Count_t, typename PPState_t>
-void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
+static void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
     thrust::device_vector<unsigned>& locationAgentList,
     thrust::device_vector<Count_t>& fullInfectedCounts,
     thrust::device_vector<PPState_t>& PPValues,
     const thrust::device_vector<unsigned>& agentLocations,
+    thrust::device_vector<unsigned>& locationIdsOfAgents,
     UnaryFunction lam) {
     unsigned numLocations = locationListOffsets.size() - 1;
     unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
@@ -51,7 +59,7 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
     const unsigned* agentLocationsPtr = thrust::raw_pointer_cast(agentLocations.data());
     unsigned* locationAgentListPtr = thrust::raw_pointer_cast(locationAgentList.data());
     unsigned numAgents = PPValues.size();
-
+    
     PROFILE_FUNCTION();
 
     if (numLocations == 1) {
@@ -68,17 +76,23 @@ void reduce_by_location(thrust::device_vector<unsigned>& locationListOffsets,
             }
         }
 #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
-#define ATOMICS
 #ifdef ATOMICS
         reduce_by_location_kernel_atomics<<<(numAgents - 1) / 256 + 1, 256>>>(
             agentLocationsPtr, fullInfectedCountsPtr, PPValuesPtr, numAgents, lam);
-#else
-#error \
-    "util.cpp's locationListOffsets computation CUDA pathway relies on atomics version, as this one needs locationListOffsets to already exist"
-        reduce_by_location_kernel<<<(numLocations - 1) / 256 + 1, 256>>>(
-            locationListOffsetsPtr, locationAgentListPtr, fullInfectedCountsPtr, PPValuesPtr, numLocations, lam);
-#endif
         cudaDeviceSynchronize();
+#else
+        thrust::device_vector<Count_t>  &reduced_values2 = Util::getBuffer((Count_t)0);//(numLocations);//*reduced_values);
+        if (reduced_keys.size()==0)reduced_keys.resize(numLocations);
+        thrust::fill(reduced_keys.begin(), reduced_keys.end(), (unsigned)0);
+        if (reduced_values2.size()==0)reduced_values2.resize(numLocations);
+        thrust::reduce_by_key(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), //keys (locationIDs sorted)
+                              thrust::make_transform_iterator(
+                                    thrust::make_permutation_iterator(PPValues.begin(), locationAgentList.begin()), lam), //values lam(PPValues[locationAgentList[i]])
+                              reduced_keys.begin(), reduced_values2.begin());
+        thrust::fill(fullInfectedCounts.begin(), fullInfectedCounts.end(), (Count_t)0);
+        thrust::copy(reduced_values2.begin(), reduced_values2.end(), thrust::make_permutation_iterator(fullInfectedCounts.begin(), reduced_keys.begin()));
+#endif
 #endif
     }
 }
+};

@@ -20,7 +20,7 @@ private:
     std::ofstream file;
     thrust::device_vector<unsigned> susceptible1;
 
-    thrust::device_vector<double> infectionRatios;
+    thrust::device_vector<float> infectionRatios;
     thrust::device_vector<float> fullInfectedCounts;
 
     class DumpStore {
@@ -136,6 +136,7 @@ public:
         thrust::device_vector<unsigned>& agentLocations,
         Timehandler& simTime,
         uint8_t variant) {
+        auto realThis = static_cast<SimulationType*>(this);
         if (susceptible1.size() == 0) {
             susceptible1.resize(locationListOffsets.size() - 1, 0);
         } else {
@@ -147,11 +148,12 @@ public:
             thrust::fill(newInfectionsAtLocationsAccumulator.begin(), newInfectionsAtLocationsAccumulator.end(), (unsigned)0);
         }
         if (dumpToFile > 0) {// Aggregate new infected counts
-            reduce_by_location(locationListOffsets,
+            Util::reduce_by_location(locationListOffsets,
                 locationAgentList,
                 susceptible1,
                 ppstates,
                 agentLocations,
+                realThis->locs->locationIdsOfAgents,
                 [variant] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible(variant) > 0; });
         }
         if (dumpToFile > 0 && simTime.getTimestamp() % dumpToFile == 0) {
@@ -165,11 +167,12 @@ public:
                 thrust::minus<unsigned>());
             // Count number of infected people at each locaiton
             thrust::device_vector<unsigned> infectedCount(locationListOffsets.size() - 1, 0);
-            reduce_by_location(locationListOffsets,
+            Util::reduce_by_location(locationListOffsets,
                 locationAgentList,
                 infectedCount,
                 ppstates,
                 agentLocations,
+                realThis->locs->locationIdsOfAgents,
                 [] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.isInfectious() > 0; });
             // Print people/location
             thrust::copy(location.begin(), location.end(), std::ostream_iterator<unsigned>(file, " "));
@@ -192,11 +195,13 @@ public:
         uint8_t variant) {
         if (dumpToFile > 0) {// Finish aggregating number of new infections
             thrust::device_vector<unsigned> susceptible2(locationListOffsets.size() - 1, 0);
-            reduce_by_location(locationListOffsets,
+            auto realThis = static_cast<SimulationType*>(this);
+            Util::reduce_by_location(locationListOffsets,
                 locationAgentList,
                 susceptible2,
                 ppstates,
                 agentLocations,
+                realThis->locs->locationIdsOfAgents,
                 [variant] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned { return ppstate.getSusceptible(variant) > 0; });
             thrust::transform(susceptible1.begin(),
                 susceptible1.end(),
@@ -496,11 +501,12 @@ public:
         //
         // Step 1 - Count up infectious people - those who are Infectious
         //
-        reduce_by_location(locationListOffsets,
+        Util::reduce_by_location(locationListOffsets,
             locationAgentList,
             fullInfectedCounts,
             ppstates,
             agentLocations,
+            realThis->locs->locationIdsOfAgents,
             [variant] HD(const typename SimulationType::PPState_t& ppstate) -> float { return ppstate.isInfectious(variant); });
 
         dumpToFileStep1(locationListOffsets, locationAgentList, ppstates, fullInfectedCounts, agentLocations, simTime, variant);
@@ -518,22 +524,22 @@ public:
             thrust::make_zip_iterator(thrust::make_tuple(
                 fullInfectedCounts.end(), locationListOffsets.end() - 1, locationListOffsets.end(), infectiousness.end())),
             infectionRatios.begin(),
-            [=] HD(thrust::tuple<float&, unsigned&, unsigned&, double&> tuple) {
+            [=] HD(thrust::tuple<float&, unsigned&, unsigned&, float&> tuple) {
                 float numInfectedAgentsPresent = thrust::get<0>(tuple);
                 unsigned offset0 = thrust::get<1>(tuple);
                 unsigned offset1 = thrust::get<2>(tuple);
                 unsigned num_agents = offset1 - offset0;
                 if (numInfectedAgentsPresent == 0.0) { return 0.0; }
-                double densityOfInfected = numInfectedAgentsPresent / num_agents;
-                /*double y =
+                float densityOfInfected = numInfectedAgentsPresent / num_agents;
+                /*float y =
                     1.0
                     / (1.0
                         + parTMP.v
                               * std::exp(-parTMP.s * 2 * (densityOfInfected - parTMP.h - 0.5)));
                 y = parTMP.a * y + parTMP.b;
                 y *= thrust::get<3>(tuple);// Weighted by infectiousness
-                return y / (60.0 * 24.0 / static_cast<double>(timeStep));*/
-                return 1.0 - exp(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<double>(timeStep));
+                return y / (60.0 * 24.0 / static_cast<float>(timeStep));*/
+                return 1.0 - exp(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<float>(timeStep));
             });
 
         //
@@ -549,20 +555,22 @@ public:
             variant);
         if (flagInfectionAtLocations) {
             thrust::device_vector<unsigned> fullInfectedCounts2(fullInfectedCounts.size(), 0);
-            reduce_by_location(locationListOffsets,
+            Util::reduce_by_location(locationListOffsets,
                 locationAgentList,
                 fullInfectedCounts2,
                 ppstates,
                 agentLocations,
+                realThis->locs->locationIdsOfAgents,
                 [] HD(const typename SimulationType::PPState_t& ppstate) -> unsigned {
                     return unsigned(ppstate.isInfectious() > 0);
                 });
             thrust::device_vector<unsigned> numberOfNewInfectionsAtLocations(fullInfectedCounts.size(), 0);
-            reduce_by_location(locationListOffsets,
+            Util::reduce_by_location(locationListOffsets,
                 locationAgentList,
                 numberOfNewInfectionsAtLocations,
                 newlyInfectedAgents,
                 agentLocations,
+                realThis->locs->locationIdsOfAgents,
                 [] HD(const unsigned& flag) -> unsigned { return flag; });
             dumpLocationInfectiousList(ppstates,
                 agentLocations,

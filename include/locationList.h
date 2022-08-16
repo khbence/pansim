@@ -45,7 +45,7 @@ public:
     // vectors
     thrust::device_vector<TypeOfLocation> locType;
     thrust::device_vector<PositionType> position;
-    thrust::device_vector<double> infectiousness;
+    thrust::device_vector<float> infectiousness;
     thrust::device_vector<unsigned> areas;
     thrust::device_vector<unsigned> capacity;
     thrust::device_vector<bool> states;// Closed/open or ON/OFF
@@ -98,7 +98,7 @@ public:
 
         thrust::host_vector<TypeOfLocation> locType_h;
         thrust::host_vector<PositionType> position_h;
-        thrust::host_vector<double> infectiousness_h;
+        thrust::host_vector<float> infectiousness_h;
         thrust::host_vector<unsigned> areas_h;
         thrust::host_vector<bool> states_h;
         thrust::host_vector<unsigned> capacity_h;
@@ -168,7 +168,7 @@ public:
         // adding cemetery
         locType_h.push_back(generalLocationTypes.rbegin()->first);
         position_h.push_back(PositionType{ 0, 0 });
-        infectiousness_h.push_back(0.0);
+        infectiousness_h.push_back(0.0f);
         areas_h.push_back(std::numeric_limits<unsigned>::max());
         states_h.push_back(true);
         capacity_h.push_back(std::numeric_limits<unsigned>::max());
@@ -230,7 +230,7 @@ public:
     }
 
     // TODO optimise randoms for performance
-    static void infectAgents(thrust::device_vector<double>& infectionRatioAtLocations,
+    static void infectAgents(thrust::device_vector<float>& infectionRatioAtLocations,
         thrust::device_vector<unsigned>& agentLocations,
         thrust::device_vector<bool>& infectionAtLocation,
         thrust::device_vector<unsigned>& newlyInfectedAgents,
@@ -265,7 +265,7 @@ public:
                 thrust::make_permutation_iterator(infectionAtLocation.begin(), agentLocations.end()),
                 newlyInfectedAgents.begin() + ppstates.size())),
             [timestamp, tracked2, flagInfectionsAtLocation, variant] HD(thrust::tuple<typename SimulationType::PPState_t&,
-                double&,
+                float&,
                 TypeOfLocation&,
                 AgentStats&,
                 unsigned&,
@@ -273,7 +273,7 @@ public:
                 bool&,
                 unsigned&> tuple) {
                 auto& ppstate = thrust::get<0>(tuple);
-                double& infectionRatio = thrust::get<1>(tuple);
+                float& infectionRatio = thrust::get<1>(tuple);
                 TypeOfLocation& locType = thrust::get<2>(tuple);
                 auto& agentStat = thrust::get<3>(tuple);
                 unsigned& agentLocation = thrust::get<4>(tuple);

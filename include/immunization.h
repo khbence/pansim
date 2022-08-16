@@ -656,10 +656,10 @@ public:
                                 vsInf = -1.0f * (efficiencyI2Dose[(1-similar)*3+0].first + (efficiencyI2Dose[similar*3+0].first-efficiencyI2Dose[(1-similar)*3+0].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+0].second + (efficiencyI2Dose[(similar)*3+0].second-efficiencyI2Dose[(1-similar)*3+0].second)*variantSimilarMultiplierLocal[i];
                             susceptibilityLocal[i] = 1.0f - vsInf;
                             float vsSympt = -1.0f * efficiencyI2Dose[(1-similar)*3+1].first * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second;
-                            if (similar && !efficiencyI2Dose && variantSimilarMultiplierLocal[i] > 0.0f)
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
                                 vsSympt = -1.0f * (efficiencyI2Dose[(1-similar)*3+1].first + (efficiencyI2Dose[similar*3+1].first-efficiencyI2Dose[(1-similar)*3+1].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+1].second + (efficiencyI2Dose[(similar)*3+1].second-efficiencyI2Dose[(1-similar)*3+1].second)*variantSimilarMultiplierLocal[i];
                             float vsHosp = -1.0f * efficiencyI2Dose[(1-similar)*3+2].first * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second;
-                            if (similar && !efficiencyI2Dose && variantSimilarMultiplierLocal[i] > 0.0f)
+                            if (similar && !((1<<i) & priorType) && variantSimilarMultiplierLocal[i] > 0.0f)
                                 vsHosp = -1.0f * (efficiencyI2Dose[(1-similar)*3+2].first + (efficiencyI2Dose[similar*3+2].first-efficiencyI2Dose[(1-similar)*3+2].first) * variantSimilarMultiplierLocal[i]) * weeksSince + efficiencyI2Dose[(1-similar)*3+2].second + (efficiencyI2Dose[(similar)*3+2].second-efficiencyI2Dose[(1-similar)*3+2].second)*variantSimilarMultiplierLocal[i];
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsSympt)/(1.0f-vsInf)), 2, i); //multiplier from state I1 (#2)
                             thrust::get<2>(tup).setScalingSymptoms(MIN(1.0f,(1.0f-vsHosp)/(1.0f-vsSympt)), 4, i); //multiplier from state I3 (#4)

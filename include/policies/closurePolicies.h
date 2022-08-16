@@ -213,7 +213,7 @@ public:
 
             if (rule.name.compare("Masks") == 0) {
                 // Masks
-                thrust::device_vector<double>& locInfectiousness = realThis->locs->infectiousness;
+                thrust::device_vector<float>& locInfectiousness = realThis->locs->infectiousness;
                 thrust::device_vector<typename SimulationType::TypeOfLocation_t>& locTypes = realThis->locs->locType;
                 unsigned homeType = data.home;
                 double maskCoefficient2 = std::stod(rule.parameter);
@@ -227,7 +227,7 @@ public:
                             thrust::make_zip_iterator(thrust::make_tuple(locTypes.begin(), locInfectiousness.begin())),
                             thrust::make_zip_iterator(thrust::make_tuple(locTypes.end(), locInfectiousness.end())),
                             [maskCoefficient2, homeType, shouldBeOpen] HD(
-                                thrust::tuple<typename SimulationType::TypeOfLocation_t&, double&> tup) {
+                                thrust::tuple<typename SimulationType::TypeOfLocation_t&, float&> tup) {
                                 auto& type = thrust::get<0>(tup);
                                 auto& infectiousness = thrust::get<1>(tup);
                                 if (type != homeType) {
@@ -417,7 +417,7 @@ public:
                     for (GlobalCondition* c : r->conditions) { change = change && c->active; }
                     if (change) {
                         realThis->updateTestingProbs(testingProbs);
-                        if (diags > 0) printf("Changing testing rates to %s\n", testingProbs);
+                        if (diags > 0) printf("Changing testing rates to %s\n", testingProbs.c_str());
                     }
                 });
             } else {// Not masks, curfew, holiday

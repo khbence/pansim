@@ -1318,6 +1318,17 @@ namespace RealMovementOps {
         }
     }
 #endif
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+    template<typename T>
+    __global__ void countByType(unsigned total, unsigned typeCount, T* types, unsigned *offsets, unsigned *counter) {
+            unsigned position = threadIdx.x + blockIdx.x * blockDim.x;
+            if (position < total) {
+                unsigned count = offsets[position+1]-offsets[position];
+                if (types[position] == 17) printf("in cemetery %d\n", count);
+                if (count) atomicAdd(&counter[types[position]], count); 
+            }
+        }
+#endif
 }// namespace RealMovementOps
 
 template<typename SimulationType>
@@ -1325,6 +1336,7 @@ class RealMovement {
     thrust::device_vector<unsigned> stepsUntilMove;
     thrust::device_vector<unsigned> noWorkLoc;// indicating children at home
     thrust::device_vector<uint8_t> noWorkAgent;// indicating agent staying home because children at home
+    thrust::device_vector<unsigned> locationTypeCounter;
     unsigned publicSpace;
     unsigned home;
     unsigned hospital;
@@ -1336,6 +1348,7 @@ class RealMovement {
     unsigned classroom;
     unsigned work;
     std::string dumpLocationAgentList;
+    std::string dumpLoctypeStat;
 
 public:
     bool enableCurfew = false;
@@ -1359,14 +1372,19 @@ public:
             "Length of quarantine in days",
             cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(10))))
             ("dumpLocationAgentList",
-            "Dump per-location list of agents at each iteration",
+            "Dump per-location list of agents at each iteration (directory)",
+            cxxopts::value<std::string>()->default_value(""))
+            ("dumpLoctypeStat",
+            "Dump per-location type daily occupancy stats (filename)",
             cxxopts::value<std::string>()->default_value(""));
+            
     }
     void initializeArgs(const cxxopts::ParseResult& result) {
         tracked = result["trace"].as<unsigned>();
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
         dumpLocationAgentList = result["dumpLocationAgentList"].as<std::string>();
+        dumpLoctypeStat = result["dumpLoctypeStat"].as<std::string>();
         if (dumpLocationAgentList.length()>0) Util::needAgentsSortedByLocation = 1;
     }
     void init(const parser::LocationTypes& data, unsigned cemeteryID) {
@@ -1573,6 +1591,25 @@ public:
             home);
         cudaDeviceSynchronize();
 #endif
+
+        if (dumpLoctypeStat.length()>0) {
+            if (locationTypeCounter.size()==0) {
+                locationTypeCounter.resize(realThis->locs->generalLocationTypes.rbegin()->first + 1);
+                std::ofstream file;
+                file.open(dumpLoctypeStat); //open for write
+                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
+                file << "\n";
+                file.close();
+            }
+            if (timestamp>0) {
+                std::ofstream file;
+                file.open(dumpLoctypeStat, std::ios_base::app); //just append
+                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
+                file << "\n";
+                file.close();
+            }
+            thrust::fill(locationTypeCounter.begin(),locationTypeCounter.end(),(unsigned)0);
+        }
     }
 
     void movement(Timehandler simTime, unsigned timeStep) {
@@ -1685,6 +1722,20 @@ public:
             thrust::copy(locationAgentList.begin(), locationAgentList.end(), std::ostream_iterator<unsigned>(file, " "));
             file << "\n";
             file.close();
+        }
+
+        if (dumpLoctypeStat.length()>0) {
+            typename SimulationType::TypeOfLocation_t *locationTypePtr = thrust::raw_pointer_cast(locationTypes.data());
+            unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
+            unsigned numLocTypes = realThis->locs->generalLocationTypes.rbegin()->first + 1;
+            unsigned* locationTypeCounterPtr = thrust::raw_pointer_cast(locationTypeCounter.data());
+            #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
+            std::cout << "Error, dumpLoctypeStat not implemented for CPU\n";
+            exit(1);
+            #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+            RealMovementOps::countByType<<<(numberOfLocations-1)/256+1,256>>>(numberOfLocations, numLocTypes, locationTypePtr, locationListOffsetsPtr, locationTypeCounterPtr);
+            cudaDeviceSynchronize();
+            #endif
         }
     }
 };
