@@ -49,7 +49,7 @@ public:
 
     ~SingleBadTransitionMatrix();
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     SingleBadTransitionMatrix* upload() const;
 #endif
 

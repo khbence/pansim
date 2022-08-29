@@ -9,7 +9,7 @@ namespace detail {
         __device__ unsigned startingIdx[5] = { 0, 1, 7, 10, 11 };// to convert from idx to state
         unsigned h_startingIdx[5] = { 0, 1, 7, 10, 11 };
         SingleBadTransitionMatrix* transition;
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         __device__ SingleBadTransitionMatrix* transition_gpu;
 #endif
     }// namespace PPStateSIRextended
@@ -35,7 +35,7 @@ states::SIRD PPStateSIRAbstract::parseState(const std::string& input) {
     }
 }
 
-void PPStateSIRAbstract::gotInfected(uint8_t variant) { this->state = states::SIRD::I; this->variant = variant;}
+HD void PPStateSIRAbstract::gotInfected(uint8_t variant) { this->state = states::SIRD::I; this->variant = variant;}
 
 [[nodiscard]] HD states::SIRD PPStateSIRAbstract::getSIRD() const { return state; }
 
@@ -72,7 +72,7 @@ HD void PPStateSIRextended::applyNewIdx() {
 
 
 HD SingleBadTransitionMatrix& PPStateSIRextended::getTransition() {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return *detail::PPStateSIRextended::transition_gpu;
 #else
     return *detail::PPStateSIRextended::transition;
@@ -80,7 +80,7 @@ HD SingleBadTransitionMatrix& PPStateSIRextended::getTransition() {
 };
 
 HD unsigned* PPStateSIRextended::getStartingIdx() {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::PPStateSIRextended::startingIdx;
 #else
     return detail::PPStateSIRextended::h_startingIdx;
@@ -127,15 +127,15 @@ HD void PPStateSIRextended::update(float scalingSymptons) {
 
 void PPStateSIRextended::initTransitionMatrix(const std::string& inputFile) {
     detail::PPStateSIRextended::transition = new SingleBadTransitionMatrix(inputFile);
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     SingleBadTransitionMatrix* tmp = detail::PPStateSIRextended::transition->upload();
-    cudaMemcpyToSymbol(detail::PPStateSIRextended::transition_gpu, &tmp, sizeof(SingleBadTransitionMatrix*));
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::PPStateSIRextended::transition_gpu), &tmp, sizeof(SingleBadTransitionMatrix*));
 #endif
     printHeader();
 }
 
 HD unsigned PPStateSIRextended::getNumberOfStates() {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::PPStateSIRextended::numberOfStates;
 #else
     return detail::PPStateSIRextended::h_numberOfStates;

@@ -1,7 +1,8 @@
+#include "hip/hip_runtime.h"
 #include "util.h"
 #include "timing.h"
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA && defined(ATOMICS)
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP && defined(ATOMICS)
 int Util::needAgentsSortedByLocation = 0;
 #else
 int Util::needAgentsSortedByLocation = 1;
@@ -21,7 +22,7 @@ thrust::device_vector<unsigned>& Util::getBuffer(unsigned valtype) {
     return reduced_values_unsigned;
 }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
 __global__ void extractOffsets_kernel(unsigned* locOfAgents, unsigned* locationListOffsets, unsigned length, unsigned nLocs) {
     unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i == 0)
@@ -47,9 +48,9 @@ void extractOffsets(unsigned* locOfAgents, unsigned* locationListOffsets, unsign
     }
     for (unsigned j = locOfAgents[length - 1] + 1; j <= nLocs; j++) { locationListOffsets[j] = length; }
     locationListOffsets[nLocs] = length;
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     extractOffsets_kernel<<<(length - 1) / 256 + 1, 256>>>(locOfAgents, locationListOffsets, length, nLocs);
-    cudaDeviceSynchronize();
+    hipDeviceSynchronize();
 #endif
 }
 void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& locationOfAgents,
@@ -68,7 +69,7 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
         thrust::stable_sort_by_key(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), locationAgentList.begin());
         END_PROFILING("sort")
     }
-#if (THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA)
+#if (THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP)
     #ifdef ATOMICS
     // Count number of people at any given location
     thrust::fill(locationListOffsets.begin(), locationListOffsets.end(), 0);

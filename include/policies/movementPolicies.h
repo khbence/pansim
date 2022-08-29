@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 #include <iostream>
 #include "timeHandler.h"
@@ -169,7 +170,7 @@ namespace RealMovementOps {
     };
 
     template<typename PPState, typename AgentMeta, typename LocationType>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -245,7 +246,7 @@ namespace RealMovementOps {
     }
 
     template<typename PPState, typename AgentMeta, typename LocationType>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -256,7 +257,7 @@ namespace RealMovementOps {
     }
 
     template<typename PPState, typename AgentMeta, typename LocationType>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -1035,7 +1036,7 @@ namespace RealMovementOps {
         a.stepsUntilMovePtr[i]--;
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename PPState, typename AgentMeta, typename LocationType>
     __global__ void doMovementDriver(unsigned numberOfAgents, MovementArguments<PPState, AgentMeta, LocationType> a) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -1044,7 +1045,7 @@ namespace RealMovementOps {
 #endif
 
     template<typename AgentMeta>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -1088,7 +1089,7 @@ namespace RealMovementOps {
         }
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename AgentMeta>
     __global__ void checkUnderageAtHomeDriver(unsigned numberOfAgents,
         unsigned* noWorkPtr,
@@ -1125,7 +1126,7 @@ namespace RealMovementOps {
 #endif
 
     template<typename AgentMeta>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -1142,7 +1143,7 @@ namespace RealMovementOps {
                 i, home, locationOffsetPtr, possibleLocationsPtr, possibleTypesPtr, home, home, home, 0, nullptr);
             if (homeLocation != std::numeric_limits<unsigned>::max())
                 if (noWorkLocPtr[homeLocation] == 1) {// TODO this is not exactly thread safe on the CPU....
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
                     if (atomicAdd(&noWorkLocPtr[homeLocation], 1) == 1)
 #else
                     noWorkLocPtr[homeLocation] = 2;
@@ -1152,7 +1153,7 @@ namespace RealMovementOps {
         }
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename AgentMeta>
     __global__ void setNoWorkTodayDriver(unsigned numberOfAgents,
         unsigned* noWorkLocPtr,
@@ -1176,7 +1177,7 @@ namespace RealMovementOps {
     }
 #endif
     template<typename PPValues>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -1234,7 +1235,7 @@ namespace RealMovementOps {
         }
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename PPValues>
     __global__ void checkSchoolWorkQuarantineDriver(unsigned numberOfAgents,
         AgentStats* agentStatsPtr,
@@ -1273,7 +1274,7 @@ namespace RealMovementOps {
 #endif
 
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -1304,7 +1305,7 @@ namespace RealMovementOps {
         }
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __global__ void checkSchoolQuarantineDriver(unsigned numSchools,
         unsigned* schoolsPtr,
         unsigned* classroomsPtr,
@@ -1318,7 +1319,7 @@ namespace RealMovementOps {
         }
     }
 #endif
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename T>
     __global__ void countByType(unsigned total, unsigned typeCount, T* types, unsigned *offsets, unsigned *counter) {
             unsigned position = threadIdx.x + blockIdx.x * blockDim.x;
@@ -1463,10 +1464,10 @@ public:
                 RealMovementOps::checkSchoolQuarantine(
                     i, schoolsPtr, classroomsPtr, classroomOffsetsPtr, locationQuarantineUntilPtr, timestamp);
             }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
             RealMovementOps::checkSchoolQuarantineDriver<<<(numSchools - 1) / 256 + 1, 256>>>(
                 numSchools, schoolsPtr, classroomsPtr, classroomOffsetsPtr, locationQuarantineUntilPtr, timestamp);
-            cudaDeviceSynchronize();
+            hipDeviceSynchronize();
 #endif
         }
 
@@ -1492,7 +1493,7 @@ public:
                     timeStep,
                     tracked);
             }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
             RealMovementOps::checkSchoolWorkQuarantineDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents,
                 agentStatsPtr,
                 agentStatesPtr,
@@ -1508,7 +1509,7 @@ public:
                 timestamp,
                 timeStep,
                 tracked);
-            cudaDeviceSynchronize();
+            hipDeviceSynchronize();
 #endif
             unsigned schoolType = school;
             unsigned classroomType = classroom;
@@ -1549,7 +1550,7 @@ public:
                 timestamp,
                 schoolAgeRestriction);
         }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         RealMovementOps::checkUnderageAtHomeDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents,
             noWorkLocPtr,
             agentMetaDataPtr,
@@ -1564,7 +1565,7 @@ public:
             classroom,
             timestamp,
             schoolAgeRestriction);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #endif
 
         // For each adult working agent (25-65), if home is flagged, at least one adult is flagged as not working that day
@@ -1580,7 +1581,7 @@ public:
                 possibleTypesPtr,
                 home);
         }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         RealMovementOps::setNoWorkTodayDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents,
             noWorkLocPtr,
             noWorkAgentPtr,
@@ -1589,7 +1590,7 @@ public:
             possibleLocationsPtr,
             possibleTypesPtr,
             home);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #endif
 
         if (dumpLoctypeStat.length()>0) {
@@ -1707,9 +1708,9 @@ public:
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
 #pragma omp parallel for
         for (unsigned i = 0; i < numberOfAgents; i++) { RealMovementOps::doMovement(i, a); }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         RealMovementOps::doMovementDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(numberOfAgents, a);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #endif
         Util::updatePerLocationAgentLists(agentLocations, locationIdsOfAgents, locationAgentList, locationListOffsets);
 
@@ -1732,9 +1733,9 @@ public:
             #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
             std::cout << "Error, dumpLoctypeStat not implemented for CPU\n";
             exit(1);
-            #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+            #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
             RealMovementOps::countByType<<<(numberOfLocations-1)/256+1,256>>>(numberOfLocations, numLocTypes, locationTypePtr, locationListOffsetsPtr, locationTypeCounterPtr);
-            cudaDeviceSynchronize();
+            hipDeviceSynchronize();
             #endif
         }
     }

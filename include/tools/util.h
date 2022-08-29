@@ -1,9 +1,11 @@
+#include "hip/hip_runtime.h"
+#include "hip/hip_runtime.h"
 #pragma once
 #include "datatypes.h"
 #include "timing.h"
 
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
 template<typename UnaryFunction, typename Count_t, typename PPState_t>
 __global__ void reduce_by_location_kernel(unsigned* locationListOffsetsPtr,
     unsigned* locationAgentListPtr,
@@ -75,11 +77,11 @@ static void reduce_by_location(thrust::device_vector<unsigned>& locationListOffs
                 fullInfectedCountsPtr[l] += lam(PPValuesPtr[locationAgentListPtr[agent]]);
             }
         }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
 #ifdef ATOMICS
         reduce_by_location_kernel_atomics<<<(numAgents - 1) / 256 + 1, 256>>>(
             agentLocationsPtr, fullInfectedCountsPtr, PPValuesPtr, numAgents, lam);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #else
         thrust::device_vector<Count_t>  &reduced_values2 = Util::getBuffer((Count_t)0);//(numLocations);//*reduced_values);
         if (reduced_keys.size()==0)reduced_keys.resize(numLocations);

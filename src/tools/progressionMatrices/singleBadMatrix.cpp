@@ -90,27 +90,27 @@ SingleBadTransitionMatrix::~SingleBadTransitionMatrix() {
     free(lengths);
 }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
 SingleBadTransitionMatrix* SingleBadTransitionMatrix::upload() const {
     SingleBadTransitionMatrix* tmp = (SingleBadTransitionMatrix*)malloc(sizeof(SingleBadTransitionMatrix));
     tmp->numStates = numStates;
-    cudaMalloc((void**)&tmp->lengths, numStates * sizeof(LengthOfState));
-    cudaMemcpy(tmp->lengths, lengths, numStates * sizeof(LengthOfState), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&tmp->lengths, numStates * sizeof(LengthOfState));
+    hipMemcpy(tmp->lengths, lengths, numStates * sizeof(LengthOfState), hipMemcpyHostToDevice);
     NextStates* tmp2 = (NextStates*)malloc(numStates * sizeof(NextStates));
     memcpy(tmp2, transitions, numStates * sizeof(NextStates));
     for (unsigned i = 0; i < numStates; i++) {
-        cudaMalloc((void**)&tmp2[i].neutral, transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>));
-        cudaMemcpy(tmp2[i].neutral,
+        hipMalloc((void**)&tmp2[i].neutral, transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>));
+        hipMemcpy(tmp2[i].neutral,
             transitions[i].neutral,
             transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>),
-            cudaMemcpyHostToDevice);
+            hipMemcpyHostToDevice);
     }
-    cudaMalloc((void**)&tmp->transitions, numStates * sizeof(NextStates));
-    cudaMemcpy(tmp->transitions, tmp2, numStates * sizeof(NextStates), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&tmp->transitions, numStates * sizeof(NextStates));
+    hipMemcpy(tmp->transitions, tmp2, numStates * sizeof(NextStates), hipMemcpyHostToDevice);
     free(tmp2);
     SingleBadTransitionMatrix* dev;
-    cudaMalloc((void**)&dev, sizeof(SingleBadTransitionMatrix));
-    cudaMemcpy(dev, tmp, sizeof(SingleBadTransitionMatrix), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&dev, sizeof(SingleBadTransitionMatrix));
+    hipMemcpy(dev, tmp, sizeof(SingleBadTransitionMatrix), hipMemcpyHostToDevice);
     free(tmp);
     return dev;
 }

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 #include <thrust/device_ptr.h>
 #include <thrust/device_malloc.h>

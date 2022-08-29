@@ -18,7 +18,7 @@ namespace detail {
         std::vector<states::WBStates> h_WB;
         std::map<std::string, char> nameIndexMap;
         std::vector<ProgressionMatrix> h_transition;
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         __constant__ unsigned numberOfStates = 0;
         __constant__ char firstInfectedState = 0;
         __constant__ char nonCOVIDDeadState = 0;
@@ -36,7 +36,7 @@ namespace detail {
 }// namespace detail
 
 HD ProgressionMatrix& DynamicPPState::getTransition(unsigned progressionID_p) {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return *detail::DynamicPPState::d_transition[progressionID_p];
 #else
     return detail::DynamicPPState::h_transition[progressionID_p];
@@ -44,7 +44,7 @@ HD ProgressionMatrix& DynamicPPState::getTransition(unsigned progressionID_p) {
 }
 
 void HD DynamicPPState::reduceInfectiousness(float multiplier) {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
 infectious = multiplier * detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
 #else
 infectious = multiplier * detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
@@ -52,7 +52,7 @@ infectious = multiplier * detail::DynamicPPState::h_infectious[state] * detail::
 }
 
 void HD DynamicPPState::updateMeta() {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     infectious = detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
     for (int i = 0; i < MAX_STRAINS; i++)
         susceptible[i] = detail::DynamicPPState::susceptible[state];
@@ -131,81 +131,81 @@ std::string DynamicPPState::initTransitionMatrix(
         }
     }
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     ProgressionMatrix* tmpDevice;
-    cudaMalloc((void**)&tmpDevice,
+    hipMalloc((void**)&tmpDevice,
         detail::DynamicPPState::h_transition.size() * sizeof(decltype(detail::DynamicPPState::d_transition)));
 
     std::vector<ProgressionMatrix*> tmp;
     for (auto& e : detail::DynamicPPState::h_transition) { tmp.push_back(e.upload()); }
-    cudaMemcpy(tmpDevice, tmp.data(), tmp.size() * sizeof(ProgressionMatrix*), cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::d_transition, &tmpDevice, sizeof(decltype(tmpDevice)));
+    hipMemcpy(tmpDevice, tmp.data(), tmp.size() * sizeof(ProgressionMatrix*), hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::d_transition), &tmpDevice, sizeof(decltype(tmpDevice)));
 
     float* infTMP;
-    cudaMalloc((void**)&infTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
-    cudaMemcpy(infTMP,
+    hipMalloc((void**)&infTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
+    hipMemcpy(infTMP,
         detail::DynamicPPState::h_infectious.data(),
         detail::DynamicPPState::h_numberOfStates * sizeof(float),
-        cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::infectious, &infTMP, sizeof(float*));
+        hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::infectious), &infTMP, sizeof(float*));
 
     float* varTMP;
-    cudaMalloc((void**)&varTMP, (multiplier.size()) * sizeof(float));
-    cudaMemcpy(varTMP, detail::DynamicPPState::h_variantMultiplier.data(), (multiplier.size()) * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::variantMultiplier, &varTMP, sizeof(float*));
+    hipMalloc((void**)&varTMP, (multiplier.size()) * sizeof(float));
+    hipMemcpy(varTMP, detail::DynamicPPState::h_variantMultiplier.data(), (multiplier.size()) * sizeof(float), hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::variantMultiplier), &varTMP, sizeof(float*));
 
     float* accuracyPCRTMP;
-    cudaMalloc((void**)&accuracyPCRTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
-    cudaMemcpy(accuracyPCRTMP,
+    hipMalloc((void**)&accuracyPCRTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
+    hipMemcpy(accuracyPCRTMP,
         detail::DynamicPPState::h_accuracyPCR.data(),
         detail::DynamicPPState::h_numberOfStates * sizeof(float),
-        cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::accuracyPCR, &accuracyPCRTMP, sizeof(float*));
+        hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::accuracyPCR), &accuracyPCRTMP, sizeof(float*));
 
     float* accuracyAntigenTMP;
-    cudaMalloc((void**)&accuracyAntigenTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
-    cudaMemcpy(accuracyAntigenTMP,
+    hipMalloc((void**)&accuracyAntigenTMP, detail::DynamicPPState::h_numberOfStates * sizeof(float));
+    hipMemcpy(accuracyAntigenTMP,
         detail::DynamicPPState::h_accuracyAntigen.data(),
         detail::DynamicPPState::h_numberOfStates * sizeof(float),
-        cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::accuracyAntigen, &accuracyAntigenTMP, sizeof(float*));
+        hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::accuracyAntigen), &accuracyAntigenTMP, sizeof(float*));
 
     states::SIRD* wbTMP;
-    cudaMalloc((void**)&wbTMP, detail::DynamicPPState::h_numberOfStates * sizeof(states::SIRD));
-    cudaMemcpy(wbTMP,
+    hipMalloc((void**)&wbTMP, detail::DynamicPPState::h_numberOfStates * sizeof(states::SIRD));
+    hipMemcpy(wbTMP,
         detail::DynamicPPState::h_WB.data(),
         detail::DynamicPPState::h_numberOfStates * sizeof(states::SIRD),
-        cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::WB, &wbTMP, sizeof(states::SIRD*));
+        hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::WB), &wbTMP, sizeof(states::SIRD*));
 
     bool* tmpSusceptible = new bool[detail::DynamicPPState::h_susceptible.size()];
     std::copy(detail::DynamicPPState::h_susceptible.begin(), detail::DynamicPPState::h_susceptible.end(), tmpSusceptible);
     bool* susTMP;
-    cudaMalloc((void**)&susTMP, detail::DynamicPPState::h_numberOfStates * sizeof(bool));
-    cudaMemcpy(susTMP, tmpSusceptible, detail::DynamicPPState::h_numberOfStates * sizeof(bool), cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::susceptible, &susTMP, sizeof(bool*));
+    hipMalloc((void**)&susTMP, detail::DynamicPPState::h_numberOfStates * sizeof(bool));
+    hipMemcpy(susTMP, tmpSusceptible, detail::DynamicPPState::h_numberOfStates * sizeof(bool), hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::susceptible), &susTMP, sizeof(bool*));
 
     bool* tmpInfected = new bool[detail::DynamicPPState::h_infected.size()];
     std::copy(detail::DynamicPPState::h_infected.begin(), detail::DynamicPPState::h_infected.end(), tmpInfected);
 
-    cudaMalloc((void**)&infTMP, detail::DynamicPPState::h_infected.size() * sizeof(bool));
-    cudaMemcpy(infTMP, tmpInfected, detail::DynamicPPState::h_infected.size() * sizeof(bool), cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(detail::DynamicPPState::infected, &infTMP, sizeof(bool*));
+    hipMalloc((void**)&infTMP, detail::DynamicPPState::h_infected.size() * sizeof(bool));
+    hipMemcpy(infTMP, tmpInfected, detail::DynamicPPState::h_infected.size() * sizeof(bool), hipMemcpyHostToDevice);
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::infected), &infTMP, sizeof(bool*));
 
-    cudaMemcpyToSymbol(detail::DynamicPPState::firstInfectedState,
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::firstInfectedState),
         &detail::DynamicPPState::h_firstInfectedState,
         sizeof(detail::DynamicPPState::h_firstInfectedState));
-    cudaMemcpyToSymbol(detail::DynamicPPState::nonCOVIDDeadState,
+    hipMemcpyToSymbol(HIP_SYMBOL(detail::DynamicPPState::nonCOVIDDeadState),
         &detail::DynamicPPState::h_nonCOVIDDeadState,
         sizeof(detail::DynamicPPState::h_nonCOVIDDeadState));
-    cudaMemcpyToSymbol(
-        detail::DynamicPPState::deadState, &detail::DynamicPPState::h_deadState, sizeof(detail::DynamicPPState::h_deadState));
+    hipMemcpyToSymbol(HIP_SYMBOL(
+        detail::DynamicPPState::deadState), &detail::DynamicPPState::h_deadState, sizeof(detail::DynamicPPState::h_deadState));
 #endif
     return header;
 }
 
 HD unsigned DynamicPPState::getNumberOfStates() {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::DynamicPPState::numberOfStates;
 #else
     return detail::DynamicPPState::h_numberOfStates;
@@ -233,7 +233,7 @@ DynamicPPState::DynamicPPState(const std::string& name, unsigned progressionID_p
 }
 
 void HD DynamicPPState::gotInfected(uint8_t v) {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     state = detail::DynamicPPState::firstInfectedState;
 #else
     state = detail::DynamicPPState::h_firstInfectedState;
@@ -302,8 +302,8 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
     return false;
 }
 
-states::WBStates DynamicPPState::getWBState() const {
-#ifdef __CUDA_ARCH__
+states::WBStates HD DynamicPPState::getWBState() const {
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::DynamicPPState::WB[state];
 #else
     return detail::DynamicPPState::h_WB[state];
@@ -312,7 +312,7 @@ states::WBStates DynamicPPState::getWBState() const {
 
 HD char DynamicPPState::die(bool covid) {
     daysBeforeNextState = -1;
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     state = covid ? detail::DynamicPPState::deadState : detail::DynamicPPState::nonCOVIDDeadState;
     updateMeta();
     return state;
@@ -324,7 +324,7 @@ HD char DynamicPPState::die(bool covid) {
 #endif
 }
 bool HD DynamicPPState::isInfected() const {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::DynamicPPState::infected[state];
 #else
     return detail::DynamicPPState::h_infected[state];
@@ -333,7 +333,7 @@ bool HD DynamicPPState::isInfected() const {
 
 
 float HD DynamicPPState::getAccuracyPCR() const {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::DynamicPPState::accuracyPCR[state];
 #else
     return detail::DynamicPPState::h_accuracyPCR[state];
@@ -341,7 +341,7 @@ float HD DynamicPPState::getAccuracyPCR() const {
 }
 
 float HD DynamicPPState::getAccuracyAntigen() const {
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
     return detail::DynamicPPState::accuracyAntigen[state];
 #else
     return detail::DynamicPPState::h_accuracyAntigen[state];

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 #pragma once
 #include <iostream>
 #include "timeHandler.h"
@@ -57,7 +58,7 @@ namespace DetailedTestingOps {
     };
 
     template<typename PPState, typename LocationType>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -146,7 +147,7 @@ namespace DetailedTestingOps {
             }
         }
     }
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename PPState, typename LocationType>
     __global__ void flagLocationsDriver(TestingArguments<PPState, LocationType> a, unsigned numberOfAgents) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -155,7 +156,7 @@ namespace DetailedTestingOps {
 #endif
 
     template<typename PPState, typename LocationType>
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     __device__
 #endif
         void
@@ -279,7 +280,7 @@ namespace DetailedTestingOps {
             if (a.tracked == i) printf("\t Agent %d was not tested\n", i);
         }
     }
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     template<typename PPState, typename LocationType>
     __global__ void doTestingDriver(TestingArguments<PPState, LocationType> a, unsigned numberOfAgents) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -436,9 +437,9 @@ public:
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
 #pragma omp parallel for
         for (unsigned i = 0; i < numberOfAgents; i++) { DetailedTestingOps::flagLocations(i, a); }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         DetailedTestingOps::flagLocationsDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(a, numberOfAgents);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #endif
 
         //
@@ -448,9 +449,9 @@ public:
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
 #pragma omp parallel for
         for (unsigned i = 0; i < numberOfAgents; i++) { DetailedTestingOps::doTesting(i, a); }
-#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
         DetailedTestingOps::doTestingDriver<<<(numberOfAgents - 1) / 256 + 1, 256>>>(a, numberOfAgents);
-        cudaDeviceSynchronize();
+        hipDeviceSynchronize();
 #endif
 
         //

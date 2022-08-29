@@ -85,33 +85,33 @@ MultiBadMatrix::MultiBadMatrix(const parser::TransitionFormat& inputData) : Basi
 MultiBadMatrix::MultiBadMatrix(const std::string& fileName)
     : MultiBadMatrix(DECODE_JSON_FILE(fileName, parser::TransitionFormat)) {}
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
 MultiBadMatrix* MultiBadMatrix::upload() const {
     MultiBadMatrix* tmp = (MultiBadMatrix*)malloc(sizeof(MultiBadMatrix));
     tmp->numStates = numStates;
-    cudaMalloc((void**)&tmp->lengths, numStates * sizeof(LengthOfState));
-    cudaMemcpy(tmp->lengths, lengths, numStates * sizeof(LengthOfState), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&tmp->lengths, numStates * sizeof(LengthOfState));
+    hipMemcpy(tmp->lengths, lengths, numStates * sizeof(LengthOfState), hipMemcpyHostToDevice);
     NextStates* tmp2 = (NextStates*)malloc(numStates * sizeof(NextStates));
     memcpy(tmp2, transitions, numStates * sizeof(NextStates));
     for (unsigned i = 0; i < numStates; i++) {
-        cudaMalloc((void**)&tmp2[i].neutral, transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>));
-        cudaMemcpy(tmp2[i].neutral,
+        hipMalloc((void**)&tmp2[i].neutral, transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>));
+        hipMemcpy(tmp2[i].neutral,
             transitions[i].neutral,
             transitions[i].neutralCount * sizeof(thrust::pair<unsigned, float>),
-            cudaMemcpyHostToDevice);
+            hipMemcpyHostToDevice);
 
-        cudaMalloc((void**)&tmp2[i].bad, transitions[i].badCount * sizeof(thrust::pair<unsigned, float>));
-        cudaMemcpy(tmp2[i].bad,
+        hipMalloc((void**)&tmp2[i].bad, transitions[i].badCount * sizeof(thrust::pair<unsigned, float>));
+        hipMemcpy(tmp2[i].bad,
             transitions[i].bad,
             transitions[i].badCount * sizeof(thrust::pair<unsigned, float>),
-            cudaMemcpyHostToDevice);
+            hipMemcpyHostToDevice);
     }
-    cudaMalloc((void**)&tmp->transitions, numStates * sizeof(NextStates));
-    cudaMemcpy(tmp->transitions, tmp2, numStates * sizeof(NextStates), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&tmp->transitions, numStates * sizeof(NextStates));
+    hipMemcpy(tmp->transitions, tmp2, numStates * sizeof(NextStates), hipMemcpyHostToDevice);
     free(tmp2);
     MultiBadMatrix* dev;
-    cudaMalloc((void**)&dev, sizeof(MultiBadMatrix));
-    cudaMemcpy(dev, tmp, sizeof(MultiBadMatrix), cudaMemcpyHostToDevice);
+    hipMalloc((void**)&dev, sizeof(MultiBadMatrix));
+    hipMemcpy(dev, tmp, sizeof(MultiBadMatrix), hipMemcpyHostToDevice);
     free(tmp);
     return dev;
 }

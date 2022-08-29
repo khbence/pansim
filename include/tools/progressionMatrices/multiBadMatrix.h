@@ -41,7 +41,7 @@ public:
     explicit MultiBadMatrix(const parser::TransitionFormat& inputData);
     explicit MultiBadMatrix(const std::string& fileName);
 
-#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_HIP
     MultiBadMatrix* upload() const;
 #endif
 
