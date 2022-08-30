@@ -1,29 +1,24 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Set the project name to your project name, my project isn't very descriptive
-project(pansimProject CXX)
+set(SRC_LIBRARY "pansimLibrary")
+set(MAIN_BINARY "pansim")
+set(TEST_BINARY "testPansim")
+
+project(coreProject CXX)
 include(cmake/StandardProjectSettings.cmake)
-include(cmake/PreventInSourceBuilds.cmake)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CUDA_STANDARD 14)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(MAIN_BINARY "panSim")
-set(TEST_BINARY "testPanSim")
-# set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
+# include(cmake/PreventInSourceBuilds.cmake)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
 # target_compile_features(project_options INTERFACE cxx_std_17)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
-    if(ENABLE_BUILD_WITH_TIME_TRACE)
-        add_compile_definitions(project_options INTERFACE -ftime-trace)
-    endif()
+  option(ENABLE_BUILD_WITH_TIME_TRACE
+         "Enable -ftime-trace to generate time tracing .json files on clang"
+         OFF)
+  if(ENABLE_BUILD_WITH_TIME_TRACE)
+    add_compile_definitions(project_options INTERFACE -ftime-trace)
+  endif()
 endif()
 
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
@@ -49,115 +44,62 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" OFF)
+option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
-# Git version information (build time)
-set(GIT_VERSION "unknown")
-find_package(Git QUIET)
-if(GIT_FOUND)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe
-        OUTPUT_VARIABLE GIT_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    message(STATUS "Current program version is ${GIT_VERSION}")
+# Very basic PCH example
+option(ENABLE_PCH "Enable Precompiled Headers" OFF)
+if(ENABLE_PCH)
+  # This sets a global PCH parameter, each project will build its own PCH, which
+  # is a good idea if any #define's change
+  #
+  # consider breaking this out per project as necessary
+  target_precompile_headers(project_options INTERFACE <iostream> <vector>
+                            <string>)
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/version.h
-               @ONLY)
-
-# Preset simulation template types
-set(MovementPolicy
-    "RealMovement"
-    CACHE STRING "Type of the movement policy.")
-set_property(CACHE MovementPolicy PROPERTY STRINGS RealMovement DummyMovement NoMovement)
-set(TestingPolicy
-    "DetailedTesting"
-    CACHE STRING "Type of the testing policy.")
-set_property(CACHE TestingPolicy PROPERTY STRINGS NoTesting DetailedTesting)
-
-set(ClosurePolicy
-    "RuleClosure"
-    CACHE STRING "Type of the closure policy.")
-set_property(CACHE ClosurePolicy PROPERTY STRINGS NoClosure RuleClosure)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/configTypes.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/out/configTypes.h @ONLY)
-
-option(USE_GPU "Using CUDA-GPU if available" ON)
-
-if(USE_GPU)
-    find_package(CUDAToolkit)
-endif(USE_GPU)
-
-if(CUDAToolkit_FOUND AND USE_GPU)
-    include(cmake/mycudautils.cmake)
-    set(ARCHITECTURE
-        "AUTO"
-        CACHE STRING "Your target CUDA architecture")
-    select_cuda_architectures("${ARCHITECTURE}" ARCH_LIST)
-    message(STATUS "CUDA_ARCH: ${ARCH_LIST}")
-    set(CMAKE_CUDA_ARCHITECTURES
-        "${ARCH_LIST}"
-        CACHE STRING "CUDA architectures" FORCE)
-    # include(FindCUDA/select_compute_arch)
-    # CUDA_DETECT_INSTALLED_GPUS(INSTALLED_GPU_CCS_1)
-    # string(STRIP "${INSTALLED_GPU_CCS_1}" INSTALLED_GPU_CCS_2)
-    # string(REPLACE " " ";" INSTALLED_GPU_CCS_3 "${INSTALLED_GPU_CCS_2}")
-    # string(REPLACE "." "" CUDA_ARCH_LIST "${INSTALLED_GPU_CCS_3}")
-    # SET(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_LIST})
-
-    add_executable(${MAIN_BINARY} src/main.cpp)
-
-    function(CUDA_CONVERT_FLAGS EXISTING_TARGET)
-        get_property(
-            old_flags
-            TARGET ${EXISTING_TARGET}
-            PROPERTY INTERFACE_COMPILE_OPTIONS)
-        if(NOT "${old_flags}" STREQUAL "")
-            string(REPLACE ";" "," CUDA_flags "${old_flags}")
-            set_property(
-                TARGET ${EXISTING_TARGET}
-                PROPERTY
-                    INTERFACE_COMPILE_OPTIONS
-                    "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
-            )
-        endif()
-    endfunction()
-
-    message(STATUS "Using CUDA-GPU")
-    enable_language(CUDA)
-    cuda_convert_flags(project_warnings)
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --expt-extended-lambda")
-    set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    target_link_libraries(${MAIN_BINARY} PUBLIC CUDA::cudart)
-    add_compile_definitions(THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA)
-else()
-    add_executable(${MAIN_BINARY} src/main.cpp)
-    if(USE_GPU AND NOT CUDA_FOUND)
-        message(INFO "CUDA does not exists")
-    endif()
-    message(STATUS "Using CPU only")
+if(ENABLE_FUZZING)
+  message(
+    "Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html"
+  )
+  add_subdirectory(fuzz_test)
 endif()
 
-# find_package(Thrust REQUIRED CONFIG)
-find_package(OpenMP)
+option(ENABLE_UNITY "Enable Unity builds of projects" OFF)
+if(ENABLE_UNITY)
+  # Add for any project you want to apply unity builds for
+  set_target_properties(intro PROPERTIES UNITY_BUILD ON)
+endif()
 
-#if(CUDAToolkit_FOUND AND USE_GPU)
-#    thrust_create_target(Thrust HOST CPP DEVICE CUDA)
-#else()
-#    thrust_create_target(Thrust HOST CPP DEVICE OMP)
-#endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_definitions(THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA)
+find_package(OpenMP REQUIRED)
 
-target_include_directories(${MAIN_BINARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
-target_link_libraries(${MAIN_BINARY} PUBLIC project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX CUDA::curand)
-# target_include_directories(${MAIN_BINARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
+add_library(${SRC_LIBRARY})
+target_include_directories(${SRC_LIBRARY} PUBLIC include rapidjson/include
+                                                 parameterParser/include
+                                                 protocols/cytolog
+                                                 protocols/constsandutils)
+
+option(USE_OSMOSIS "Using the more accurate but 8* more expensive osmosis for diffusion" ON)
+if (USE_OSMOSIS)
+  target_compile_definitions(${SRC_LIBRARY} PRIVATE "OSMOSIS")
+endif ()
+
+add_executable(${MAIN_BINARY})
 
 include(src/CMakeLists.txt)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules (JEMALLOC jemalloc)
+
+pkg_search_module(JEMALLOC REQUIRED jemalloc)
+include_directories(${JEMALLOC_INCLUDE_DIRS})
+
+target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} OpenMP::OpenMP_CXX ${JEMALLOC_LIBRARIES})
+target_link_libraries(${MAIN_BINARY} PUBLIC project_options project_warnings ${JEMALLOC_LIBRARIES})
+
 if(ENABLE_TESTING)
-    enable_testing()
-    add_subdirectory(test)
+  add_subdirectory(test)
 endif()

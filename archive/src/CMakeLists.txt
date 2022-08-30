@@ -1,0 +1,11 @@
+include(${CMAKE_CURRENT_LIST_DIR}/agentData/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/IO/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/tools/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/policies/CMakeLists.txt)
+
+target_include_directories(${MAIN_BINARY} PUBLIC include)
+if(CUDAToolkit_FOUND AND USE_GPU)
+  get_target_property(libSources ${MAIN_BINARY} SOURCES)
+  set_source_files_properties(${libSources} PROPERTIES LANGUAGE CUDA)
+  set_target_properties(${MAIN_BINARY} PROPERTIES LANGUAGE CUDA)
+endif()

@@ -1,32 +1,21 @@
-.PHONY: buildCPU buildGPU dbuildBaseCPU dbuildCPU dbuildGPU drunCPU drunGPU format
+.PHONY: debug release rund runr
 
-buildCPU:
-	mkdir -p build;
-	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=OFF
-	cd build; make -j
+debug: 
+	cmake -E make_directory $(CURDIR)/debug
+	cmake -S $(CURDIR) -B $(CURDIR)/debug -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTING=ON
+	cmake --build $(CURDIR)/debug --parallel
 
-buildGPU:
-	mkdir -p build;
-	cd build; cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_GPU=ON
-	cd build; make -j
+release:
+	cmake -E make_directory $(CURDIR)/release
+	cmake -S $(CURDIR) -B $(CURDIR)/release -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTING=OFF
+	cmake --build $(CURDIR)/release --parallel
 
-runGPU: buildGPU
-	./
+rund: debug
+	./debug/pansim
 
-dbuildBaseCPU:
-	docker build . -f Dockerfile.baseCPU -t khbence/covid_ppcu:base_cpu
+runr: release
+	./release/pansim
 
-dbuildCPU:
-	docker build . -f Dockerfile.CPU -t khbence/covid_ppcu:cpu
-
-dbuildGPU:
-	docker build . -f Dockerfile.GPU -t khbence/covid_ppcu:gpu
-
-drunCPU: dbuildCPU
-	docker run --rm khbence/covid_ppcu:cpu
-
-drunGPU: dbuildGPU
-	docker run --rm khbence/covid_ppcu:gpu
-
-format:
-	docker run --rm --mount src=${CURDIR},target=/app,type=bind khbence/format
+unittest: debug
+	./debug/test/testPansim
+	
