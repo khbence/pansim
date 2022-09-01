@@ -75,17 +75,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenMP REQUIRED)
+add_subdirectory(json)
 
 add_library(${SRC_LIBRARY})
-target_include_directories(${SRC_LIBRARY} PUBLIC include rapidjson/include
-                                                 parameterParser/include
-                                                 protocols/cytolog
-                                                 protocols/constsandutils)
-
-option(USE_OSMOSIS "Using the more accurate but 8* more expensive osmosis for diffusion" ON)
-if (USE_OSMOSIS)
-  target_compile_definitions(${SRC_LIBRARY} PRIVATE "OSMOSIS")
-endif ()
 
 add_executable(${MAIN_BINARY})
 
@@ -97,7 +89,7 @@ pkg_check_modules (JEMALLOC jemalloc)
 pkg_search_module(JEMALLOC REQUIRED jemalloc)
 include_directories(${JEMALLOC_INCLUDE_DIRS})
 
-target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} OpenMP::OpenMP_CXX ${JEMALLOC_LIBRARIES})
+target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json ${JEMALLOC_LIBRARIES})
 target_link_libraries(${MAIN_BINARY} PUBLIC project_options project_warnings ${JEMALLOC_LIBRARIES})
 
 if(ENABLE_TESTING)
