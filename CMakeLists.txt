@@ -70,7 +70,7 @@ if(ENABLE_UNITY)
   set_target_properties(intro PROPERTIES UNITY_BUILD ON)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -90,6 +90,7 @@ pkg_search_module(JEMALLOC REQUIRED jemalloc)
 include_directories(${JEMALLOC_INCLUDE_DIRS})
 
 target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json ${JEMALLOC_LIBRARIES})
+target_include_directories(${SRC_LIBRARY} PUBLIC cxxopts/include)
 target_link_libraries(${MAIN_BINARY} PUBLIC project_options project_warnings ${JEMALLOC_LIBRARIES})
 
 if(ENABLE_TESTING)
