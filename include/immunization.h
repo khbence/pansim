@@ -104,7 +104,7 @@ public:
             "Order of immunization (starting at 1, 0 to skip) for agents in different categories health workers, nursery home "
             "worker/resident, 60+, 18-60 with underlying condition, essential worker, 18+, 60+underlying, school teachers, "
             "12-18 children, 5-12 children",
-            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7,0"))
+            cxxopts::value<std::string>()->default_value("1,2,3,4,5,6,0,0,7,8"))
             ("vaccinationGroupLevel",
             "Immunization level in different groups in the order listed in immunizationOrder's description",
             cxxopts::value<std::string>()->default_value("0.9,0.85,0.9,0.82,0.8,0.75,0.8,0.67,0.4,0.2")) //75%: "0.9,0.85,0.9,0.89,0.95,0.85,0.8,0.88,0.6,0.4"

@@ -12,7 +12,7 @@ import pandas as pd
 tmpdirPath = '/home/reguly/pansim/tmpdirs'
 panSimPath = '/home/reguly/pansim/'
 submitScriptPath = tmpdirPath+'/submit_gpu.sh'
-binaryPath = panSimPath+'/build_a100/panSim'
+binaryPath = panSimPath+'/build_v100/panSim'
 
 def is_number(s):
     if isinstance(s,dict):
@@ -93,13 +93,24 @@ class Instance:
         #parse results
         self.completed = True
         for i in range(0,self.nruns):
-            self.results[i] = pd.DataFrame(uf.std_txt_reader(self.workdir+f'/result_{i+1}.txt'))
-        result = self.results[0]
-        for i in range(1,self.nruns):
-            result = pd.concat((result, self.results[i]))
-        by_row_index = result.groupby(result.index)
-        self.result_avg = by_row_index.mean()
-        self.result_std = by_row_index.std()
+            try:
+                self.results[i] = pd.DataFrame(uf.std_txt_reader(self.workdir+f'/result_{i+1}.txt'))
+            except:
+                print(f'Error, {self.workdir} run {i} crashed')
+        result = int(0)
+        for res in self.results:
+            if isinstance(result, int):
+                result = self.results[res]
+            else:
+                result = pd.concat((result, self.results[res]))
+        if isinstance(result, int):
+            print(f'Error, {self.workdir} batch had no valid runs')
+            self.result_avg = pd.DataFrame()
+            self.result_std = pd.DataFrame()
+        else:
+            by_row_index = result.groupby(result.index)
+            self.result_avg = by_row_index.mean()
+            self.result_std = by_row_index.std()
 
 class Manager:
     def __init__(self, globalConfig) -> None:

@@ -11,7 +11,8 @@ private:
     double k;
     unsigned dumpToFile = 0;
     double c0_offset, trunc;
-    int d_offset, d_peak_offset;
+    std::vector<int> d_offset;
+    int d_peak_offset;
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
@@ -95,16 +96,16 @@ public:
             cxxopts::value<std::string>()->default_value(""))
             ("d_offset",
             "seasonality day offset ",
-            cxxopts::value<int>()->default_value("-5"))
+            cxxopts::value<std::string>()->default_value("-5"))
             ("d_peak_offset",
             "seasonality peak day offset ",
             cxxopts::value<int>()->default_value("0"))
-            ("c0",
-            "seasonality c0 value ",
-            cxxopts::value<double>()->default_value("3.08"))
             ("trunc",
             "seasonality truncation value for Omicron ",
-            cxxopts::value<double>()->default_value("0.5"));
+            cxxopts::value<double>()->default_value("0.5"))
+            ("c0",
+            "seasonality c0 value ",
+            cxxopts::value<double>()->default_value("3.08"));
     }
 
     void finalize() {
@@ -118,7 +119,7 @@ protected:
         this->k = result["infectionCoefficient"].as<double>();
         dumpToFile = result["dumpLocationInfections"].as<unsigned>();
         dumpDirectory = result["dumpLocationInfectiousList"].as<std::string>();
-        d_offset = result["d_offset"].as<int>();
+        d_offset = splitStringInt(result["d_offset"].as<std::string>(), ',');
         d_peak_offset = result["d_peak_offset"].as<int>();
         c0_offset = result["c0"].as<double>();
         trunc = result["trunc"].as<double>();
@@ -455,11 +456,13 @@ public:
         double trunc_val = 0.5;
 
         if (simDay > 250 && simDay < 450) {
-            d += d_offset;
+            d += d_offset[0];
             d_peak += d_peak_offset;
             c0 = c0_offset;
         } else if (simDay > 600) {
             trunc_val = trunc;
+            if (d_offset.size()>0)
+                d += d_offset[1];
         }
         int d_mod = d % 366;
         if (d_mod > 366 / 2)
@@ -514,8 +517,8 @@ public:
         //
         // Step 2 - calculate infection ratios, based on density of infected people
         //
-        double tmpK = this->k;
-        double seasonality = seasonalityMultiplier(simTime);
+        float tmpK = this->k;
+        float seasonality = seasonalityMultiplier(simTime);
         //if (simTime.getStepsUntilMidnight()==1) printf("%g\n", seasonality);
         thrust::transform(thrust::make_zip_iterator(thrust::make_tuple(fullInfectedCounts.begin(),
                               locationListOffsets.begin(),
@@ -529,7 +532,7 @@ public:
                 unsigned offset0 = thrust::get<1>(tuple);
                 unsigned offset1 = thrust::get<2>(tuple);
                 unsigned num_agents = offset1 - offset0;
-                if (numInfectedAgentsPresent == 0.0) { return 0.0; }
+                if (numInfectedAgentsPresent == 0.0f) { return 0.0f; }
                 float densityOfInfected = numInfectedAgentsPresent / num_agents;
                 /*float y =
                     1.0
@@ -539,7 +542,7 @@ public:
                 y = parTMP.a * y + parTMP.b;
                 y *= thrust::get<3>(tuple);// Weighted by infectiousness
                 return y / (60.0 * 24.0 / static_cast<float>(timeStep));*/
-                return 1.0 - exp(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<float>(timeStep));
+                return 1.0f - expf(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<float>(timeStep));
             });
 
         //
