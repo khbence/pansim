@@ -35,7 +35,7 @@ class uniqueIDProvider:
 
 
 class Instance:
-    def __init__(self, nruns, globalConfig, parameters, manager) -> None:
+    def __init__(self, nruns, globalConfig, parameters, manager, read=False) -> None:
         self.completed = False
         self.globalConfig = globalConfig
         self.parameters = parameters
@@ -45,12 +45,19 @@ class Instance:
         self.manager = manager
         self.nruns = nruns
         self.results = {}
+        self.read = read
 
     def prepare(self) -> None:
         
         #create tmpdir
         if os.path.exists(self.workdir):
-            print('Warning, path '+self.workdir+' already exists')
+            if self.read:
+                print('Path '+self.workdir+' already exists, reading in results')
+                #TODO: check if it's the same run...
+                self.read_results()
+                return
+            else:    
+                print('Warning, path '+self.workdir+' already exists')
         else:
             os.mkdir(self.workdir)
         
@@ -91,6 +98,9 @@ class Instance:
         while not (re.search(r'\b'+str(self.slurmID)+r'\b',str(a.stdout)) is None):
             time.sleep(5)
             a = subprocess.run(['squeue'],capture_output=True)
+        self.read_results()
+
+    def read_results(self) -> None:
         #parse results
         self.completed = True
         for i in range(0,self.nruns):
