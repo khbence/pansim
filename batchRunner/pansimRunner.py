@@ -8,6 +8,7 @@ import json
 from tokenize import String
 import util_funs as uf
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
 
 tmpdirPath = '/home/reguly/pansim/tmpdirs'
 panSimPath = '/home/reguly/pansim/'
@@ -162,17 +163,16 @@ class Manager:
         instance = Instance(nruns, self.globalArgs, parameters, self)
         return instance
 
-    def runBatch(self, nruns, parameters):
+    def runBatch(self, nruns, poolsize, parameters):
         batchsize = len(parameters)
         threads = []
         instances = []
         print(f'Starting batch of {batchsize}')
+        executor = ThreadPoolExecutor(poolsize)
         for i in range(0,batchsize):
             instances = instances + [self.createInstance(nruns,parameters[i])]
-            threads = threads + [threading.Thread(target=instances[i].run)]
-            threads[i].start()
-        for i in range(0,batchsize):
-            threads[i].join()
+            executor.submit(instances[i].run)
+        executor.shutdown(wait=True)
         return instances
 
 
@@ -188,7 +188,7 @@ def main():
     # x = threading.Thread(target=a.run)
     # x.start()
     # x.join()
-    insts = manager.runBatch(2,[{
+    insts = manager.runBatch(2,2,[{
         '--closures':{'rules': [ { 
       'name': 'sept_23_nov_11', 
       'conditionType': 'afterDays', 
