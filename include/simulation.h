@@ -520,9 +520,9 @@ public:
                                     (thrust::get<1>(tup).infectedTimestamp > timestamp - 24 * 60 / timeStepL &&
                                      thrust::get<1>(tup).infectedTimestamp <= timestamp);
                             });
-        stats.push_back((unsigned)(infectedHCWorker*100)/healthcareWorkerCount);
+        stats.push_back((unsigned)(infectedHCWorker*100)/MAX(1,healthcareWorkerCount));
         stats.push_back((unsigned)exposedHCWorker);
-        std::cout << (unsigned)(infectedHCWorker*100)/healthcareWorkerCount << "\t";
+        std::cout << (unsigned)(infectedHCWorker*100)/MAX(1,healthcareWorkerCount) << "\t";
         std::cout << (unsigned)exposedHCWorker << "\t";
 
         //Number of people infected with different variants
