@@ -1,4 +1,7 @@
 {
+    "cmake.configureSettings": {
+        "USE_GPU": "OFF"
+    },
     "files.associations": {
         "any": "cpp",
         "array": "cpp",

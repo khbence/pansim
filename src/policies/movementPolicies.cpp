@@ -1,7 +1,1 @@
-#include "movementPolicies.h"
-
-namespace policies {
-namespace movement {
-
-}
-}
+#include "movementPolicies.hpp"
