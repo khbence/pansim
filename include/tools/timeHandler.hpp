@@ -6,9 +6,8 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "customExceptions.h"
-#include "timeDay.h"
-#include "datatypes.h"
+#include "timeDay.hpp"
+#include "datatypes.hpp"
 
 class TimeDay;
 class TimeDayDuration;

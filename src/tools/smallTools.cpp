@@ -1,4 +1,4 @@
-#include "smallTools.h"
+#include "smallTools.hpp"
 
 namespace smallTools {
 std::filesystem::path createRootDirs(std::string_view rawPath) {

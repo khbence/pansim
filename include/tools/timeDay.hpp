@@ -1,6 +1,6 @@
 #pragma once
-#include "timeHandler.h"
-#include "datatypes.h"
+#include "timeHandler.hpp"
+#include "datatypes.hpp"
 
 class Timehandler;
 class TimeDayDuration;

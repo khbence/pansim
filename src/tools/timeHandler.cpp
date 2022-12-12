@@ -1,4 +1,5 @@
-#include "timeHandler.h"
+#include "timeHandler.hpp"
+#include "customExceptions.hpp"
 
 // + operators
 Timehandler Timehandler::operator+(unsigned steps) const {
