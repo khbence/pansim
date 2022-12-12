@@ -68,13 +68,16 @@ add_executable(${MAIN_BINARY})
 
 include(src/CMakeLists.txt)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules (JEMALLOC jemalloc)
+include(FetchContent)
+FetchContent_Declare(
+    fmtfetch
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 9.1.0
+)
 
-pkg_search_module(JEMALLOC REQUIRED jemalloc)
-include_directories(${JEMALLOC_INCLUDE_DIRS})
+FetchContent_MakeAvailable(fmtfetch)
 
-target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} Thrust nlohmann_json::nlohmann_json ${JEMALLOC_LIBRARIES})
+target_link_libraries(${SRC_LIBRARY} PUBLIC project_options project_warnings ${FILE_FORMAT_LIB} Thrust nlohmann_json::nlohmann_json fmt::fmt)
 target_include_directories(${SRC_LIBRARY} PUBLIC cxxopts/include)
 
 if(ENABLE_TESTING)

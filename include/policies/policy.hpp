@@ -12,6 +12,7 @@ protected:
 
 public:
     ParallelStrategy getParallelStrategy() const;
+    virtual ~Policy() = default;
 };
 
 class PolicyFactory {};

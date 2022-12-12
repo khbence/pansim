@@ -1,8 +1,0 @@
-FROM archlinux
-
-RUN pacman -Syyu --noconfirm
-RUN pacman -Sy --noconfirm git base-devel make
-RUN pacman -Sy --noconfirm gcc cmake gtest gdb valgrind
-RUN pacman -Sy --noconfirm libffi
-
-RUN useradd -m -d /home/nonroot -u 1000 nonroot && chown -R nonroot /home/nonroot
