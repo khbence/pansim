@@ -1,6 +1,5 @@
 #include "agentMeta.hpp"
-#include "customExceptions.h"
-#include "JSONDecoder.h"
+#include "customExceptions.hpp"
 #include <limits>
 #include <algorithm>
 

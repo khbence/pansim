@@ -1,7 +1,7 @@
 #pragma once
-#include "globalStates.h"
+#include "globalStates.hpp"
 #include <string>
-#include "progressionMatrices.h"
+#include "progressionMatrices.hpp"
 #include "progressionMatrixFormat.h"
 #include "agentMeta.h"
 #include "agentsList.h"

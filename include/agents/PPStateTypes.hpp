@@ -1,5 +1,5 @@
 #pragma once
-#include "globalStates.h"
+#include "globalStates.hpp"
 #include "progressionMatrices.h"
 #include <string>
 

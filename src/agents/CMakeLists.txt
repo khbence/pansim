@@ -8,3 +8,5 @@ target_sources(
   PRIVATE ${CMAKE_CURRENT_LIST_DIR}/PPStateTypes.cpp)
 
 target_include_directories(${SRC_LIBRARY} PUBLIC include/agents)
+
+include(${CMAKE_CURRENT_LIST_DIR}/progressionMatrices/CMakeLists.txt)

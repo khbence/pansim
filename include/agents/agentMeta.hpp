@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include "nlohmann/json.hpp"
-#include "datatypes.h"
+#include "datatypes.hpp"
 
 class BasicAgentMeta {
     class AgeInterval {

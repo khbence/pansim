@@ -1,12 +1,12 @@
 #pragma once
 #include <string>
-#include "agentTypesFormat.h"
+#include "agentsFormat.hpp"
 #include <vector>
-#include "globalStates.h"
-#include "timeHandler.h"
-#include "timeDay.h"
+#include "globalStates.hpp"
+#include "timeHandler.hpp"
+#include "timeDay.hpp"
 #include "unordered_map"
-#include "datatypes.h"
+#include "datatypes.hpp"
 
 class AgentTypeList {
 public:
