@@ -10,14 +10,14 @@
 	"dockerFile": "../Dockerfile.devel",
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-	
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-vscode.cpptools-extension-pack",
-		"ms-vscode.cmake-tools",
-		"github.copilot"
-	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack",
+				"github.copilot"
+			]
+		}
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
