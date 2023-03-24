@@ -77,10 +77,10 @@ public:
         s = new config::Simulation_t(_initResult);
     }
 
-    std::vector<std::seed_seq::result_type> runForDayInMatlab(std::string *options, size_t n)
+    std::vector<std::seed_seq::result_type> runForDay(std::string *options, size_t n)
     {
         if (!_isInitialized) {
-            mexErrMsgTxt("Cannot run uninitialized simulation... Initialize it first.");
+            printf("Cannot run uninitialized simulation... Initialize it first.");
             return std::vector<unsigned>();
         }
 

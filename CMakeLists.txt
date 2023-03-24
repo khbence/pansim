@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(MAIN_BINARY "panSim")
 set(TEST_BINARY "testPanSim")
+set(MEX_LIB "mexPanSim")
+
 # set(CUB_DIR, "${CMAKE_CURRENT_LIST_DIR}/cub")
 
 # Link this 'library' to set the c++ standard / compile-time options requested
@@ -90,6 +92,9 @@ if(USE_GPU)
     find_package(CUDAToolkit)
 endif(USE_GPU)
 
+find_package(Matlab REQUIRED)
+matlab_add_mex(NAME ${MEX_LIB} SRC matlab/cpp_example_mex.cpp)
+
 if(CUDAToolkit_FOUND AND USE_GPU)
     include(cmake/mycudautils.cmake)
     set(ARCHITECTURE
@@ -135,7 +140,11 @@ if(CUDAToolkit_FOUND AND USE_GPU)
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr --expt-extended-lambda")
     set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     set_target_properties(${MAIN_BINARY} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    target_link_libraries(${MAIN_BINARY} PUBLIC CUDA::cudart)
+    target_link_libraries(${MAIN_BINARY} CUDA::cudart)
+
+    set_target_properties(${MEX_LIB} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    set_target_properties(${MEX_LIB} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_link_libraries(${MEX_LIB} CUDA::cudart)
 else()
     add_executable(${MAIN_BINARY} src/main.cpp)
     if(USE_GPU AND NOT CUDA_FOUND)
@@ -155,13 +164,17 @@ find_package(OpenMP)
 
 
 target_include_directories(${MAIN_BINARY} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
+target_include_directories(${MEX_LIB} PUBLIC rapidjson/include cxxopts/include cmake/config/out)
 #target_link_libraries(${MAIN_BINARY} PUBLIC project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX CUDA::curand)
 if(CUDAToolkit_FOUND AND USE_GPU)
   add_compile_definitions(THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA)
-  target_link_libraries(${MAIN_BINARY} PUBLIC project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX CUDA::curand)
+  target_link_libraries(${MAIN_BINARY} project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX CUDA::curand)
+  target_link_libraries(${MEX_LIB} project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX CUDA::curand)
 else()
   add_compile_definitions(THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP)
-  target_link_libraries(${MAIN_BINARY} PUBLIC project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
+  target_link_libraries(${MAIN_BINARY} project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
+  target_link_libraries(${MEX_LIB} project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
+  include_directories(/home/shared/software/cuda/11.6/include/)
 endif()
 # target_include_directories(${MAIN_BINARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 

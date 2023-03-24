@@ -3,11 +3,11 @@ function run_cpp()
     dir = fileparts(mfilename('fullpath'));
     %if ~isequal(fileparts(which('example_mex')), dir)
         % Compile the mex
-        cwd = cd(dir);
-        cleanup_obj = onCleanup(@() cd(cwd));
-        fprintf('Compiling example_mex\n');
-        mex cpp_example_mex.cpp
-    %end
+    %     cwd = cd(dir);
+    %     cleanup_obj = onCleanup(@() cd(cwd));
+    %     fprintf('Compiling example_mex\n');
+    %     mex cpp_example_mex.cpp
+    % %end
     
     % Use the standard interface
     % This interface can be used for any mex interface function using the
@@ -18,6 +18,7 @@ function run_cpp()
     % The standard interface avoids the need to write a specific interface
     % class for each mex file.
     fprintf('Using the standard interface\n');
+    [dir '/cpp_example_mex']
     obj = mex_interface_cpp(str2fun([dir '/cpp_example_mex'])); % str2fun allows us to use the full path, so the mex need not be on our path
     
     inp_params = ["opt1", "opt2", "opt3"];
