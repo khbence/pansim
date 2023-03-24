@@ -13,6 +13,43 @@
 #include "immunization.h"
 #include "smallTools.h"
 
+cxxopts::Options defineProgramParameters() {
+    cxxopts::Options options("covid", "An agent-based epidemic simulator");
+    options.add_options()("w,weeks", "Length of simulation in weeks", cxxopts::value<unsigned>()->default_value("12"))(
+        "t,deltat", "Length of timestep in minutes", cxxopts::value<unsigned>()->default_value("10"))(
+        "n,numagents", "Number of agents", cxxopts::value<int>()->default_value("-1"))(
+        "N,numlocs", "Number of dummy locations", cxxopts::value<int>()->default_value("-1"))("P,progression",
+        "Path to the config file for the progression matrices.",
+        cxxopts::value<std::string>()->default_value(
+            "inputConfigFiles" + separator() + "progressions" + separator() + "transition_config.json"))("a,agents",
+        "Agents file, for all human being in the experiment.",
+        cxxopts::value<std::string>()->default_value("inputRealExample" + separator() + "agents.json"))("A,agentTypes",
+        "List and schedule of all type fo agents.",
+        cxxopts::value<std::string>()->default_value("inputConfigFiles" + separator() + "agentTypes.json"))("l,locations",
+        "List of all locations in the simulation.",
+        cxxopts::value<std::string>()->default_value("inputRealExample" + separator() + "locations.json"))("L,locationTypes",
+        "List of all type of locations",
+        cxxopts::value<std::string>()->default_value("inputConfigFiles" + separator() + "locationTypes.json"))("p,parameters",
+        "List of all general parameters for the simulation except the "
+        "progression data.",
+        cxxopts::value<std::string>()->default_value("inputConfigFiles" + separator() + "parameters.json"))("c,configRandom",
+        "Config file for random initialization.",
+        cxxopts::value<std::string>()->default_value("inputConfigFiles" + separator() + "configRandom.json"))("closures",
+        "List of closure rules.",
+        cxxopts::value<std::string>()->default_value("inputConfigFiles" + separator() + "closureRules.json"))("r,randomStates",
+        "Change the states from the agents file with the configRandom file's "
+        "stateDistribution.")("outAgentStat",
+        "name of the agent stat output file, if not set there will be no print",
+        cxxopts::value<std::string>()->default_value(""))(
+        "diags", "level of diagnositcs to print", cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))));
+
+        
+    options.add_options()("h,help", "Print usage");
+    options.add_options()("version", "Print version");
+
+    return options;
+}
+
 template<typename PositionType,
     typename TypeOfLocation,
     typename PPState,
@@ -84,6 +121,8 @@ public:
     Timehandler simTime;
     thrust::device_vector<bool> healthcareWorker;
     unsigned healthcareWorkerCount;
+    std::vector<int> totalHospitalizations;
+    unsigned dueWithCOVID;
 
     friend class MovementPolicy<Simulation>;
     friend class InfectionPolicy<Simulation>;
@@ -108,7 +147,13 @@ public:
             cxxopts::value<unsigned>()->default_value("2"))
             ("startDate",
             "days into the year the simulation starts with (Jan 1 is 0) ",
-            cxxopts::value<unsigned>()->default_value("267"));
+            cxxopts::value<unsigned>()->default_value("267"))
+            ("totalHospitalizations",
+            "number of agents hospitalized every day for any reason",
+            cxxopts::value<std::string>()->default_value("inputConfigFiles/dailyHospitalizationTargets.txt"))
+            ("dueWithCOVID",
+            "total hospitalization target should be reached with 0 - unrelated+due to COVID, or 1 - unrelated+with COVID",
+            cxxopts::value<unsigned>()->default_value("0"));
 
         InfectionPolicy<Simulation>::addProgramParameters(options);
         MovementPolicy<Simulation>::addProgramParameters(options);
@@ -124,6 +169,36 @@ public:
         auto& agentStats = agents->agentStats;
         auto& agentMeta = agents->agentMetaData;
         unsigned timestamp = simTime.getTimestamp();
+
+        //for target unrelated Hospitalizations we need to count up those in hospital due to COVID or with COVID
+        unsigned inHospitalWithCovid;
+        if (dueWithCOVID == 0) { //Due to COVID, count up I5_h, I6_h, R_h
+            inHospitalWithCovid = thrust::count_if(ppstates.begin(), ppstates.end(), []HD(PPState state) {
+                    return (state.getStateIdx() >=6 && state.getStateIdx() <=8); //In hospital due to COVID
+            });
+        } else {
+            //Number of people in hospital with active infection
+            unsigned hospitalTypeLocal = hospitalType;
+            inHospitalWithCovid = thrust::count_if(thrust::make_zip_iterator(
+                thrust::make_tuple(ppstates.begin(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.begin()), agentStats.begin())),
+                                                thrust::make_zip_iterator(
+                thrust::make_tuple(ppstates.end(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.end()), agentStats.end())),
+                [hospitalTypeLocal, timestamp] HD (thrust::tuple<PPState, unsigned, AgentStats> tup) {
+                    return (thrust::get<0>(tup).isInfected() && 
+                            thrust::get<1>(tup)==hospitalTypeLocal &&
+                            !(thrust::get<0>(tup).getWBState() < states::WBStates::S && timestamp > 0 && thrust::get<2>(tup).hospitalizedUntilTimestamp == timestamp)); //not discharged today
+                    });
+        }
+
+        float probabilityMul = 0.0f;
+        unsigned simDay = simTime.getTimestamp()/simTime.getStepsPerDay();
+        if (simDay < totalHospitalizations.size()) {
+            //Probabilities set up based on 2019 statistics of average daily hospital occupancy of 48000
+            //need to weight this probability so COVID+non-COVID gives desired target
+            unsigned targetHospitalized = std::max(0.0, double(totalHospitalizations[simDay]) - double(inHospitalWithCovid)*(9730000.0/179500.0));
+            probabilityMul = float(targetHospitalized)/48000.0;
+            // printf("%d %g\n", simDay, probabilityMul);
+        }
         unsigned tracked = locs->tracked;
         thrust::for_each(
             thrust::make_zip_iterator(thrust::make_tuple(
@@ -132,7 +207,7 @@ public:
                 agentMeta.end(),
                 agentStats.end(),
                 thrust::make_counting_iterator<unsigned>(0) + ppstates.size())),
-            [timestamp, tracked, timeStep] HD(thrust::tuple<PPState&, AgentMeta&, AgentStats&, unsigned> tup) {
+            [timestamp, tracked, timeStep, probabilityMul] HD(thrust::tuple<PPState&, AgentMeta&, AgentStats&, unsigned> tup) {
                 auto& ppstate = thrust::get<0>(tup);
                 auto& meta = thrust::get<1>(tup);
                 auto& agentStat = thrust::get<2>(tup);
@@ -292,7 +367,9 @@ public:
                 //
 
                 // If already dead, or in hospital (due to COVID or non-COVID), return
-                if (ppstate.getWBState() == states::WBStates::S || timestamp < agentStat.hospitalizedUntilTimestamp) return;
+                if (ppstate.getWBState() == states::WBStates::D ||
+                    ppstate.getWBState() == states::WBStates::S ||
+                    timestamp < agentStat.hospitalizedUntilTimestamp) return;
 
 
                 if (RandomGenerator::randomReal(1.0) < suddenDeathProbs[!sex * 7 + ageGroup] && false) {
@@ -311,7 +388,14 @@ public:
                 //
                 // Random hospitalization
                 //
-                double probability = randomHospProbs[type * 4 * 7 + !sex * 7 + ageGroup];
+                //                                        2020   2021     2022       2023
+                int hospitalOccupancyYearlyMultDay[] = {99, 99+365, 99+2*365, 99+3*365};
+                double hospitalOccupancyYearlyMult[] = {0.82, 0.67, 0.9, 0.9};
+                int day = timestamp / (24 * 60 / timeStep);
+                int d = 0;
+                while (day > hospitalOccupancyYearlyMultDay[d] && d < 4) d++;
+
+                double probability = randomHospProbs[type * 4 * 7 + !sex * 7 + ageGroup] * (probabilityMul>0.0f ? probabilityMul : hospitalOccupancyYearlyMult[d]);
                 if (RandomGenerator::randomReal(1.0) < probability) {
                     // Got hospitalized
                     // Length;
@@ -401,7 +485,7 @@ public:
                 auto agentStat = thrust::get<1>(tup);
                 auto diagnosed = thrust::get<2>(tup);
                 if (ppstate.getWBState() != states::WBStates::D &&// avoid double-counting with COVID
-                    ppstate.getWBState() != states::WBStates::S && diagnosed == false
+                    ppstate.getWBState() != states::WBStates::S //&& diagnosed == false with COVID
                     && timestamp < agentStat.hospitalizedUntilTimestamp)
                     return true;
                 else
@@ -584,6 +668,20 @@ public:
 
         healthcareWorkerCount = thrust::count(healthcareWorker.begin(),healthcareWorker.end(),true);
     }
+
+    void setupHospitalizations(const cxxopts::ParseResult& result) {
+        dueWithCOVID = result["dueWithCOVID"].as<unsigned>();
+        std::string countStr = result["totalHospitalizations"].as<std::string>();
+        std::ifstream t(countStr.c_str());
+        std::string buffer;
+
+        while(std::getline(t, buffer)) {
+            if (buffer.length()==0 || buffer.at(0) == '#')
+                continue;
+            totalHospitalizations = splitStringInt(buffer, ',');
+        }
+    }
+
 public:
     explicit Simulation(const cxxopts::ParseResult& result)
         : timeStep(result["deltat"].as<decltype(timeStep)>()),
@@ -595,6 +693,7 @@ public:
         infectiousnessMultiplier = splitStringFloat(result["infectiousnessMultiplier"].as<std::string>(),',');
         diseaseProgressionScaling = splitStringFloat(result["diseaseProgressionScaling"].as<std::string>(),',');
         diseaseProgressionDeathScaling = splitStringFloat(result["diseaseProgressionDeathScaling"].as<std::string>(),',');
+        setupHospitalizations(result);
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
         TestingPolicy<Simulation>::initializeArgs(result);
@@ -673,6 +772,41 @@ public:
                 if (variantCounts[variant]>0) InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, variant);
             ++simTime;
         }
+        agents->printAgentStatJSON(outAgentStat);
+        InfectionPolicy<Simulation>::finalize();
+    }
+
+    std::vector<unsigned> runForDay(int argc, char **args) {
+        std::vector<unsigned> variantCounts;
+        
+        PROFILE_FUNCTION();
+
+        auto stats = refreshAndPrintStatistics(simTime);
+        ClosurePolicy<Simulation>::midnight(simTime, timeStep, stats);
+        MovementPolicy<Simulation>::planLocations(simTime, timeStep);
+        variantCounts = countVariantCases(); //TODO: we do this multiple times
+
+        unsigned stepsPerDay = simTime.getStepsPerDay();
+        for (int i = 0; i < stepsPerDay; i++) {
+            MovementPolicy<Simulation>::movement(simTime, timeStep);
+            ClosurePolicy<Simulation>::step(simTime, timeStep);
+            for (int variant = 0; variant < infectiousnessMultiplier.size(); variant++)
+                if (variantCounts[variant]>0) InfectionPolicy<Simulation>::infectionsAtLocations(simTime, timeStep, variant);
+            ++simTime;
+            
+        }
+        BEGIN_PROFILING("midnight")
+        if (simTime.getTimestamp() > 0) TestingPolicy<Simulation>::performTests(simTime, timeStep);
+        if (simTime.getTimestamp() > 0) updateAgents(simTime);// No disease progression at launch
+        immunization->update(simTime, timeStep);
+        if (enableOtherDisease) otherDisease(simTime, timeStep);
+        stats = refreshAndPrintStatistics(simTime);
+        END_PROFILING("midnight")
+
+        return stats;
+    }
+    
+    void finalize() {
         agents->printAgentStatJSON(outAgentStat);
         InfectionPolicy<Simulation>::finalize();
     }

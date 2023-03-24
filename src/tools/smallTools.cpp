@@ -15,14 +15,14 @@ std::vector<double> splitStringDouble(std::string probsString, char sep) {
     for (char i; ss >> i;) {
         arg.push_back(i);
         if (ss.peek() == sep) {
-            if (arg.length() > 0 && isdigit(arg[0])) {
+            if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
                 params.push_back(atof(arg.c_str()));
                 arg.clear();
             }
             ss.ignore();
         }
     }
-    if (arg.length() > 0 && isdigit(arg[0])) {
+    if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
         params.push_back(atof(arg.c_str()));
         arg.clear();
     }
@@ -37,7 +37,7 @@ std::vector<float> splitStringFloat(std::string probsString, char sep) {
     for (char i; ss >> i;) {
         arg.push_back(i);
         if (ss.peek() == sep || ss.peek() == '\n') {
-            if (arg.length() > 0 && isdigit(arg[0])) {
+            if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
                 params.push_back(atof(arg.c_str()));
                 arg.clear();
             }
@@ -45,7 +45,7 @@ std::vector<float> splitStringFloat(std::string probsString, char sep) {
             if (ss.peek() == '\n') break;
         }
     }
-    if (arg.length() > 0 && isdigit(arg[0])) {
+    if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
         params.push_back(atof(arg.c_str()));
         arg.clear();
     }
@@ -59,7 +59,7 @@ std::vector<int> splitStringInt(std::string probsString, char sep) {
     for (char i; ss >> i;) {
         arg.push_back(i);
         if (ss.peek() == sep || ss.peek() == '\n') {
-            if (arg.length() > 0 && isdigit(arg[0])) {
+            if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
                 params.push_back(atoi(arg.c_str()));
                 arg.clear();
             }
@@ -67,7 +67,7 @@ std::vector<int> splitStringInt(std::string probsString, char sep) {
             if (ss.peek() == '\n') break;
         }
     }
-    if (arg.length() > 0 && isdigit(arg[0])) {
+    if (arg.length() > 0 && (isdigit(arg[0]) || arg[0] == '-')) {
         params.push_back(atoi(arg.c_str()));
         arg.clear();
     }

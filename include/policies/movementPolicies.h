@@ -282,8 +282,8 @@ namespace RealMovementOps {
                         a.workType,
                         0,
                         nullptr);
-                    // if not at workplace, move home, but allow movement later
-                    if (a.agentLocationsPtr[i] != workplace)
+                    // if not at workplace, or workplace is closed, move home, but allow movement later if not closed
+                    if (a.agentLocationsPtr[i] != workplace || a.locationStatesPtr[workplace] == false) {
                         a.agentLocationsPtr[i] = RealMovementOps::findActualLocationForType(i,
                             a.homeType,
                             a.locationOffsetPtr,
@@ -294,6 +294,11 @@ namespace RealMovementOps {
                             a.workType,
                             0,
                             nullptr);
+                        if (a.locationStatesPtr[workplace] == false) {
+                            a.stepsUntilMovePtr[i] = a.simTime.getStepsUntilMidnight(a.timeStep);
+                            return;        
+                        } 
+                    }
 
                 } else {
                     a.stepsUntilMovePtr[i] = a.simTime.getStepsUntilMidnight(a.timeStep);
@@ -1398,6 +1403,28 @@ public:
         classroom = data.classroom;
     }
 
+    void dumpLoctypeStatNow(unsigned timestamp) {
+        auto realThis = static_cast<SimulationType*>(this);
+        if (dumpLoctypeStat.length()>0) {
+            if (locationTypeCounter.size()==0) {
+                locationTypeCounter.resize(realThis->locs->generalLocationTypes.rbegin()->first + 1);
+                std::ofstream file;
+                file.open(dumpLoctypeStat); //open for write
+                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
+                file << "\n";
+                file.close();
+            }
+            if (timestamp>0) {
+                std::ofstream file;
+                file.open(dumpLoctypeStat, std::ios_base::app); //just append
+                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
+                file << "\n";
+                file.close();
+            }
+            thrust::fill(locationTypeCounter.begin(),locationTypeCounter.end(),(unsigned)0);
+        }
+    }
+
     void planLocations(Timehandler simTime, unsigned timeStep) {
         PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
@@ -1591,26 +1618,9 @@ public:
             home);
         cudaDeviceSynchronize();
 #endif
-
-        if (dumpLoctypeStat.length()>0) {
-            if (locationTypeCounter.size()==0) {
-                locationTypeCounter.resize(realThis->locs->generalLocationTypes.rbegin()->first + 1);
-                std::ofstream file;
-                file.open(dumpLoctypeStat); //open for write
-                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
-                file << "\n";
-                file.close();
-            }
-            if (timestamp>0) {
-                std::ofstream file;
-                file.open(dumpLoctypeStat, std::ios_base::app); //just append
-                thrust::copy(locationTypeCounter.begin(), locationTypeCounter.end(), std::ostream_iterator<unsigned>(file, " "));
-                file << "\n";
-                file.close();
-            }
-            thrust::fill(locationTypeCounter.begin(),locationTypeCounter.end(),(unsigned)0);
-        }
+        //dumpLoctypeStatNow(timestamp);
     }
+
 
     void movement(Timehandler simTime, unsigned timeStep) {
         PROFILE_FUNCTION();
@@ -1725,6 +1735,7 @@ public:
         }
 
         if (dumpLoctypeStat.length()>0) {
+            dumpLoctypeStatNow(simTime.getTimestamp());
             typename SimulationType::TypeOfLocation_t *locationTypePtr = thrust::raw_pointer_cast(locationTypes.data());
             unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
             unsigned numLocTypes = realThis->locs->generalLocationTypes.rbegin()->first + 1;
