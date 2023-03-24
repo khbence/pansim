@@ -123,6 +123,9 @@ public:
     unsigned healthcareWorkerCount;
     std::vector<int> totalHospitalizations;
     unsigned dueWithCOVID;
+    double currentMaskValue = 1.0;
+    int diagnosticLevel;
+    unsigned homeType;
 
     friend class MovementPolicy<Simulation>;
     friend class InfectionPolicy<Simulation>;
@@ -693,6 +696,7 @@ public:
         infectiousnessMultiplier = splitStringFloat(result["infectiousnessMultiplier"].as<std::string>(),',');
         diseaseProgressionScaling = splitStringFloat(result["diseaseProgressionScaling"].as<std::string>(),',');
         diseaseProgressionDeathScaling = splitStringFloat(result["diseaseProgressionDeathScaling"].as<std::string>(),',');
+        diagnosticLevel = result["diags"].as<unsigned>();
         setupHospitalizations(result);
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
@@ -726,7 +730,9 @@ public:
             RandomGenerator::resize(agents->PPValues.size());
             statesHeader = header + "H\tT\tP1\tP2\tQ\tQT\tNQ\tMUT\tHOM\tVAC\tNI\tINF\tREINF\tBSTR\tIMM\tHCI\tHCE\tINFV\tINFH\tVNI";
             std::cout << statesHeader << '\n';
-            ClosurePolicy<Simulation>::init(data.acquireLocationTypes(), data.acquireClosureRules(), statesHeader);
+            auto locTypes = data.acquireLocationTypes();
+            homeType = locTypes.home;
+            ClosurePolicy<Simulation>::init(locTypes, data.acquireClosureRules(), statesHeader);
             locs->initialize();
             immunization->initCategories();
             flagHealthcareWorkers();
@@ -745,6 +751,124 @@ public:
             }));
         }
         return variantCounts;
+    }
+
+    void processFlags(char **argv, int argc) {
+        //Possible flags: "TPdef", "TP015", "TP035", "PLNONE", "PL0", "CFNONE","CF2000-0500", "SONONE", "SO12", "SO3", "QU0", "QU2", "QU3", "MA1.0", "MA0.8", "WEEK2", "WEEK4", "WEEK6", "WEEK8"
+        for (int i = 0; i < argc; i++) {
+            std::string flag = argv[i];
+            std::string prefix = flag.substr(0, 2);
+
+            if (prefix == "TP") {
+                if (diagnosticLevel > 0) std::cout << "Testing policy " << flag << std::endl;
+                if (flag == "TPdef") {
+                    updateTestingProbs("0.00005,0.01,0.0005,0.0005,0.005,0.05");
+                } else if (flag == "TP015") {
+                    updateTestingProbs("0.00005,1,0.2,0.2,0.005,0.05", "035");
+                } else if (flag == "TP035") {
+                    updateTestingProbs("0.00005,0.2,0.04,0.04,0.005,0.05");
+                }
+            } else if (prefix == "PL") {
+                if (diagnosticLevel > 0) std::cout << "Location closures " << flag << std::endl;
+                if (flag == "PLNONE") {
+                    int fixListArr[4] = {5,6,22,44};
+                    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(
+                                             locs->locType.begin(), locs->states.begin(), locs->essential.begin())),
+                            thrust::make_zip_iterator(
+                                thrust::make_tuple(locs->locType.end(), locs->states.end(), locs->essential.end())),
+                            [fixListArr] HD(
+                                thrust::tuple<unsigned&, bool&, uint8_t&> tup) {
+                                auto& type = thrust::get<0>(tup);
+                                auto& isOpen = thrust::get<1>(tup);
+                                auto& isEssential = thrust::get<2>(tup);
+                                if (isEssential == 1) return;
+                                for (unsigned i = 0; i < 4; i++)
+                                    if (type == fixListArr[i])
+                                        isOpen = true;
+                            });
+                } else if (flag == "PL0") {
+                    int fixListArr[4] = {5,6,22,44};
+                    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(
+                                             locs->locType.begin(), locs->states.begin(), locs->essential.begin())),
+                            thrust::make_zip_iterator(
+                                thrust::make_tuple(locs->locType.end(), locs->states.end(), locs->essential.end())),
+                            [fixListArr] HD(
+                                thrust::tuple<unsigned&, bool&, uint8_t&> tup) {
+                                auto& type = thrust::get<0>(tup);
+                                auto& isOpen = thrust::get<1>(tup);
+                                auto& isEssential = thrust::get<2>(tup);
+                                if (isEssential == 1) return;
+                                for (unsigned i = 0; i < 4; i++)
+                                    if (type == fixListArr[i])
+                                        isOpen = false;
+                            });
+
+                }
+            } else if (prefix == "CF") {
+                if (diagnosticLevel > 0) std::cout << "Curfew policy: " << flag << std::endl;
+                if (flag == "CFNONE") {
+                    toggleCurfew(false, 0, 0);
+                } else if (flag == "CF2000-0500") {
+                    toggleCurfew(true, 20*60, 5*60);
+                }
+            } else if (prefix == "SO") {
+                if (diagnosticLevel > 0) std::cout << "School age restriction: " << flag << std::endl;
+                if (flag == "SONONE") {
+                    setSchoolAgeRestriction(0);
+                } else if (flag == "SO12") {
+                    setSchoolAgeRestriction(12);
+                } else if (flag == "SO3") {
+                    setSchoolAgeRestriction(3);
+                }
+            } else if (prefix == "QU") {
+                if (diagnosticLevel > 0) std::cout << "Quarantine policy: " << flag << std::endl;
+                if (flag == "QU0") {
+                    quarantinePolicy(0);
+                } else if (flag == "QU2") {
+                    quarantinePolicy(2);
+                } else if (flag == "QU3") {
+                    quarantinePolicy(3);
+                }
+            } else if (prefix == "MA") {
+                if (flag == "MA1.0") {
+                    if (currentMaskValue != 1.0) {
+                        if (diagnosticLevel > 0) std::cout << "Masks at 100%" << std::endl;
+                        double currentMaskValue_local = currentMaskValue;
+                        int homeType_l = homeType;
+                        thrust::for_each(
+                            thrust::make_zip_iterator(thrust::make_tuple(locs->locType.begin(), locs->infectiousness.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(locs->locType.end(), locs->infectiousness.end())),
+                            [currentMaskValue_local, homeType_l] HD(
+                                thrust::tuple<unsigned&, float&> tup) {
+                                auto& type = thrust::get<0>(tup);
+                                auto& infectiousness = thrust::get<1>(tup);
+                                if (type != homeType_l) {
+                                    infectiousness = infectiousness / currentMaskValue_local;
+                                }
+                            });
+                        currentMaskValue = 1.0;
+                    }
+                } else if (flag == "MA0.8") {
+                    if (currentMaskValue != 0.8) {
+                        if (diagnosticLevel > 0) std::cout << "Masks at 80%" << std::endl;
+                        double currentMaskValue_local = currentMaskValue;
+                        int homeType_l = homeType;
+                        thrust::for_each(
+                            thrust::make_zip_iterator(thrust::make_tuple(locs->locType.begin(), locs->infectiousness.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(locs->locType.end(), locs->infectiousness.end())),
+                            [currentMaskValue_local, homeType_l] HD(
+                                thrust::tuple<unsigned&, float&> tup) {
+                                auto& type = thrust::get<0>(tup);
+                                auto& infectiousness = thrust::get<1>(tup);
+                                if (type != homeType_l) {
+                                    infectiousness = infectiousness * currentMaskValue_local;
+                                }
+                            });
+                        currentMaskValue = 0.8;
+                    }
+                }
+            }
+        }
     }
 
     void runSimulation() {

@@ -218,11 +218,13 @@ public:
                 unsigned homeType = data.home;
                 double maskCoefficient2 = std::stod(rule.parameter);
                 std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
-                this->rules.emplace_back(rule.name, conds, [&, homeType, maskCoefficient2, diags](Rule* r) {
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, homeType, maskCoefficient2, diags, realThis](Rule* r) {
                     bool close = true;
                     for (GlobalCondition* c : r->conditions) { close = close && c->active; }
                     bool shouldBeOpen = !close;
                     if (r->previousOpenState != shouldBeOpen) {
+                        realThis->currentMaskValue = shouldBeOpen ? 1.0 : maskCoefficient2;
                         thrust::for_each(
                             thrust::make_zip_iterator(thrust::make_tuple(locTypes.begin(), locInfectiousness.begin())),
                             thrust::make_zip_iterator(thrust::make_tuple(locTypes.end(), locInfectiousness.end())),
