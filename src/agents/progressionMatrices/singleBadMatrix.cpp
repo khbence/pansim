@@ -1,19 +1,20 @@
-#include "singleBadMatrix.h"
+#include "singleBadMatrix.hpp"
+#include "JSONReader.hpp"
 
 SingleBadTransitionMatrix::NextStates::NextStates(bool _hasBad,
     thrust::pair<unsigned, float> _bad,
     thrust::pair<unsigned, float>* _neutral,
     unsigned _neutralCount)
-    : hasBad(_hasBad), bad(_bad), neutral(_neutral), neutralCount(_neutralCount) {}
+    : hasBad(_hasBad), bad(_bad), neutralCount(_neutralCount), neutral(_neutral) {}
 
 HD unsigned SingleBadTransitionMatrix::NextStates::selectNext(float scalingSypmtons) const {
-    double random = RandomGenerator::randomUnit();
-    double iterator = 0.0;
-    double remainders = 0.0;
+    float random = RandomGenerator::randomUnit<float>();
+    float iterator = 0.0;
+    float remainders = 0.0;
     if (hasBad) {
         iterator = bad.second * scalingSypmtons;
         if (random < iterator) { return bad.first; }
-        remainders = (bad.second - iterator) / neutralCount;
+        remainders = (bad.second - iterator) / static_cast<float>(neutralCount);
     }
     unsigned idx = 0;
     do {
@@ -44,10 +45,10 @@ void SingleBadTransitionMatrix::NextStatesInit::cleanUp(unsigned ownIndex) {
     }
 }
 
-SingleBadTransitionMatrix::SingleBadTransitionMatrix(const parser::TransitionFormat& inputData)
+SingleBadTransitionMatrix::SingleBadTransitionMatrix(const io::TransitionFormat& inputData)
     : BasicLengthAbstract(inputData.states.size()) {
     std::vector<NextStatesInit> initTransitions(inputData.states.size());
-    transitions = (NextStates*)malloc(sizeof(NextStates) * inputData.states.size());
+    transitions = reinterpret_cast<NextStates*>(malloc(sizeof(NextStates) * inputData.states.size()));
 
     auto getStateIndex = [&inputData](const std::string& name) {
         unsigned idx = 0;
@@ -74,15 +75,15 @@ SingleBadTransitionMatrix::SingleBadTransitionMatrix(const parser::TransitionFor
         thrust::pair<unsigned, float> badVal =
             initTransitions[i].bad ? initTransitions[i].bad.value() : thrust::pair<unsigned, float>(0, 0.0f);
         thrust::pair<unsigned, float>* neutrals =
-            (thrust::pair<unsigned, float>*)malloc(initTransitions[i].neutral.size() * sizeof(thrust::pair<unsigned, float>));
-        for (int j = 0; j < initTransitions[i].neutral.size(); j++) neutrals[j] = initTransitions[i].neutral[j];
-        transitions[i] = NextStates(initTransitions[i].bad ? true : false, badVal, neutrals, initTransitions[i].neutral.size());
+            reinterpret_cast<thrust::pair<unsigned, float>*>(malloc(initTransitions[i].neutral.size() * sizeof(thrust::pair<unsigned, float>)));
+        for (std::size_t j = 0; j < initTransitions[i].neutral.size(); j++) neutrals[j] = initTransitions[i].neutral[j];
+        transitions[i] = NextStates(initTransitions[i].bad ? true : false, badVal, neutrals, static_cast<unsigned>(initTransitions[i].neutral.size()));
         ++i;
     }
 }
 
 SingleBadTransitionMatrix::SingleBadTransitionMatrix(const std::string& fileName)
-    : SingleBadTransitionMatrix(DECODE_JSON_FILE(fileName, parser::TransitionFormat)) {}
+    : SingleBadTransitionMatrix(io::JSONReader::parseFile<io::TransitionFormat>(fileName)) {}
 
 SingleBadTransitionMatrix::~SingleBadTransitionMatrix() {
     for (unsigned i = 0; i < numStates; i++) { free(transitions[i].neutral); }

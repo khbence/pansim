@@ -2,12 +2,13 @@
 #include "globalStates.hpp"
 #include <string>
 #include "progressionMatrices.hpp"
-#include "progressionMatrixFormat.h"
-#include "agentMeta.h"
-#include "agentsList.h"
+#include "progressionMatrixFormat.hpp"
+#include "agentMeta.hpp"
+#include "agentsList.hpp"
 #include <vector>
 #include <map>
-#include "progressionType.h"
+#include <array>
+#include "progressionType.hpp"
 
 using ProgressionMatrix = MultiBadMatrix;
 
@@ -17,7 +18,7 @@ class DynamicPPState {
 
     char state = 0;// a number
     short daysBeforeNextState = -1;
-    float susceptible[MAX_STRAINS] = {0.0};
+    std::array<float, globalConstants::MAX_STRAINS> float susceptible = {0.0};
     uint8_t variant = 0;
 
     static HD ProgressionMatrix& getTransition(unsigned progressionID_p);

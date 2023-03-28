@@ -1,12 +1,14 @@
 #pragma once
-#include "randomGenerator.h"
+#include <array>
+#include "globalStates.hpp"
+#include <vector>
 
 class BasicLengthAbstract {
 protected:
     class LengthOfState {
-        float avgLength[MAX_STRAINS];
-        float maxLength[MAX_STRAINS];
-        double p[MAX_STRAINS];
+        std::array<float, globalConstants::MAX_STRAINS> avgLength;
+        std::array<float, globalConstants::MAX_STRAINS> maxLength;
+        std::array<double, globalConstants::MAX_STRAINS> p;
 
         [[nodiscard]] static double expectedLength(double p, float max);
         [[nodiscard]] static double calculateModifiedP(double p, float avgLength, float maxLength);
@@ -20,8 +22,8 @@ protected:
     BasicLengthAbstract(std::size_t n);
 
 public:
-    LengthOfState* lengths;
     unsigned numStates;
+    LengthOfState* lengths;
 
     [[nodiscard]] HD int calculateJustDays(unsigned state, int variant) const;
 };

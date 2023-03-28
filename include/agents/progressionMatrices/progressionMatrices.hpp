@@ -1,3 +1,3 @@
 #pragma once
-#include "singleBadMatrix.h"
-#include "multiBadMatrix.h"
+#include "singleBadMatrix.hpp"
+#include "multiBadMatrix.hpp"

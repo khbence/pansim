@@ -1,5 +1,5 @@
 #include "PPStateTypes.hpp"
-#include "customExceptions.h"
+#include "customExceptions.hpp"
 
 // static stuff
 namespace detail {

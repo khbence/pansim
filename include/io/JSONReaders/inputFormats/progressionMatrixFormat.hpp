@@ -23,4 +23,5 @@ struct TransitionFormat {
 
 void from_json(const nlohmann::json& j, TransitionFormat::SingleState::Progression& progression);
 void from_json(const nlohmann::json& j, TransitionFormat::SingleState& singleState);
+void from_json(const nlohmann::json& j, TransitionFormat& transition);
 }

@@ -7,6 +7,10 @@
 #define HD
 #endif
 
+namespace globalConstants {
+    constexpr std::size_t MAX_STRAINS = 7;
+}
+
 // #define AGENT = 0;
 // #define FROM = 1;
 // #define TO = 2;

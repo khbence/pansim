@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include "nlohmann/json.hpp"
+#include "parametersFormat.hpp"
 #include "datatypes.hpp"
 
 class BasicAgentMeta {
@@ -15,13 +15,13 @@ class BasicAgentMeta {
         float transmission;
 
     public:
-        explicit AgeInterval(nlohmann::json in);
+        explicit AgeInterval(io::Parameters::Age in);
         bool operator==(unsigned age) const { return (from <= age) && (age < to); }
         [[nodiscard]] float getSymptoms() const;
         [[nodiscard]] float getTransmission() const;
     };
 
-    float scalingSymptoms[7*MAX_STRAINS] = {0.0};
+    std::array<float, 7 * globalConstants::MAX_STRAINS> scalingSymptoms = { 0.0 };
     float scalingAgeSex = 1.0;
     uint8_t age = 0;
     uint8_t preCondIdx = 0;
@@ -32,9 +32,9 @@ class BasicAgentMeta {
     static std::map<std::string, float> preConditionScaling;
 
 public:
-    static void initData(const parser::Parameters& inputData);
+    static void initData(const io::Parameters& inputData);
 
-    BasicAgentMeta(char gender, unsigned age, std::string preCondition);
+    BasicAgentMeta(char gender, unsigned age_p, std::string preCondition);
     BasicAgentMeta();
 
     void HD setScalingSymptoms(float scaling, uint8_t state, uint8_t strain);

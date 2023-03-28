@@ -1,6 +1,6 @@
 #pragma once
 #include "globalStates.hpp"
-#include "progressionMatrices.h"
+#include "progressionMatrices.hpp"
 #include <string>
 
 
@@ -12,9 +12,10 @@ protected:
 public:
     static HD unsigned getNumberOfStates() { return 0; };
 
-    static void initTransitionMatrix(const std::string& inputFile) {}
+    static void initTransitionMatrix([[maybe_unused]] const std::string& inputFile) {}
 
     HD explicit PPStateSIRAbstract(states::SIRD s);
+    virtual ~PPStateSIRAbstract() = default;
     states::SIRD parseState(const std::string& input);
     virtual HD void update(float scalingSymptons) = 0;
     virtual HD void gotInfected(uint8_t variant);
@@ -22,7 +23,7 @@ public:
     [[nodiscard]] HD states::WBStates getWBState() const;
     virtual HD char getStateIdx() const = 0;
     [[nodiscard]] virtual bool HD isInfectious() const { return state == states::SIRD::I; }
-    [[nodiscard]] virtual float HD getSusceptible(uint8_t variant) const { return state == states::SIRD::S; }
+    [[nodiscard]] virtual float HD getSusceptible([[maybe_unused]] uint8_t variant_p) const { return state == states::SIRD::S; }
 };
 
 class PPStateSIRBasic : public PPStateSIRAbstract {

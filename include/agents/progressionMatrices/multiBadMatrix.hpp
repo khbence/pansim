@@ -1,8 +1,9 @@
 #pragma once
-#include "basicLengthAbstract.h"
+#include "basicLengthAbstract.hpp"
 #include <vector>
 #include <tuple>
-#include "progressionMatrixFormat.h"
+#include "progressionMatrixFormat.hpp"
+#include "thrust/tuple.h"
 
 class MultiBadMatrix : public BasicLengthAbstract {
     class NextStates {
@@ -38,7 +39,7 @@ public:
 public:
     MultiBadMatrix() = default;
 
-    explicit MultiBadMatrix(const parser::TransitionFormat& inputData);
+    explicit MultiBadMatrix(const io::TransitionFormat& inputData);
     explicit MultiBadMatrix(const std::string& fileName);
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA

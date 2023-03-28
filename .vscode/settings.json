@@ -77,7 +77,10 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "complex": "cpp",
+        "shared_mutex": "cpp",
+        "cfenv": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

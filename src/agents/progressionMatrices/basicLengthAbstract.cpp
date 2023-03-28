@@ -1,5 +1,6 @@
-#include "basicLengthAbstract.h"
-#include "smallTools.h"
+#include "basicLengthAbstract.hpp"
+#include "smallTools.hpp"
+#include "randomGenerator.hpp"
 
 double BasicLengthAbstract::LengthOfState::expectedLength(double pInput, float max) {
     if (pInput < 0.0) { return 0.0; }

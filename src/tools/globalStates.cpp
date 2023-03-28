@@ -2,7 +2,7 @@
 #include "customExceptions.hpp"
 
 namespace states {
-    __host__ __device__ SIRD& operator++(SIRD& e) { return e = static_cast<SIRD>(static_cast<int>(e) + 1); }
+    HD SIRD& operator++(SIRD& e) { return e = static_cast<SIRD>(static_cast<int>(e) + 1); }
 
     [[nodiscard]] states::WBStates parseWBState(const std::string& rawState) {
         if (rawState.length() != 1) { throw IOAgentTypes::InvalidWBStateInSchedule(rawState); }

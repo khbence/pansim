@@ -3,14 +3,14 @@
 #include <limits>
 #include <algorithm>
 
-BasicAgentMeta::AgeInterval::AgeInterval(parser::Parameters::Age in)
+BasicAgentMeta::AgeInterval::AgeInterval(io::Parameters::Age in)
     : symptoms(static_cast<float>(in.symptoms)), transmission(static_cast<float>(in.transmission)) {
     if (in.from < 0) { throw IOParameters::NegativeFrom(); }
-    from = in.from;
+    from = static_cast<decltype(from)>(in.from);
     if (in.to < 0) {
         to = std::numeric_limits<decltype(to)>::max();
     } else {
-        to = in.to;
+        to = static_cast<decltype(to)>(in.to);
     }
     if (to < from) { throw IOParameters::NegativeInterval(from, to); }
 }
@@ -25,7 +25,7 @@ std::map<std::string, float> BasicAgentMeta::preConditionScaling;
 
 // init the three static variable with the data that coming from parameters json
 // file
-void BasicAgentMeta::initData(const parser::Parameters& inputData) {
+void BasicAgentMeta::initData(const io::Parameters& inputData) {
     // init the scaling based in sex
     if (inputData.sex.size() != 2) { throw IOParameters::NotBinary(); }
     for (unsigned i = 0; i < sexScaling.size(); ++i) {
@@ -46,7 +46,7 @@ void BasicAgentMeta::initData(const parser::Parameters& inputData) {
 
 BasicAgentMeta::BasicAgentMeta() {}
 
-BasicAgentMeta::BasicAgentMeta(char gender, unsigned age, std::string preCondition) {
+BasicAgentMeta::BasicAgentMeta(char gender, unsigned age_p, std::string preCondition) {
 
     scalingAgeSex = 1.0;
     // modify based on gender
@@ -60,7 +60,7 @@ BasicAgentMeta::BasicAgentMeta(char gender, unsigned age, std::string preConditi
         throw IOAgents::InvalidGender(std::to_string(gender));
     }
 
-    this->age = (uint8_t)age;
+    age = static_cast<uint8_t>(age_p);
     // modify based on age
     auto it = std::find(ageScaling.begin(), ageScaling.end(), age);
     if (it == ageScaling.end()) { throw IOAgents::NotDefinedAge(age); }
@@ -71,16 +71,16 @@ BasicAgentMeta::BasicAgentMeta(char gender, unsigned age, std::string preConditi
     // modify based on pre-condition
     auto itMap = preConditionScaling.find(preCondition);
     if (itMap == preConditionScaling.end()) { throw IOAgents::NotDefinedCondition(preCondition); }
-    preCondIdx = std::stoi(preCondition);
+    preCondIdx = static_cast<decltype(preCondIdx)>(std::stoi(preCondition));
     scalingAgeSex *= itMap->second;
 
-    for (int i = 0; i < MAX_STRAINS*7; i++) {
+    for (std::size_t i = 0; i < globalConstants::MAX_STRAINS*7; i++) {
         scalingSymptoms[i] = scalingAgeSex;
     }
 }
 
-void HD BasicAgentMeta::setScalingSymptoms(float scaling, uint8_t state, uint8_t variant) { scalingSymptoms[variant*7+MAX(6,state)] = scalingAgeSex * scaling; }
-float HD BasicAgentMeta::getScalingSymptoms(uint8_t variant, uint8_t state) const { return scalingSymptoms[variant*7+MAX(6,state)]; }
+void HD BasicAgentMeta::setScalingSymptoms(float scaling, uint8_t state, uint8_t variant) { scalingSymptoms[static_cast<std::size_t>(variant*7+std::max(static_cast<decltype(state)>(6),state))] = scalingAgeSex * scaling; }
+float HD BasicAgentMeta::getScalingSymptoms(uint8_t variant, uint8_t state) const { return scalingSymptoms[static_cast<std::size_t>(variant*7+std::max(static_cast<decltype(state)>(6),state))]; }
 
 uint8_t HD BasicAgentMeta::getAge() const { return age; }
 

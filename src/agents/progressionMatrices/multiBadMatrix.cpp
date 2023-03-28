@@ -1,23 +1,27 @@
-#include "multiBadMatrix.h"
+#include "multiBadMatrix.hpp"
+#include "randomGenerator.hpp"
+#include "JSONReader.hpp"
+#include "progressionMatrixFormat.hpp"
+#include "customExceptions.hpp"
 
 MultiBadMatrix::NextStates::NextStates(unsigned _badCount,
     thrust::pair<unsigned, float>* _bad,
     unsigned _neutralCount,
     thrust::pair<unsigned, float>* _neutral)
-    : badCount(_badCount), bad(_bad), neutralCount(_neutralCount), neutral(_neutral) {}
+    : neutralCount(_neutralCount), badCount(_badCount), neutral(_neutral), bad(_bad) {}
 
 thrust::pair<unsigned, bool> HD MultiBadMatrix::NextStates::selectNext(float scalingSypmtons) const {
     if (neutralCount == 0) { scalingSypmtons = 1.0; }
-    double random = RandomGenerator::randomUnit();
-    double preSum = 0.0;
-    double badSum = 0.0;
+    float random = RandomGenerator::randomUnit<float>();
+    float preSum = 0.0;
+    float badSum = 0.0;
     for (unsigned i = 0; i < badCount; ++i) {
         preSum += bad[i].second * scalingSypmtons;
         if (random < preSum) { return thrust::make_pair<unsigned, bool>(bad[i].first, true); }
         badSum += bad[i].second;
     }
 
-    double badScaling = 1.0 + ((badSum - preSum) / (1.0 - badSum));
+    float badScaling = 1.0f + ((badSum - preSum) / (1.0f - badSum));
     if (badCount == 0) { badScaling = 1.0; }
 
     unsigned idx = 0;
@@ -40,12 +44,12 @@ void MultiBadMatrix::NextStatesInit::cleanUp(unsigned ownIndex) {
 
 bool doubleIsZero(double value) { return (0.9999 < value) && (value < 1.0001); }
 
-MultiBadMatrix::MultiBadMatrix(const parser::TransitionFormat& inputData) : BasicLengthAbstract(inputData.states.size()) {
+MultiBadMatrix::MultiBadMatrix(const io::TransitionFormat& inputData) : BasicLengthAbstract(inputData.states.size()) {
     std::vector<NextStatesInit> initTransitions(inputData.states.size());
 
     // malloc instead of new, because this way we can use free in both CPU and
     // GPU code
-    transitions = (NextStates*)malloc(sizeof(NextStates) * inputData.states.size());
+    transitions = reinterpret_cast<NextStates*>(malloc(sizeof(NextStates) * inputData.states.size()));
 
     auto getStateIndex = [&inputData](const std::string& name) {
         unsigned idx = 0;
@@ -70,20 +74,20 @@ MultiBadMatrix::MultiBadMatrix(const parser::TransitionFormat& inputData) : Basi
         initTransitions[i].cleanUp(i);
         if (!doubleIsZero(sumChance) && !s.progressions.empty()) { throw(IOProgression::BadChances(s.stateName, sumChance)); }
         thrust::pair<unsigned, float>* bads =
-            (thrust::pair<unsigned, float>*)malloc(initTransitions[i].bad.size() * sizeof(thrust::pair<unsigned, float>));
+            reinterpret_cast<thrust::pair<unsigned, float>*>(malloc(initTransitions[i].bad.size() * sizeof(thrust::pair<unsigned, float>)));
         thrust::pair<unsigned, float>* neutrals =
-            (thrust::pair<unsigned, float>*)malloc(initTransitions[i].neutral.size() * sizeof(thrust::pair<unsigned, float>));
+            reinterpret_cast<thrust::pair<unsigned, float>*>(malloc(initTransitions[i].neutral.size() * sizeof(thrust::pair<unsigned, float>)));
 
-        for (int j = 0; j < initTransitions[i].neutral.size(); ++j) { neutrals[j] = initTransitions[i].neutral[j]; }
-        for (int j = 0; j < initTransitions[i].bad.size(); ++j) { bads[j] = initTransitions[i].bad[j]; }
+        for (std::size_t j = 0; j < initTransitions[i].neutral.size(); ++j) { neutrals[j] = initTransitions[i].neutral[j]; }
+        for (std::size_t j = 0; j < initTransitions[i].bad.size(); ++j) { bads[j] = initTransitions[i].bad[j]; }
 
-        transitions[i] = NextStates(initTransitions[i].bad.size(), bads, initTransitions[i].neutral.size(), neutrals);
+        transitions[i] = NextStates(static_cast<unsigned>(initTransitions[i].bad.size()), bads, static_cast<unsigned>(initTransitions[i].neutral.size()), neutrals);
         ++i;
     }
 }
 
 MultiBadMatrix::MultiBadMatrix(const std::string& fileName)
-    : MultiBadMatrix(DECODE_JSON_FILE(fileName, parser::TransitionFormat)) {}
+    : MultiBadMatrix(io::JSONReader::parseFile<io::TransitionFormat>(fileName)) {}
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 MultiBadMatrix* MultiBadMatrix::upload() const {

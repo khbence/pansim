@@ -1,14 +1,14 @@
 #pragma once
 #include <array>
-#include "optional.h"
+#include <optional>
 #include <vector>
 #include <string>
 #include "thrust/pair.h"
-#include "progressionMatrixFormat.h"
-#include "customExceptions.h"
+#include "progressionMatrixFormat.hpp"
+#include "customExceptions.hpp"
 #include <algorithm>
-#include "randomGenerator.h"
-#include "basicLengthAbstract.h"
+#include "randomGenerator.hpp"
+#include "basicLengthAbstract.hpp"
 
 class SingleBadTransitionMatrix : public BasicLengthAbstract {
     class NextStates {
@@ -29,7 +29,7 @@ class SingleBadTransitionMatrix : public BasicLengthAbstract {
     class NextStatesInit {
     public:
         // pair<index of new state,  raw chance to get there>
-        stc::optional<std::pair<unsigned, float>> bad;
+        std::optional<std::pair<unsigned, float>> bad;
         std::vector<std::pair<unsigned, float>> neutral;
 
         NextStatesInit() = default;
@@ -45,7 +45,7 @@ public:
 public:
     SingleBadTransitionMatrix() = default;
 
-    explicit SingleBadTransitionMatrix(const parser::TransitionFormat& inputData);
+    explicit SingleBadTransitionMatrix(const io::TransitionFormat& inputData);
     explicit SingleBadTransitionMatrix(const std::string& fileName);
 
     ~SingleBadTransitionMatrix();
