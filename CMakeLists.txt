@@ -94,7 +94,7 @@ endif(USE_GPU)
 
 find_package(Matlab)
 if (Matlab_FOUND)
-    matlab_add_mex(NAME ${MEX_LIB} SRC matlab/cpp_example_mex.cpp)
+    matlab_add_mex(NAME ${MEX_LIB} SRC matlab/mexPanSim.cpp)
 endif()
 
 if(CUDAToolkit_FOUND AND USE_GPU)

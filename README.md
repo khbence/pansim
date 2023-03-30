@@ -83,6 +83,12 @@ The inputConfigFiles directory contains good COVID-19 specific defaults and gene
 
 If you want to generate random amount of agents and locations use the -n and -N flags described above.
 
+## Matlab interface
+
+If matlab is detected, CMake will build a shared library (mex) that can be used from Matlab. The matlab script in the 'matlab' directory named run_cpp.m shows an example of how to use the mex file. The script will run the simulation with a few non-default parameters, and trigger a set of closures. You have to run this script from the root directory of the project. In order to have matlab find the .m files, you have to add the 'matlab' directory to the matlab path, as well as your build directory, containing mexPanSim.mexa64. For example, if you are using the default build directory, you can run the following commands from the root directory of the project:
+> addpath('matlab')
+> addpath('build')
+
 # License
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
