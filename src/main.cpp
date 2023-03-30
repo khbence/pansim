@@ -21,8 +21,6 @@ int main(int argc, char** argv) {
     auto options = defineProgramParameters();
     config::Simulation_t::addProgramParameters(options);
 
-    options.add_options()("h,help", "Print usage");
-    options.add_options()("version", "Print version");
     cxxopts::ParseResult result = options.parse(argc, argv);
     if (result.count("help") != 0) {
         std::cout << options.help() << std::endl;

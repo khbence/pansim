@@ -470,11 +470,12 @@ public:
             });
     }
 
-    std::vector<unsigned> refreshAndPrintStatistics(Timehandler& simTime) {
+    std::vector<unsigned> refreshAndPrintStatistics(Timehandler& simTime, bool print = true) {
         PROFILE_FUNCTION();
         // COVID
         auto result = locs->refreshAndGetStatistic();
-        for (auto val : result) { std::cout << val << "\t"; }
+        if (print)
+            for (auto val : result) { std::cout << val << "\t"; }
         // non-COVID hospitalization
         auto& ppstates = agents->PPValues;
         auto& diagnosed = agents->diagnosed;
@@ -497,16 +498,19 @@ public:
         unsigned stayedHome = thrust::count(agents->stayedHome.begin(), agents->stayedHome.end(), true);
         std::vector<unsigned> stats(result);
         stats.push_back(hospitalized);
-        std::cout << hospitalized << "\t";
+        if (print)
+            std::cout << hospitalized << "\t";
         // Testing
         auto tests = TestingPolicy<Simulation>::getStats();
-        std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t" << thrust::get<2>(tests) << "\t";
+        if (print)
+            std::cout << thrust::get<0>(tests) << "\t" << thrust::get<1>(tests) << "\t" << thrust::get<2>(tests) << "\t";
         stats.push_back(thrust::get<0>(tests));
         stats.push_back(thrust::get<1>(tests));
         stats.push_back(thrust::get<2>(tests));
         // Quarantine stats
         auto quarant = agents->getQuarantineStats(timestamp);
-        std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t" << thrust::get<2>(quarant) << "\t";
+        if (print)
+            std::cout << thrust::get<0>(quarant) << "\t" << thrust::get<1>(quarant) << "\t" << thrust::get<2>(quarant) << "\t";
         stats.push_back(thrust::get<0>(quarant));
         stats.push_back(thrust::get<1>(quarant));
         stats.push_back(thrust::get<2>(quarant));
@@ -526,21 +530,25 @@ public:
                 else
                     out = std::to_string(variantcounts[variant]);
             }
-            std::cout << out << "\t";
+            if (print)
+                std::cout << out << "\t";
             stats.push_back(variantcounts[0]); //TODO: this is just the first one...
         } else {
-            std::cout << unsigned(0) << "\t";
+            if (print)
+                std::cout << unsigned(0) << "\t";
             stats.push_back(unsigned(0));
         }
 
         // Stayed home count
         stayedHome = stayedHome - stats[10] - stats[11];// Subtract dead
-        std::cout << stayedHome << "\t";
+        if (print)
+            std::cout << stayedHome << "\t";
         stats.push_back(stayedHome);
 
         // Number of immunized
         stats.push_back(immunization->immunizedToday);
-        std::cout << immunization->immunizedToday << "\t";
+        if (print)
+            std::cout << immunization->immunizedToday << "\t";
 
         // Number of new infections
         unsigned timeStepL = timeStep;
@@ -550,7 +558,8 @@ public:
                     agentStat.infectedTimestamp > timestamp - 24 * 60 / timeStepL && agentStat.infectedTimestamp <= timestamp);
             });
         stats.push_back(newInfected);
-        std::cout << newInfected << "\t";
+        if (print)
+            std::cout << newInfected << "\t";
 
         //Number of people infected at least once
         unsigned infectionCount =
@@ -558,7 +567,8 @@ public:
                 return agentStat.infectedCount>0;
             });
         stats.push_back(infectionCount);
-        std::cout << infectionCount << "\t";
+        if (print)
+            std::cout << infectionCount << "\t";
 
         //Number of reinfections so far
         unsigned reinfectionCount =
@@ -566,7 +576,8 @@ public:
                                      [] HD(AgentStats agentStat) {return unsigned(agentStat.infectedCount > 1 ? agentStat.infectedCount-1 : 0);},
                                      (unsigned)0, thrust::plus<unsigned>());
         stats.push_back(reinfectionCount);
-        std::cout << reinfectionCount << "\t";
+        if (print)
+            std::cout << reinfectionCount << "\t";
 
         //Cumulative number of boosters
         unsigned boosters =
@@ -574,7 +585,8 @@ public:
                                      [] HD(AgentStats agentStat) {return unsigned(agentStat.immunizationCount > 1 ? agentStat.immunizationCount-1 : 0);},
                                      (unsigned)0, thrust::plus<unsigned>());
         stats.push_back(boosters);
-        std::cout << boosters << "\t";
+        if (print)
+            std::cout << boosters << "\t";
 
         //Level of immunity in the population
         std::string out;
@@ -588,7 +600,8 @@ public:
             else out = out + "," + std::to_string(unsigned(susceptib));
         }
         stats.push_back((unsigned)susceptib); //TODO: this is just the last one...
-        std::cout << out << "\t";
+        if (print)
+            std::cout << out << "\t";
 
         //count number of health workers who are infected
         auto& quarantined = agents->quarantined;
@@ -609,8 +622,10 @@ public:
                             });
         stats.push_back((unsigned)(infectedHCWorker*100)/MAX(1,healthcareWorkerCount));
         stats.push_back((unsigned)exposedHCWorker);
-        std::cout << (unsigned)(infectedHCWorker*100)/MAX(1,healthcareWorkerCount) << "\t";
-        std::cout << (unsigned)exposedHCWorker << "\t";
+        if (print)
+            std::cout << (unsigned)(infectedHCWorker*100)/MAX(1,healthcareWorkerCount) << "\t";
+        if (print)
+            std::cout << (unsigned)exposedHCWorker << "\t";
 
         //Number of people infected with different variants
         unsigned countInf;
@@ -622,7 +637,8 @@ public:
             else out = out + "," + std::to_string(unsigned(countInf));
         }
         stats.push_back((unsigned)countInf); //TODO: this is just the last one...
-        std::cout << out << "\t";
+        if (print)
+            std::cout << out << "\t";
 
         //Number of people in hospital with active infection
         unsigned hospitalTypeLocal = hospitalType;
@@ -632,16 +648,19 @@ public:
             thrust::make_tuple(ppstates.end(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.end()))),
             [hospitalTypeLocal] HD (thrust::tuple<PPState, unsigned> tup) {return (thrust::get<0>(tup).isInfected() && thrust::get<1>(tup)==hospitalTypeLocal);});
         stats.push_back(infInHosp); //TODO: this is just the last one...
-        std::cout << infInHosp << "\t";
+        if (print)
+            std::cout << infInHosp << "\t";
 
         //Number of vaccinated but not previously infected
         unsigned vaccNotInf =
             thrust::count_if(agentStats.begin(), agentStats.end(), 
                                      [] HD(AgentStats agentStat) {return agentStat.infectedCount == 0 && agentStat.immunizationCount>0;});
         stats.push_back(vaccNotInf);
-        std::cout << vaccNotInf;
+        if (print)
+            std::cout << vaccNotInf;
 
-        std::cout << '\n';
+        if (print)
+            std::cout << '\n';
         return stats;
     }
 
@@ -754,7 +773,7 @@ public:
     }
 
     void processFlags(char **argv, int argc) {
-        //Possible flags: "TPdef", "TP015", "TP035", "PLNONE", "PL0", "CFNONE","CF2000-0500", "SONONE", "SO12", "SO3", "QU0", "QU2", "QU3", "MA1.0", "MA0.8", "WEEK2", "WEEK4", "WEEK6", "WEEK8"
+        //Possible flags: "TPdef", "TP015", "TP035", "PLNONE", "PL0", "CFNONE","CF2000-0500", "SONONE", "SO12", "SO3", "QU0", "QU2", "QU3", "MA1.0", "MA0.8"
         for (int i = 0; i < argc; i++) {
             std::string flag = argv[i];
             std::string prefix = flag.substr(0, 2);
@@ -905,7 +924,7 @@ public:
         
         PROFILE_FUNCTION();
 
-        auto stats = refreshAndPrintStatistics(simTime);
+        auto stats = refreshAndPrintStatistics(simTime,false);
         ClosurePolicy<Simulation>::midnight(simTime, timeStep, stats);
         MovementPolicy<Simulation>::planLocations(simTime, timeStep);
         variantCounts = countVariantCases(); //TODO: we do this multiple times

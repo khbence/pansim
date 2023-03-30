@@ -26,6 +26,11 @@ cxxopts::ParseResult initialize(int argc, char** argv) {
     auto options = defineProgramParameters();
     config::Simulation_t::addProgramParameters(options);
 
+    //print each arg
+    for (int i = 0; i < argc; i++) {
+        std::cout << argv[i] << std::endl;
+    }
+
     cxxopts::ParseResult result = options.parse(argc, argv);
     if (result.count("help") != 0) {
         std::cout << options.help() << std::endl;
