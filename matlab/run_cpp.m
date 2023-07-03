@@ -10,9 +10,10 @@ function run_cpp()
     whos inp_params
     class(inp_params)
     obj.initSimulation(inp_params);
-    while true
+    for i = 1:10
+        fprintf('Day %d\n',i);
         inp_params = ["opt1","opt2"]; %["TPdef", "SONONE", "CF2000-0500"];
-        val_params = obj.runForDay(inp_params)
+        val_params = obj.runForDay(inp_params);
         %print(val_params)
     end
 
