@@ -5,7 +5,7 @@ target_sources(${MAIN_BINARY}
 
 target_include_directories(${MAIN_BINARY} PUBLIC include/IO/dataProviders)
 
-if (Matlab_FOUND)
+if (Matlab_FOUND OR pybind11_FOUND)
     target_sources(${MEX_LIB}
                 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dataProvider.cpp)
     target_sources(${MEX_LIB}

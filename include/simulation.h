@@ -529,10 +529,10 @@ public:
                     out = out + "," + std::to_string(variantcounts[variant]);
                 else
                     out = std::to_string(variantcounts[variant]);
+                stats.push_back(variantcounts[variant]);
             }
             if (print)
                 std::cout << out << "\t";
-            stats.push_back(variantcounts[0]); //TODO: this is just the first one...
         } else {
             if (print)
                 std::cout << unsigned(0) << "\t";
@@ -598,8 +598,8 @@ public:
                                     0.0f, thrust::plus<float>());
             if (variant == 0) out = std::to_string(unsigned(susceptib));
             else out = out + "," + std::to_string(unsigned(susceptib));
+            stats.push_back((unsigned)susceptib);
         }
-        stats.push_back((unsigned)susceptib); //TODO: this is just the last one...
         if (print)
             std::cout << out << "\t";
 
@@ -635,8 +635,8 @@ public:
                                     [variant] HD(AgentStats stats) {return ((1<<variant) & stats.variant) ? true : false;});
             if (variant == 0) out = std::to_string(unsigned(countInf));
             else out = out + "," + std::to_string(unsigned(countInf));
+            stats.push_back((unsigned)countInf);
         }
-        stats.push_back((unsigned)countInf); //TODO: this is just the last one...
         if (print)
             std::cout << out << "\t";
 
@@ -647,7 +647,7 @@ public:
                                               thrust::make_zip_iterator(
             thrust::make_tuple(ppstates.end(),thrust::make_permutation_iterator(locs->locType.begin(), agents->location.end()))),
             [hospitalTypeLocal] HD (thrust::tuple<PPState, unsigned> tup) {return (thrust::get<0>(tup).isInfected() && thrust::get<1>(tup)==hospitalTypeLocal);});
-        stats.push_back(infInHosp); //TODO: this is just the last one...
+        stats.push_back(infInHosp);
         if (print)
             std::cout << infInHosp << "\t";
 

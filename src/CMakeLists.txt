@@ -10,7 +10,7 @@ if(CUDAToolkit_FOUND AND USE_GPU)
   set_target_properties(${MAIN_BINARY} PROPERTIES LANGUAGE CUDA)
 endif()
 
-if (Matlab_FOUND)
+if (Matlab_FOUND OR pybind11_FOUND)
   target_include_directories(${MEX_LIB} PUBLIC include)
   if(CUDAToolkit_FOUND AND USE_GPU)
     get_target_property(libSources ${MEX_LIB} SOURCES)

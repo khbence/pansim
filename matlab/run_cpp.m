@@ -1,7 +1,7 @@
 function run_cpp()
     % Check if the mex exists
     dir = fileparts(mfilename('fullpath'));
-    obj = mex_interface_cpp(str2fun([dir '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
+    obj = mexPanSim_wrap(str2func([dir '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
     
     inp_params = ["panSim", "-r", " ", "--quarantinePolicy", "0", "-k", "0.00041", ...
          "--progression", "inputConfigFiles/progressions_Jun17_tune/transition_config.json", ...
@@ -11,7 +11,7 @@ function run_cpp()
     class(inp_params)
     obj.initSimulation(inp_params);
     while true
-        inp_params = ["opt1","opt2"]; %["TPdef", "SONONE", "CF2000-0500"];
+        inp_params = ["TPdef", "SONONE", "CF2000-0500"];
         val_params = obj.runForDay(inp_params)
         %print(val_params)
     end

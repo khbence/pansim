@@ -5,7 +5,7 @@
 %   Construction -    obj = mexfun('new',         ...)
 %   Destruction -           mexfun('delete', obj)
 %   Other methods - [...] = mexfun('method', obj, ...)
-classdef mexPanSim < handle
+classdef mexPanSim_wrap < handle
     properties (Access = private, Hidden = true)
         mexHandle; % Handle to the mex function
     end
@@ -14,7 +14,7 @@ classdef mexPanSim < handle
         % Inputs:
         %    mexfun - handle to the C++ class interface mex.
         %    varargin - arguments passed to the mex when calling 'new'.
-        function this = mexPanSim(mexfun, varargin)
+        function this = mexPanSim_wrap(mexfun, varargin)
             this.mexHandle = mexfun;
             % this.mexHandle('new', varargin{:});
         end
