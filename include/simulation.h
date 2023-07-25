@@ -783,9 +783,9 @@ public:
                 if (flag == "TPdef") {
                     updateTestingProbs("0.00005,0.01,0.0005,0.0005,0.005,0.05");
                 } else if (flag == "TP015") {
-                    updateTestingProbs("0.00005,1,0.2,0.2,0.005,0.05", "035");
-                } else if (flag == "TP035") {
                     updateTestingProbs("0.00005,0.2,0.04,0.04,0.005,0.05");
+                } else if (flag == "TP035") {
+                    updateTestingProbs("0.00005,1.0,0.2,0.2,0.005,0.05");
                 }
             } else if (prefix == "PL") {
                 if (diagnosticLevel > 0) std::cout << "Location closures " << flag << std::endl;
@@ -923,7 +923,7 @@ public:
         std::vector<unsigned> variantCounts;
         
         PROFILE_FUNCTION();
-
+        processFlags(args, argc);
         auto stats = refreshAndPrintStatistics(simTime,false);
         ClosurePolicy<Simulation>::midnight(simTime, timeStep, stats);
         MovementPolicy<Simulation>::planLocations(simTime, timeStep);
