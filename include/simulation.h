@@ -833,7 +833,7 @@ public:
             } else if (prefix == "SO") {
                 if (diagnosticLevel > 0) std::cout << "School age restriction: " << flag << std::endl;
                 if (flag == "SONONE") {
-                    setSchoolAgeRestriction(0);
+                    setSchoolAgeRestriction(99);
                 } else if (flag == "SO12") {
                     setSchoolAgeRestriction(12);
                 } else if (flag == "SO3") {
