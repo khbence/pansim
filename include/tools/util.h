@@ -69,10 +69,16 @@ static void reduce_by_location(thrust::device_vector<unsigned>& locationListOffs
     } else {
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
-#pragma omp parallel for
-        for (unsigned l = 0; l < numLocations; l++) {
-            for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1]; agent++) {
-                fullInfectedCountsPtr[l] += lam(PPValuesPtr[locationAgentListPtr[agent]]);
+        if (omp_get_max_threads() == 1) {
+            for (unsigned agent = 0; agent < numAgents; agent++) {
+                fullInfectedCountsPtr[agentLocationsPtr[agent]] += lam(PPValuesPtr[agent]);
+            }
+        } else {
+            #pragma omp parallel for
+            for (unsigned l = 0; l < numLocations; l++) {
+                for (unsigned agent = locationListOffsetsPtr[l]; agent < locationListOffsetsPtr[l + 1]; agent++) {
+                    fullInfectedCountsPtr[l] += lam(PPValuesPtr[locationAgentListPtr[agent]]);
+                }
             }
         }
 #elif THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA

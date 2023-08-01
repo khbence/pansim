@@ -61,6 +61,7 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
     // Make a copy of locationOfAgents
     thrust::copy(locationOfAgents.begin(), locationOfAgents.end(), locationIdsOfAgents.begin());
     thrust::sequence(locationAgentList.begin(), locationAgentList.end());
+
     // Now sort by location, so locationAgentList contains agent IDs sorted by
     // location
     if (Util::needAgentsSortedByLocation) {
@@ -87,9 +88,23 @@ void Util::updatePerLocationAgentLists(const thrust::device_vector<unsigned>& lo
     thrust::lower_bound(locationIdsOfAgents.begin(), locationIdsOfAgents.end(), locationListOffsets.begin(), locationListOffsets.end(), locationListOffsets.begin());
     #endif
 #else
-    // Now extract offsets into locationAgentList where locations begin
-    unsigned* locationIdsOfAgentsPtr = thrust::raw_pointer_cast(locationIdsOfAgents.data());
-    unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
-    extractOffsets(locationIdsOfAgentsPtr, locationListOffsetsPtr, locationIdsOfAgents.size(), locationListOffsets.size() - 1);
+    if (Util::needAgentsSortedByLocation) {
+        // Now extract offsets into locationAgentList where locations begin
+        unsigned* locationIdsOfAgentsPtr = thrust::raw_pointer_cast(locationIdsOfAgents.data());
+        unsigned* locationListOffsetsPtr = thrust::raw_pointer_cast(locationListOffsets.data());
+        extractOffsets(locationIdsOfAgentsPtr, locationListOffsetsPtr, locationIdsOfAgents.size(), locationListOffsets.size() - 1);
+    } else {
+        thrust::fill(locationListOffsets.begin(), locationListOffsets.end(), 0);
+        Util::reduce_by_location(locationListOffsets,
+            locationAgentList,
+            locationListOffsets,
+            locationAgentList /* will be unused */,
+            locationOfAgents,
+            locationIdsOfAgents,
+            [] HD(const unsigned& a) -> unsigned {
+                return unsigned(1);
+            });
+        thrust::exclusive_scan(locationListOffsets.begin(), locationListOffsets.end(), locationListOffsets.begin());
+    }
 #endif
 };

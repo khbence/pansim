@@ -717,6 +717,10 @@ public:
         diseaseProgressionDeathScaling = splitStringFloat(result["diseaseProgressionDeathScaling"].as<std::string>(),',');
         diagnosticLevel = result["diags"].as<unsigned>();
         setupHospitalizations(result);
+        #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_OMP
+        if (omp_get_max_threads() == 1)
+            Util::needAgentsSortedByLocation = 0;
+        #endif
         InfectionPolicy<Simulation>::initializeArgs(result);
         MovementPolicy<Simulation>::initializeArgs(result);
         TestingPolicy<Simulation>::initializeArgs(result);
