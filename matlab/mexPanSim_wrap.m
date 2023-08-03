@@ -5,11 +5,7 @@
 %   Construction -    obj = mexfun('new',         ...)
 %   Destruction -           mexfun('delete', obj)
 %   Other methods - [...] = mexfun('method', obj, ...)
-<<<<<<< HEAD:matlab/mexPanSim_wrap.m
 classdef mexPanSim_wrap < handle
-=======
-classdef mex_interface_cpp < handle
->>>>>>> origin/main:matlab/mex_interface_cpp.m
     properties (Access = private, Hidden = true)
         mexHandle; % Handle to the mex function
     end
@@ -18,11 +14,7 @@ classdef mex_interface_cpp < handle
         % Inputs:
         %    mexfun - handle to the C++ class interface mex.
         %    varargin - arguments passed to the mex when calling 'new'.
-<<<<<<< HEAD:matlab/mexPanSim_wrap.m
         function this = mexPanSim_wrap(mexfun, varargin)
-=======
-        function this = mex_interface_cpp(mexfun, varargin)
->>>>>>> origin/main:matlab/mex_interface_cpp.m
             this.mexHandle = mexfun;
             % this.mexHandle('new', varargin{:});
         end
