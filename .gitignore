@@ -11,6 +11,7 @@ inputConfigFiles/article*.json
 articleTest
 articleTest/*
 article_*
+matlab/mexPanSim.mexa64
 
 
 # Polcz:
