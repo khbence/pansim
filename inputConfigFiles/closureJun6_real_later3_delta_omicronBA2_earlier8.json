@@ -1,0 +1,327 @@
+{
+  "rules": [
+    {
+      "name": "sept_23_nov_11",
+      "conditionType": "afterDays",
+      "threshold": 0,
+      "threshold2": 0,
+      "openAfter": 49,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        6,
+        22
+      ]
+    },
+    {
+      "name": "nov_11_sept_1",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 293,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        44
+      ]
+    },
+    {
+      "name": "nov_11_apr_29",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 169,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        22
+      ]
+    },
+    {
+      "name": "nov_11_maj_22",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 192,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        6
+      ]
+    },
+    {
+      "name": "nov_11_apr_23",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 163,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        5
+      ]
+    },
+    {
+      "name": "marc8-apr8",
+      "conditionType": "afterDays",
+      "threshold": 166,
+      "threshold2": 166,
+      "openAfter": 31,
+      "closeAfter": -1,
+      "parameter": 0,
+      "locationTypesToClose": [
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 125,
+      "threshold2": 1,
+      "openAfter": 6,
+      "parameter": 24e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 316,
+      "threshold2": 2,
+      "openAfter": 6,
+      "parameter": 10e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 437,
+      "threshold2": 3,
+      "openAfter": 6,
+      "parameter": 25e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 480,
+      "threshold2": 4,
+      "openAfter": 6,
+      "parameter": 20e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 1530,
+      "threshold2": 4,
+      "openAfter": 140,
+      "parameter": 1e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 604,
+      "threshold2": 5,
+      "openAfter": 150,
+      "parameter": 10e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 1085,
+      "threshold2": 6,
+      "openAfter": 150,
+      "parameter": 1e-5,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 117,
+      "closeAfter": -1,
+      "parameter": 14,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 166,
+      "threshold2": 166,
+      "openAfter": 42,
+      "closeAfter": -1,
+      "parameter": 3,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 397,
+      "threshold2": 397,
+      "openAfter": 8,
+      "closeAfter": -1,
+      "parameter": 3,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 208,
+      "threshold2": 208,
+      "openAfter": 20,
+      "closeAfter": -1,
+      "parameter": 10,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 263,
+      "threshold2": 263,
+      "openAfter": 79,
+      "closeAfter": -1,
+      "parameter": 3,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "Curfew",
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 148,
+      "parameter": "2000-0500",
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "Curfew",
+      "conditionType": "afterDays",
+      "threshold": 197,
+      "threshold2": 197,
+      "openAfter": 15,
+      "parameter": "2200-0500",
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "Curfew",
+      "conditionType": "afterDays",
+      "threshold": 212,
+      "threshold2": 212,
+      "openAfter": 8,
+      "parameter": "2300-0500",
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "HolidayMode",
+      "conditionType": "afterDays",
+      "threshold": 92,
+      "threshold2": 92,
+      "openAfter": 4,
+      "parameter": 1.0,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "HolidayMode",
+      "conditionType": "afterDays",
+      "threshold": 457,
+      "threshold2": 457,
+      "openAfter": 1,
+      "parameter": 1.0,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "SchoolAgeRestriction",
+      "conditionType": "afterDays",
+      "threshold": 455,
+      "threshold2": 455,
+      "openAfter": 11,
+      "closeAfter": -1,
+      "parameter": 3,
+      "locationTypesToClose": [
+        3
+      ]
+    },
+    {
+      "name": "Masks",
+      "parameter": 1.25,
+      "conditionType": "afterDays",
+      "threshold": 530,
+      "threshold2": 530,
+      "openAfter": 1700,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "QuarantinePolicy",
+      "conditionType": "afterDays",
+      "threshold": 530,
+      "threshold2": 530,
+      "openAfter": 1,
+      "parameter": 1,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "TestingProb",
+      "conditionType": "afterDays",
+      "threshold": 259,
+      "threshold2": 259,
+      "openAfter": 1,
+      "parameter": "0.00005,0.01,0.0005,0.0005,0.5,0.05",
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    },
+    {
+      "name": "ReduceMovement",
+      "parameter": 0.094929,
+      "conditionType": "afterDays",
+      "threshold": 49,
+      "threshold2": 49,
+      "openAfter": 52,
+      "closeAfter": -1,
+      "locationTypesToClose": [
+      ]
+    }
+  ]
+}
