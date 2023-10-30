@@ -1,8 +1,10 @@
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
-%  Modified on 2023. July 14. (2023a)
+%  Modified on 2023. August 3. (2023a)
 %
-%  Revised on 2023. October 16. (2023a)
+%    THIS SCRIPT SHOULD BE CALLED IN THE ROOT DIRECTORY
+% 
+%#ok<*CLALL>
 
 clear all
 
@@ -163,7 +165,7 @@ end
 %%
 
 % Load PanSim arguments
-PanSim_args = load_PanSim_args;
+PanSim_args = load_PanSim_args("Real");
 
 %%%
 % Create simulator object
@@ -176,7 +178,7 @@ for k = 2:N+1
     % -----------------------------------
     % Simulate and collect measurement
 
-    simout = obj.runForDay(string(PM(k-1,:)));
+    simout = obj.runForDay(["NUKU"]);
     [simx,simbeta] = get_SEIRb(simout,Np);
 
     x(:,k) = simx;
@@ -215,14 +217,14 @@ for k = 2:N+1
     r.simout0 = simout_prev;
     r.simout1 = simout;
     r.simx0 = simx_prev;
-    r.simx1 = simx(:)';
+    r.simx1 = simx';
     r.cmdbeta = beta_cmd(k-1);
     r.simbeta = simbeta;
 
     Results(k-1,:) = r;
 
     simout_prev = simout;
-    simx_prev = simx;
+    simx_prev = simx';
 
     % -----------------------------------
     % Compute control input
@@ -266,8 +268,23 @@ Results.ddIref = Iref(2:end);
 
 Now = datetime;
 Now.Format = "uuuu-MM-dd_HH:mm";
-filename = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results/Result_" + string(Now) + ".xls";
+filename = "../Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results/Result_" + string(Now) + "_Tenyleges_lezarasokkal.xls";
 writetable(splitvars(Results),filename,"Sheet","Results");
 writetable(table(kI,kP,kD,k_anti_windup,k_reset_integrator),filename,"Sheet","Parameters")
 
 % clear all
+
+%%
+
+simout = [
+    Results.simout0(1,:)
+    Results.simout1
+    ];
+
+T = simout2table(simout);
+
+fname = "REC_" + string(T.Date(end)) + "_Agent-based.mat";
+save(fname,"T")
+
+clear all
+
