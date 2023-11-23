@@ -207,7 +207,7 @@ public:
 #ifdef PYTHON
 namespace py = pybind11;
 
-PYBIND11_MODULE(mexPanSim, m) {
+PYBIND11_MODULE(pyPanSim, m) {
     py::class_<SimulatorInterface>(m, "SimulatorInterface")
         .def(py::init<>())
         .def("initSimulation", [](SimulatorInterface &self, std::vector<std::string> options) {
