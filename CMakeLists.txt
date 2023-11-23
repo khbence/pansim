@@ -89,10 +89,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config/in/configTypes.h.in
 
 option(USE_GPU "Using CUDA-GPU if available" ON)
 
-if(USE_GPU)
-    find_package(CUDAToolkit)
-endif(USE_GPU)
-
 # Add options for MATLAB and Python bindings
 option(ENABLE_MATLAB "Enable MATLAB bindings" OFF)
 option(ENABLE_PYTHON "Enable Python bindings" OFF)
@@ -102,6 +98,7 @@ if(ENABLE_MATLAB)
     if(Matlab_FOUND)
         message(STATUS "MATLAB found")
         matlab_add_mex(NAME ${MEX_LIB} SRC matlab/mexPanSim.cpp)
+        target_compile_definitions(${MEX_LIB} PRIVATE MATLAB)
     else()
         message(STATUS "MATLAB not found")
     endif()
@@ -117,6 +114,10 @@ if (ENABLE_PYTHON)
         message(STATUS "pybind11 not found")
     endif()
 endif(ENABLE_PYTHON)
+
+if(USE_GPU)
+    find_package(CUDAToolkit)
+endif(USE_GPU)
 
 
 if(CUDAToolkit_FOUND AND USE_GPU)
@@ -166,10 +167,12 @@ if(CUDAToolkit_FOUND AND USE_GPU)
     target_link_libraries(${MAIN_BINARY} CUDA::cudart)
     if (Matlab_FOUND)
         set_target_properties(${MEX_LIB} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+        set_property(TARGET ${MEX_LIB} PROPERTY CUDA_ARCHITECTURES ${ARCH_LIST})
         target_link_libraries(${MEX_LIB} CUDA::cudart)
     endif()
     if (pybind11_FOUND)
         set_target_properties(${PY_LIB} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+        set_property(TARGET ${PY_LIB} PROPERTY CUDA_ARCHITECTURES ${ARCH_LIST})
         target_link_libraries(${PY_LIB} PUBLIC CUDA::cudart)
     endif()
 else()

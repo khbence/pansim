@@ -8,11 +8,14 @@ git clone https://github.com/NVIDIA/thrust.git --recursive
 
 mkdir build
 cd build
-cmake .. -DCMAKE_CXX_FLAGS="-I/home/ppolcz/_PanSim/thrust" -DUSE_GPU=OFF
+#if you want to run on CPUs
+cmake .. -DUSE_GPU=OFF -DENABLE_PYTHON=ON
+#if you want to run on GPUs
+cmake .. -DUSE_GPU=ON -DENABLE_PYTHON=ON
 make -j2
 
+cp pyPanSim.*.so ../
 cd ..
-cp build/mexPanSim.mexa64 matlab
 
 wget https://users.itk.ppke.hu/~regiszo/inputs.tgz
 tar xfv inputs.tgz
