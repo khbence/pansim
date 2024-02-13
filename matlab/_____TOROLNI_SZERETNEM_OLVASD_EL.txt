@@ -1,0 +1,191 @@
+.
+├── 1
+│
+│  │ Ebben a mappaban a regi probalkozasok talalhatoak.
+│  │ (A 2024. februar 13. elotti probalkozasok: PID, MPC + LUT.)
+│  └────────────────────────────────────────────────────
+│
+│   ├── Aggregator_A.m
+│   ├── Aggregator_B.m
+│   ├── Aggregator_C.m
+│   ├── Aggregator_D.m
+│   ├── Aggregator_E_GP.m
+│   ├── Aggregator_F_Statistical.m
+│   ├── Analyze_Result_A.m
+│   ├── COV_init_LQ_nonlin.m
+│   ├── COV_sim_LQ_nonlin.slx
+│   ├── COV_sim_LQ_nonlin.slxc
+│   ├── COV_sim_LQ_nonlin.slx.r2022b
+│   ├── Data
+│   ├── figgen.m
+│   ├── Fn_SLPIA_ode.m
+│   ├── Fn_SLPIA_out.m
+│   ├── get_SEIRb.m
+│   ├── get_SLPIAb.m
+│   ├── Intervention_Selector.m
+│   ├── load_PanSim_args.m
+│   ├── load_policy_measures.m
+│   ├── Main__Ami_volt.m
+│   ├── Main.m
+│   ├── Main__Mi_lett_volna_ha_Lag.m
+│   ├── Main__Mi_lett_volna_ha.m
+│   ├── Main_min_max.m
+│   ├── Main_MPC_Agent_v1_fancy.m
+│   ├── Main_MPC_Agent_v1.m
+│   ├── Main_MPC_Agent_v2_Integral.m
+│   ├── Main_MPC_Agent_v3.m
+│   ├── Main_MPC_Agent_v4_randref.m
+│   ├── Main_MPC_Agent_v5_randref.m
+│   ├── Main_MPC_Agent_v5_Tp01.m
+│   ├── Main_MPC_Agent_v5_Tp07.m
+│   ├── Main_MPC_Agent_v6_Tp07.m
+│   ├── Main_MPC_Agent_v7_Tp07.m
+│   ├── Main_MPC_Agent_v8_Tp07.m
+│   ├── Main_MPC_SEIR.m
+│   ├── mexPanSim.cpp
+│   ├── mexPanSim.mexa64
+│   ├── mexPanSim_wrap.m
+│   ├── mf_epid_ode_model_6comp.m
+│   ├── mf_epid_ode_model_8comp.m
+│   ├── mf_epid_ode_model_SLPIA.m
+│   ├── PanSim_args.mat
+│   ├── PanSim_max_after.mat
+│   ├── PanSim_max.mat
+│   ├── PanSim_min.mat
+│   ├── Parameters
+│   ├── policy2table.m
+│   ├── policy_varnames.m
+│   ├── quantify_policy.m
+│   ├── readMatrixFromFile.m
+│   ├── Readme
+│   ├── REC_2021-07-01_Agent-based_Delay21.mat
+│   ├── REC_2021-07-01_Agent-based_Sc0_PLNONE_CFNONE_SONONE_QU0.mat
+│   ├── REC_2021-07-01_Agent-based_Sc0_PLNONE_CFNONE_SONONE_QU0_Ujra.mat
+│   ├── REC_2021-07-01_Agent-based_Sc1_CFNONE_SONONE.mat
+│   ├── REC_2021-07-01_Agent-based_Sc1_CFNONE_SONONE_Ujra.mat
+│   ├── REC_2021-07-01_Agent-based_Sc2_CFNONE.mat
+│   ├── REC_2021-07-01_Agent-based_Sc2_CFNONE_Ujra.mat
+│   ├── REC_2021-07-01_Agent-based_Sc3_QU0.mat
+│   ├── REC_2021-07-01_Agent-based_Sc3_QU0_Ujra.mat
+│   ├── REC_2021-07-20_Agent-based.mat
+│   ├── REC_2021-07-22_Agent-based_Sc0_TPdef_PLNONE_CFNONE_SONONE_QU0_MA08.mat
+│   ├── REC_2021-07-22_Agent-based_Sc1_TPdef_PL0_CFNONE_SONONE_QU2_MA08.mat
+│   ├── REC_2023-07-23_CmpWW-based__1.mat
+│   ├── REC_2023-07-23_CmpWW-based__2.mat
+│   ├── res2.mat
+│   ├── Results
+│   ├── run_cpp.m
+│   ├── run_cpp.py
+│   ├── SEIR_measurement.m
+│   ├── SEIR_transition.m
+│   ├── simout2table.m
+│   ├── simout_varnames.m
+│   ├── SLPIAHRD_measurement.m
+│   ├── SLPIAHRD_transition.m
+│   ├── slprj
+│   ├── str2fun.m
+│   ├── Update_LUT.m
+│   ├── Update_LUT_v7.m
+│   ├── Visualize_Cmp_vs_Agn.m
+│   ├── Visualize_Control.m
+│   ├── Visualize_Intervention_Simple.m
+│   ├── Visualize_Intervention____TODO.m
+│   └── Visualize_MPC.m
+│
+│
+│
+├── 2
+│
+│  │ Ebben a mappaban az ujabb probalkozasok talalhatoak.
+│  │ (Optimalizacion alapulo rekonstrukcio + MPC + LUT)
+│  └────────────────────────────────────────────────────
+│
+│   ├── Data
+│   ├── Fn_SLPIAHDR_ode.m
+│   ├── Fn_SLPIAHDR_out.m
+│   ├── Fn_SLPIA_ode.m
+│   ├── Fn_SLPIA_out.m
+│   ├── get_SLPIAb.m
+│   ├── get_SLPIAHDRb.m
+│   ├── get_SLPIAHDRb_T.m
+│   ├── load_PanSim_args.m
+│   ├── load_policy_measures.m
+│   ├── Main_receding_hor_v1.m
+│   ├── mexPanSim.cpp
+│   ├── mexPanSim.mexa64
+│   ├── mexPanSim_wrap.m
+│   ├── mf_epid_ode_model_6comp.m
+│   ├── mf_epid_ode_model_8comp.m
+│   ├── mf_epid_ode_model_SLPIAH.m
+│   ├── mf_epid_ode_model_SLPIA.m
+│   ├── Parameters
+│   ├── Readme
+│   ├── rec_SLPIAHDR.asv
+│   ├── rec_SLPIAHDR.m
+│   ├── Step0_Load_Globals.m
+│   ├── Step1_Reconstruction_SLPIA.asv
+│   ├── Step1_Reconstruction_SLPIAHDR.asv
+│   ├── Step1_Reconstruction_SLPIAHDR.m
+│   ├── Step1_Reconstruction_SLPIA.m
+│   ├── Visualize_Intervention_Simple.m
+│   ├── Visualize_MPC.m
+│   ├── vn_policy.m
+│   ├── vn_simout.m
+│   ├── vn_SLPIAHDR.m
+│   └── vn_SLPIA.m
+│
+│
+│
+│
+│  │ A `matlab` gyoker mappaban talalhato egyedulallo fajlok mind at lettek helyezve `1`-be.
+│  │ Egyelore itt is meghagyom, de hamarosan torolni fogom.
+│  └────────────────────────────────────────────────────
+│
+│
+│  │ Tehat a kovetkezoket torolni fogom:
+│  └────────────────────────────────────────────────────
+│
+│
+├── COV_init_LQ_nonlin.m
+├── Data
+│   ├── data2.txt
+│   ├── data.txt
+│   └── Policy_measures.mat
+├── figgen.m
+├── get_SEIRb.m
+├── load_PanSim_args.m
+├── load_policy_measures.m
+├── Main__Ami_volt.m
+├── Main.m
+├── Main__Mi_lett_volna_ha_Lag.m
+├── Main__Mi_lett_volna_ha.m
+├── Main_min_max.m
+├── mexPanSim.cpp
+├── mexPanSim.mexa64
+├── mexPanSim_wrap.m
+├── readMatrixFromFile.m
+├── Readme
+│   ├── Compute_beta.txt
+│   ├── How_to_matlab.txt
+│   └── How_to_python.txt
+├── run_cpp.m
+├── run_cpp.py
+├── SEIR_measurement.m
+├── SEIR_transition.m
+├── simout2table.m
+├── SLPIAHRD_measurement.m
+├── SLPIAHRD_transition.m
+├── str2fun.m
+├── _____TOROLNI_SZERETNEM_OLVASD_EL.txt
+├── Utils
+│   ├── casadi_helper
+│   ├── epid_helper
+│   ├── gp_helper
+│   ├── Matlab_helper
+│   ├── pcz_colormix.m
+│   ├── pcz_hex2rgb.m
+│   ├── pcz_sigmoid_pattern.asv
+│   ├── Plot_Colors.m
+│   └── string_operations
+├── Visualize_Cmp_vs_Agn.m
+└── Visualize_Control.m
