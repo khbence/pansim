@@ -1,0 +1,22 @@
+
+
+
+git clone --recursive https://github.com/khbence/pansim.git
+cd pansim
+
+git clone https://github.com/NVIDIA/thrust.git --recursive -b cuda-11.6
+
+mkdir build
+cd build
+#if you want to run on CPUs
+cmake .. -DUSE_GPU=OFF -DENABLE_PYTHON=ON
+#if you want to run on GPUs
+cmake .. -DUSE_GPU=ON -DENABLE_PYTHON=ON
+make -j2
+
+cp pyPanSim.*.so ../
+cd ..
+
+wget https://users.itk.ppke.hu/~regiszo/inputs.tgz
+tar xfv inputs.tgz
+rm inputs.tgz

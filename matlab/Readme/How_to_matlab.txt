@@ -4,11 +4,11 @@
 git clone --recursive https://github.com/khbence/pansim.git
 cd pansim
 
-git clone https://github.com/NVIDIA/thrust.git --recursive
+git clone https://github.com/NVIDIA/thrust.git --recursive -b cuda-11.6
 
 mkdir build
 cd build
-cmake .. -DCMAKE_CXX_FLAGS="-I/home/ppolcz/_PanSim/thrust" -DUSE_GPU=OFF
+cmake .. -DUSE_GPU=OFF -DENABLE_MATLAB=ON
 make -j2
 
 cd ..

@@ -12,7 +12,7 @@ target_sources(${MAIN_BINARY} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/util.cpp)
 target_include_directories(${MAIN_BINARY} PUBLIC include/tools)
 
 
-if (Matlab_FOUND OR pybind11_FOUND)
+if (Matlab_FOUND)
     target_sources(${MEX_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/operators.cpp)
     target_sources(${MEX_LIB}
                 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/randomGenerator.cpp)
@@ -23,4 +23,17 @@ if (Matlab_FOUND OR pybind11_FOUND)
     target_sources(${MEX_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/util.cpp)
 
     target_include_directories(${MEX_LIB} PUBLIC include/tools)
+endif()
+
+if (pybind11_FOUND)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/operators.cpp)
+    target_sources(${PY_LIB}
+                PRIVATE ${CMAKE_CURRENT_LIST_DIR}/randomGenerator.cpp)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/smallTools.cpp)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/timeDay.cpp)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/timeHandler.cpp)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/timing.cpp)
+    target_sources(${PY_LIB} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/util.cpp)
+
+    target_include_directories(${PY_LIB} PUBLIC include/tools)
 endif()
