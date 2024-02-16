@@ -7,10 +7,11 @@
 %%
 
 % Population in the simulator
-Np = 179500;
+Np = C.Np;
 
-RESULT = "Result_2024-02-08_11-10_T7_randref_aggr_Finalized";
-R = readtimetable("/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results/" + RESULT + "/A.xls");
+%{
+RESULT = "Result_2024-02-13_16-59_T28_allcomb";
+R = readtimetable("/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2/" + RESULT + "/A47.xls");
 R.Date.Format = 'uuuu-MM-dd';
 
 Start_Date = datetime(2020,10,01);
@@ -18,6 +19,12 @@ Start_Date = datetime(2020,10,01);
 End_Date = datetime(2021,01,31);
 
 R = R(isbetween(R.Date,Start_Date,End_Date),:);
+%}
+
+%%
+
+Start_Date = R.Date(1);
+End_Date = R.Date(end);
 
 N = height(R) - 1;
 
@@ -37,16 +44,16 @@ Q("Future",:) = [];
 
 import casadi.*
 
-[f,~,~,J] = mf_epid_ode_model_8comp(Np);
+[f,~,~,J] = epid.ode_model_8comp(Np);
 
 % -----------------------------------
 % Reference values
 
-D = R.D1 + R.D2;
-H = R.I5h + R.I6h;
-S = Np - D - R.IMM1 - R.L - R.P - R.I - R.A - H;
+D = double(R.D1 + R.D2);
+H = double(R.I5h + R.I6h);
+S = Np - D - double(R.IMM1) - R.L - R.P - R.I - R.A - H;
 
-x_PanSim = [S R.L R.P R.I R.A H D R.IMM1]';
+x_PanSim = double([S R.L R.P R.I R.A H D R.IMM1]');
 
 % -----------------------------------
 % Initial guess
@@ -75,19 +82,19 @@ beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min,'
 beta = beta_fh(beta_var);
 
 tauL_guess = P.Param(1,K.L_iPeriod);
-tauL = helper.new_var('tauL',[1,1],'lb',1/50,'ub',2);
+tauL = helper.new_var('tauL',[1,1],'lb',1/3,'ub',1);
 
 tauP_guess = P.Param(1,K.P_iPeriod);
-tauP = helper.new_var('tauP',[1,1],'lb',1/50,'ub',2);
+tauP = helper.new_var('tauP',[1,1],'lb',1/3,'ub',1);
 
 tauI_guess = P.Param(1,K.I_iPeriod);
-tauI = helper.new_var('tauI',[1,1],'lb',1/50,'ub',2);
+tauI = helper.new_var('tauI',[1,1],'lb',1/5,'ub',1);
 
 tauA_guess = P.Param(1,K.A_iPeriod);
-tauA = helper.new_var('tauA',[1,1],'lb',1/50,'ub',2);
+tauA = helper.new_var('tauA',[1,1],'lb',1/5,'ub',1);
 
 tauH_guess = P.Param(1,K.H_iPeriod);
-tauH = helper.new_var('tauH',[1,1],'lb',1/50,'ub',2);
+tauH = helper.new_var('tauH',[1,1],'lb',1/14,'ub',1/7);
 
 pI_guess = P.Param(1,K.Pr_I);
 pI = helper.new_var('pI',[1,1],'lb',0.01,'ub',0.99);
@@ -125,7 +132,7 @@ helper.add_obj('I_error',sumsqr(x(J.I,:) - R.I'),1);
 helper.add_obj('A_error',sumsqr(x(J.A,:) - R.A'),1);
 helper.add_obj('H_error',sumsqr(x(J.H,:) - H'),100);
 helper.add_obj('D_error',sumsqr(x(J.D,:) - D'),10);
-helper.add_obj('R_error',sumsqr(x(J.R,:) - R.IMM1'),0.01);
+helper.add_obj('R_error',sumsqr(x(J.R,:) - double(R.IMM1)'),0.01);
 
 % helper.add_obj('State_error',sumsqr(x - x_PanSim));
 
@@ -154,11 +161,11 @@ x_sol = helper.get_value('x');
 R.TrRate_Rec = beta_fh( beta_sol )';
 x_Rec = x_fh( x_sol );
 
-tauL = helper.get_value('tauL')
-tauP = helper.get_value('tauP')
-tauI = helper.get_value('tauI')
-tauA = helper.get_value('tauA')
-tauH = helper.get_value('tauH')
+tauL = 1/helper.get_value('tauL')
+tauP = 1/helper.get_value('tauP')
+tauI = 1/helper.get_value('tauI')
+tauA = 1/helper.get_value('tauA')
+tauH = 1/helper.get_value('tauH')
 pI = helper.get_value('pI')
 pH = helper.get_value('pH')
 pD = helper.get_value('pD')
@@ -169,14 +176,12 @@ w = helper.get_value('w')
 Fig = figure;
 delete(Fig.Children)
 
-[~,TrRate] = get_SLPIAHDRb_T(R,Np);
-
 nexttile
-plot(R.Date,[R.TrRate , R.TrRate_Rec , TrRate])
+plot(R.Date,[R.TrRate , R.TrRate_Rec])
+title('Transmission rate')
 
-SLPIAHDR = vn_SLPIAHDR;
 for i = 1:J.nx
     nexttile
     plot(R.Date,[x_PanSim(i,:)' , x_Rec(i,:)'])
-    title(SLPIAHDR(i))
+    title(Vn.SLPIAHDR(i))
 end
