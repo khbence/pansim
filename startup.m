@@ -1,5 +1,6 @@
 
 
+addpath('build')
 addpath('matlab/2')
 addpath(genpath('matlab/Utils'))
 addpath(genpath('matlab/Toolboxes'))
