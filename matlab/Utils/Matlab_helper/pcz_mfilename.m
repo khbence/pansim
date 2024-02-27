@@ -56,6 +56,26 @@ else
     s.reldir = '[Relative directory in workspace `_` not detected.]';
 end
 
+if strcmp(args.Type,'string')
+    s.version     = string(s.version);
+    s.path        = string(s.path);
+    s.dirs        = string(s.dirs);
+    s.dir         = string(s.dir);
+    s.pdir        = string(s.pdir);
+    s.ppdir       = string(s.ppdir);
+    s.pppdir      = string(s.pppdir);
+    s.ppppdir     = string(s.ppppdir);
+    s.startup     = string(s.startup);
+    s.pstartup    = string(s.pstartup);
+    s.ppstartup   = string(s.ppstartup);
+    s.pppstartup  = string(s.pppstartup);
+    s.ppppstartup = string(s.ppppstartup);
+    s.bname       = string(s.bname);
+    s.ext         = string(s.ext);
+    s.fname       = string(s.fname);
+    s.pdirs       = string(s.pdirs);
+    s.reldir      = string(s.reldir);
+end
 
 end
 

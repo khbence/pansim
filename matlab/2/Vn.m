@@ -5,6 +5,83 @@ classdef Vn
 %
 
 properties (Constant = true)
+    % `simout` is defined later
+
+    TrRate = "TrRate";
+    SLPIA = ["S","L","P","I","A"];
+    SLPIAHDR = ["S","L","P","I","A","H","D","R"];
+
+    params = ["tauL","tauP","tauA","tauI","tauH","qA","pI","pH","pD"];
+
+    policy = ["TP","PL","CF","SO","QU","MA"];
+    policy_Iq = "Iq";
+    policy_Iq_ = Vn.policy_Iq + "_" + string(cellfun(@(i) {num2str(i)},num2cell(1:numel(Vn.policy))))
+    TP = table(categorical(["TPdef"; "TP015"; "TP035"]),[0.5; 1.5; 3.5],'VariableNames',{'TP','TP_Val'});
+    PL = table(categorical(["PLNONE";"PL0"]),[0;1],'VariableNames',{'PL','PL_Val'});
+    CF = table(categorical(["CFNONE";"CF2000-0500"]),[0;1],'VariableNames',{'CF','CF_Val'});
+    SO = table(categorical(["SONONE";"SO3";"SO12"]),[0;1;2],'VariableNames',{'SO','SO_Val'});
+    QU = table(categorical(["QU0";"QU2";"QU3"]),[0;2;4],'VariableNames',{'QU','QU_Val'});
+    MA = table(categorical(["MA0.8";"MA1.0"]),[0.8;1],'VariableNames',{'MA','MA_Val'});
+end
+
+methods(Static)
+        
+    function R = quantify_policy(R)
+        R_ = join(join(join(join(join(join(R(:,Vn.policy),Vn.TP),Vn.PL),Vn.CF),Vn.SO),Vn.QU),Vn.MA);
+        
+        for vn = Vn.policy + "_Val"
+            R.(vn) = R_.(vn);
+        end
+        
+        R.Iq = Vn.Iq(R);
+        R.IQ = Vn.IQ(R);
+    end    
+
+    function PM = allcomb
+        Values = cellfun(@(r) {Vn.(r).(r)}, num2cell(Vn.policy));
+        Combinations = allcomb(Values{:});
+        PM = array2table(Combinations,'VariableNames',Vn.policy);
+        PM = Vn.quantify_policy(PM);
+    end
+
+    function ret = Iq(R)
+        % round(sqrt([0.5 1.5 3.5] - 0.5)) / 2
+        ret = [ round(sqrt(R.TP_Val-0.5))/2 , R.PL_Val , R.CF_Val , R.SO_Val/2 , R.QU_Val/4 , (1-R.MA_Val)*5 ];
+    end
+
+    function ret = IQ(R)
+        ret = ...
+            1e5 * round(R.TP_Val + 0.5) + ...
+            1e4 * R.PL_Val + ...
+            1e3 * R.CF_Val + ...
+            1e2 * R.SO_Val + ...
+            1e1 * R.QU_Val + ...
+            1e0 * round((1-R.MA_Val)*10);
+        ret = int32(ret);
+    end
+
+    function ret = Ipredk(ks)
+        ret = "Ipred_k" + string(ks+1);
+    end
+
+    function ret = Hpredk(ks)
+        ret = "Hpred_k" + string(ks+1);
+    end
+
+    function ret = TrRatek(ks)
+        ret = "TrRate_k" + string(ks+1);
+    end
+
+    function ret = IQk(ks)
+        ret = "IQ_k" + string(ks+1);
+    end
+end
+
+% -------------------------------------------------------------------------------------- %
+% --- SIMOUT IS DEFINED HERE ----------------------------------------------------------- %
+% -------------------------------------------------------------------------------------- %
+
+properties (Constant = true)
     simout = [
 ...                                              ┌─ (R_h)
 ...                                              │     ┌─ (R)
@@ -48,30 +125,6 @@ properties (Constant = true)
 ...  39    40   [41      42      43      44      45      46      47   ]  48     49
     "HCI" "HCE" "INFV1" "INFV2" "INFV3" "INFV4" "INFV5" "INFV6" "INFV7" "INFH" "VNI"
     ];
-
-    TrRate = "TrRate";
-    SLPIA = ["S","L","P","I","A"];
-    SLPIAHDR = ["S","L","P","I","A","H","D","R"];
-
-    params = ["tauL","tauP","tauA","tauI","tauH","qA","pI","pH","pD"];
-
-    policy = ["TP","PL","CF","SO","QU","MA"];
-    policy_Iq = "Iq";
-    policy_Iq_ = Vn.policy_Iq + "_" + string(cellfun(@(i) {num2str(i)},num2cell(1:numel(Vn.policy))))
-    TP = table(categorical(["TPdef"; "TP015"; "TP035"]),[0.5; 1.5; 3.5],'VariableNames',{'TP','TP_Val'});
-    PL = table(categorical(["PLNONE";"PL0"]),[0;1],'VariableNames',{'PL','PL_Val'});
-    CF = table(categorical(["CFNONE";"CF2000-0500"]),[0;1],'VariableNames',{'CF','CF_Val'});
-    SO = table(categorical(["SONONE";"SO3";"SO12"]),[0;1;2],'VariableNames',{'SO','SO_Val'});
-    QU = table(categorical(["QU0";"QU2";"QU3"]),[0;2;4],'VariableNames',{'QU','QU_Val'});
-    MA = table(categorical(["MA0.8";"MA1.0"]),[0.8;1],'VariableNames',{'MA','MA_Val'});
-end
-
-methods(Static)
-    
-    function Iq = Iq(R)
-        % round(sqrt([0.5 1.5 3.5] - 0.5)) / 2
-        Iq = [ round(sqrt(R.TP_Val-0.5))/2 , R.PL_Val , R.CF_Val , R.SO_Val/2 , R.QU_Val/4 , (1-R.MA_Val)*5 ];
-    end
 end
 
 end

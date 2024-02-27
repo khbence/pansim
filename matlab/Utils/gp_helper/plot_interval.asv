@@ -46,10 +46,11 @@ end
     for i = 1:numel(Idx_start)
         Idx = Idx_start(i):Idx_end(i);
     
-        Sh(1) = plot(tt(Idx),lb(Idx));
-        Sh(2) = plot(tt(Idx),ub(Idx));
+        F = patch(x2,inBetween,[0.5 0.2 0.5],'FaceAlpha',0.5,'EdgeAlpha',0)
 
-        Sh(3) = patch(...
+        Sh(1) = plot()
+
+        Sh = patch(...
             [tt(Idx) , fliplr(tt(Idx))], ...
             [ub(Idx) , fliplr(lb(Idx))], ...
             FaceColor, ...
@@ -66,8 +67,6 @@ end
         else
             Sh(1).LineStyle = 'none';
             Sh(2).LineStyle = 'none';
-            Sh(1).Visible = 'off';
-            Sh(2).Visible = 'off';
         end
     
     end

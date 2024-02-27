@@ -6,4 +6,4 @@ end
 if ~istable(PM)
     PM = array2table(PM,'VariableNames',Vn.policy);
 end
-PM = hp.quantify_policy(PM);
+PM = Vn.quantify_policy(PM);

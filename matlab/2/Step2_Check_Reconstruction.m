@@ -10,7 +10,9 @@
 Np = C.Np;
 
 RESULT = "Result_2024-02-13_16-59_T28_allcomb";
-R = readtimetable("/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2/" + RESULT + "/A47.xls");
+xls = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2/" + RESULT + "/A47.xls";
+xls = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2/GenLUT/Fig_2024-02-26_14-28.xls";
+R = readtimetable(xls);
 R.Date.Format = 'uuuu-MM-dd';
 
 Start_Date = datetime(2020,10,01);
@@ -21,19 +23,34 @@ R = R(isbetween(R.Date,Start_Date,End_Date),:);
 
 %%
 
-R = rec_SLPIAHDR(R);
-
-%%
-
 fp = pcz_mfilename(mfilename('fullpath'));
 Q = readtable(string(fp.dir) + "/Parameters/Par_HUN_2023-12-19_JN1.xlsx", ...
     "ReadRowNames",true,"Sheet","Main");
 Q = Q(["Transient","Original","Future"],:);
 
+% Q("Original","Period_L") = table(2);
+% Q("Original","Period_P") = table(4);
+% Q("Original","Period_A") = table(7);
+% Q("Original","Pr_D") = table(0.48);
+
+% 2024.02.26. (február 26, hétfő), 15:06
+Q("Original","Pr_I") = table(0.48);
+Q("Original","Period_L") = table(1.5);
+Q("Original","Period_P") = table(3.1);
+Q("Original","Period_A") = table(4.1);
+Q("Original","Pr_D") = table(0.48);
+
+
 P = Epid_Par.Get(Q);
 P = P(isbetween(P.Date,Start_Date,End_Date),:);
+P = hp.param2table(P.Param);
+R(:,P.Properties.VariableNames) = P;
 
 K = Epid_Par.GetK;
+
+%%
+
+R = rec_SLPIAHDR(R);
 
 %% Construct optimization
 
@@ -42,7 +59,7 @@ import casadi.*
 [f,~,~,J] = epid.ode_model_8comp(Np);
 
 x = R(:,Vn.SLPIAHDR + "r").Variables';
-p = P.Param';
+p = R(:,Vn.params).Variables';
 beta = R.TrRateRec;
 
 model_error = x*0;

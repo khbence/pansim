@@ -11,6 +11,6 @@ opts = detectImportOptions(filename);
 opts = setvartype(opts,Vn.policy,"categorical");
 
 T = readtable(filename,opts);
-T = hp.quantify_policy(T);
+T = Vn.quantify_policy(T);
 
 end
