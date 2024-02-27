@@ -30,6 +30,7 @@ Nr_Periods = s.Nr_Periods;
 N = Nr_Periods*Tp;
 
 DIR = s.DIR;
+MAT_Results = fullfile(DIR,sprintf("A%04d.xls",PM_comb_Idx));
 
 s = load(MAT_PM_combi(PM_comb_Idx));
 PM_Indices = s.Perm;
@@ -99,5 +100,4 @@ clear pansim mex
 
 R = Vn.quantify_policy(R);
 
-filename = fullfile(DIR,sprintf("A%04d.xls",PM_comb_Idx));
-writetimetable(R,filename,"Sheet","Results");
+writetimetable(R,MAT_Results,"Sheet","Results");
