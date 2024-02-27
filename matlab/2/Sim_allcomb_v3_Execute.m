@@ -52,7 +52,9 @@ for i = 1:N_sim
     save(MAT_PM_combi(i),"Perm")
 end
 
-allperms = Pmx_Perms(:);
+% fig = figure(12);
+% histogram(Pmx_Perms(:)-0.5,'BinEdges',(0:nP));
 
-fig = figure(12);
-histogram(allperms-0.5,'BinEdges',(0:nP));
+for i = N_sim
+    Sim_allcomb_v3_Simplified(i);
+end

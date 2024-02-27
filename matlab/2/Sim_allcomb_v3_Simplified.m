@@ -1,3 +1,4 @@
+function Sim_allcomb_v3_Simplified(PM_comb_Idx)
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Modified on 2023. July 14. (2023a)
