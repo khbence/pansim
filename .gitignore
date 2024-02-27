@@ -16,3 +16,5 @@ matlab/mexPanSim.mexa64
 
 # Polcz:
 thrust
+Fn_*_ode.m
+Fn_*_out.m

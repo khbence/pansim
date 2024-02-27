@@ -319,12 +319,10 @@ for k = 0:Nr_Periods-1
         R.k(Idx) = k;
         R.d(Idx) = d;
 
-        fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
-    
-        drawnow
-
-        % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
     end
+    fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+    drawnow
+    % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
 
     Pend = (k+1)*Tp;
     if Pend >= 7
