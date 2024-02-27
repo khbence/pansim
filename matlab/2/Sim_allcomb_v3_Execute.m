@@ -6,17 +6,27 @@
 % 
 
 fp = pcz_mfilename(mfilename("fullpath"));
-DIR_Export = fullfile(fp.dir,'Export');
-MAT_PM_Allcomb = fullfile(DIR_Export,'PM_Allcomb.mat');
+DIR_Input = fullfile(fp.dir,'Input');
+DIR_Output = fullfile(fp.dir,'Output');
+MAT_PM_Allcomb = fullfile(DIR_Input,'PM_Allcomb.mat');
+MAT_PM_combi = @(i) fullfile(DIR_Input,sprintf('PM_comb%04d.mat',i));
 
 Today = string(datetime('today','Format','uuuu-MM-dd'));
-DIR = fullfile(DIR_Export,"Allcomb_" + Today);
+DIR = fullfile(DIR_Output,"Allcomb_" + Today);
+
+if ~exist(DIR_Input,"dir")
+    mkdir(DIR_Input)
+end
+
+if ~exist(DIR_Output,"dir")
+    mkdir(DIR_Output)
+end
 
 if ~exist(DIR,"dir")
     mkdir(DIR);
 end
 
-%%
+%% PM_Allcomb.mat
 
 T = Vn.allcomb;
 nP = height(T);
@@ -30,26 +40,19 @@ nP = height(T);
 
 Tp = 28;
 Nr_Periods = 13;
-N = Tp * Nr_Periods;
+save(MAT_PM_Allcomb,"DIR","T","Tp","Nr_Periods")
+
+%% PM_comb000i.mat
 
 N_sim = 1000;
-
 Pmx_Perms = zeros(N_sim,Nr_Periods);
 for i = 1:N_sim
-    Pmx_Perms(i,:) = randperm(nP,Nr_Periods);
+    Perm = randperm(nP,Nr_Periods);
+    Pmx_Perms(i,:) = Perm;
+    save(MAT_PM_combi(i),"Perm")
 end
 
 allperms = Pmx_Perms(:);
 
 fig = figure(12);
 histogram(allperms-0.5,'BinEdges',(0:nP));
-
-Idx = 0;
-save(MAT_PM_Allcomb,"DIR","T","nP","Idx","Pmx_Perms","Tp","N","Nr_Periods")
-
-for i = 1:nP
-    Sim_allcomb_v3
-end
-
-delete(MAT_PM_Allcomb)
-

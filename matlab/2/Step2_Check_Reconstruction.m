@@ -34,10 +34,10 @@ Q = Q(["Transient","Original","Future"],:);
 % Q("Original","Pr_D") = table(0.48);
 
 % 2024.02.26. (február 26, hétfő), 15:06
-Q("Original","Pr_I") = table(0.48);
+Q("Original","Pr_I") = table(0.46);
 Q("Original","Period_L") = table(1.5);
 Q("Original","Period_P") = table(3.1);
-Q("Original","Period_A") = table(4.1);
+Q("Original","Period_A") = table(4);
 Q("Original","Pr_D") = table(0.48);
 
 

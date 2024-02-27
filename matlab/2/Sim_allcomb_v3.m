@@ -2,10 +2,31 @@
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Modified on 2023. July 14. (2023a)
 %
-
-clear all
+% 
+% `Idx` should be set first
 
 VISUALIZE = false;
+
+%%
+
+if exist('pansim','var')
+    clear pansim
+end
+clear mex
+
+%%
+
+fp = pcz_mfilename(mfilename("fullpath"));
+DIR_Input = fullfile(fp.dir,'Input');
+DIR_Output = fullfile(fp.dir,'Output');
+MAT_PM_Allcomb = fullfile(DIR_Input,'PM_Allcomb.mat');
+MAT_PM_combi = @(i) fullfile(DIR_Input,sprintf('PM_comb%04d.mat',i));
+
+s = load(MAT_PM_Allcomb);
+T = s.T;
+Tp = s.Tp;
+Nr_Periods = s.Nr_Periods;
+DIR = s.DIR;
 
 %%
 
@@ -70,12 +91,14 @@ PanSim_args = ps.load_PanSim_args;
 %%%
 % Create simulator object
 DIR = fileparts(mfilename('fullpath'));
-obj = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
-obj.initSimulation(PanSim_args);
+pansim = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
+pansim.initSimulation(PanSim_args);
+
+%%
 
 % First step
 PM0 = T(PM_Indices(1),Vn.policy);
-simout = obj.runForDay(string(PM0.Variables));
+simout = pansim.runForDay(string(PM0.Variables));
 O = hp.simout2table(simout);
 R(1,O.Properties.VariableNames) = O;
 
@@ -97,7 +120,7 @@ for k = 0:Nr_Periods-1
     % Simulate and collect measurement
 
     for d = 1:Tp
-        simout = obj.runForDay(string(PM.Variables));
+        simout = pansim.runForDay(string(PM.Variables));
 
         Idx = Tp*k+d;
 
@@ -116,6 +139,7 @@ for k = 0:Nr_Periods-1
     R = rec_SLPIAHDR(R,Start_Date + [0,(k+1)*Tp],C.Np);
 
 end
+clear pansim mex
 
 if VISUALIZE
     fig = Visualize_MPC(R,N+1,"Tp",Tp);
@@ -125,4 +149,3 @@ end
 filename = s.DIR + "/A" + num2str(s.Actual_Pmx) + ".xls";
 writetimetable(R,filename,"Sheet","Results");
 exportgraphics(fig,s.DIR + "/Fig" + num2str(s.Actual_Pmx) + ".jpg");
-

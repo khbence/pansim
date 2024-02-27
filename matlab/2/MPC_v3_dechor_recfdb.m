@@ -5,9 +5,10 @@
 % Decreasing, shrinking, narrowing, shortening horizon. 
 % Feedback using the reconstructed, estimated epidemic state.
 
-%%
-
-clear all
+if exist('pansim','var')
+    clear pansim
+end
+clear mex
 
 %% Load parameters
 
@@ -131,10 +132,10 @@ PanSim_args = ps.load_PanSim_args;
 %%%
 % Create simulator object
 DIR = fileparts(mfilename('fullpath'));
-obj = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
-obj.initSimulation(PanSim_args);
+pansim = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
+pansim.initSimulation(PanSim_args);
 
-simout = obj.runForDay(string(k0_PM));
+simout = pansim.runForDay(string(k0_PM));
 
 %% Initialize timetable `R` (Results)
 
@@ -309,7 +310,7 @@ for k = 0:Nr_Periods-1
     % Simulate and collect measurement
 
     for d = 1:Tp
-        simout = obj.runForDay(string(R(Tp*k+d,Vn.policy).Variables));
+        simout = pansim.runForDay(string(R(Tp*k+d,Vn.policy).Variables));
 
         Idx = Tp*k+d;
 
@@ -332,6 +333,7 @@ for k = 0:Nr_Periods-1
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
     end
 end
+clear pansim mex
 
 fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 

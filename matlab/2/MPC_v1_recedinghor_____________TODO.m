@@ -2,7 +2,10 @@
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Created on 2024. January 23. (2023a)
 
-clear all
+if exist('pansim','var')
+    clear pansim
+end
+clear mex
 
 % Population in the simulator
 Np = 179500;
@@ -207,10 +210,10 @@ PanSim_args = load_PanSim_args;
 %%%
 % Create simulator object
 DIR = fileparts(mfilename('fullpath'));
-obj = mexPanSim_wrap(str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
-obj.initSimulation(PanSim_args);
+pansim = mexPanSim_wrap(str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
+pansim.initSimulation(PanSim_args);
 
-simout = obj.runForDay(string(PM(1,:)));
+simout = pansim.runForDay(string(PM(1,:)));
 [x0,beta0] = get_SLPIAb(simout,Np);
 xx(:,1) = x0;
 
@@ -270,7 +273,7 @@ for k = 0:N-N_MPC-1
 
     r = Results(Tp*k+1,:);
     for d = 1:Tp
-        simout = obj.runForDay(string(PM(k+1,:)));
+        simout = pansim.runForDay(string(PM(k+1,:)));
         [simx,simbeta] = get_SLPIAb(simout,Np);
 
         xx(:,Tp*k+d+1) = simx;
@@ -310,6 +313,7 @@ for k = 0:N-N_MPC-1
     end
 
 end
+clear pansim mex
 
 filename = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results/Result_" + string(Now) + ".xls";
 writetable(splitvars(Results),filename,"Sheet","Results");

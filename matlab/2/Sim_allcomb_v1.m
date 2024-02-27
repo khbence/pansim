@@ -6,9 +6,12 @@
 % 
 % Decreasing, shrinking, narrowing, shortening horizon
 
-%%
+if exist('pansim','var')
+    clear pansim
+end
+clear mex
 
-clear all
+%%
 
 matname = 'matlab/2/PM_Indices.mat';
 s = load(matname);
@@ -78,12 +81,12 @@ PanSim_args = ps.load_PanSim_args;
 %%%
 % Create simulator object
 DIR = fileparts(mfilename('fullpath'));
-obj = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
-obj.initSimulation(PanSim_args);
+pansim = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
+pansim.initSimulation(PanSim_args);
 
 % First step
 PM0 = T(PM_Indices(1),Vn.policy);
-simout = obj.runForDay(string(PM0.Variables));
+simout = pansim.runForDay(string(PM0.Variables));
 O = hp.simout2table(simout);
 R(1,O.Properties.VariableNames) = O;
 
@@ -105,7 +108,7 @@ for k = 0:Nr_Periods-1
     % Simulate and collect measurement
 
     for d = 1:Tp
-        simout = obj.runForDay(string(PM.Variables));
+        simout = pansim.runForDay(string(PM.Variables));
 
         Idx = Tp*k+d;
 
@@ -123,6 +126,7 @@ for k = 0:Nr_Periods-1
     R = rec_SLPIAHDR(R,Start_Date + [0,(k+1)*Tp],C.Np);
 
 end
+clear pansim mex
 
 fig = Visualize_MPC(R,N+1);
 drawnow
