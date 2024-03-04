@@ -10,24 +10,40 @@ arguments
     args.FaceAlpha = 0.2;
 end
 
-    if args.PlotMean
+    Alpha = args.Alpha;
+    PlotMean = args.PlotMean;
+    args = rmfield(args,"Alpha");
+    args = rmfield(args,"PlotMean");
+
+    nv_pairs = repmat(fieldnames(args)',[2,1]);
+    for i = 1:width(nv_pairs)
+        nv_pairs{2,i} = args.(nv_pairs{2,i});
+    end
+
+    if PlotMean
         Pl_Mu = plot(tt,xx,'Color',args.LineColor,'LineStyle',args.LineStyle,"LineWidth",args.LineWidth);
     end
+    
+    Sh = plot_interval(tt,xx-Alpha*xx_std,xx+Alpha*xx_std,FaceColor,nv_pairs{:});
 
-    Sh = shade(tt,xx'+args.Alpha*xx_std',tt,xx-args.Alpha*xx_std, ...
-        'FillType',[1 2;2 1], ...
-        'FillColor',FaceColor);
-    for s = Sh.'
-        if isprop(s,'FaceAlpha')
-            s.FaceAlpha = args.FaceAlpha;
-        end
-        if isprop(s,'LineStyle')
-            s.LineStyle = 'none';
-        end
+    if PlotMean
+        Sh = [Pl_Mu ; Sh(:)];
     end
-
-    if args.PlotMean
-        Sh = [Pl_Mu ; Sh];
-    end
+    
+    % 
+    % 
+    % 
+    % Sh = shade(tt,xx'+args.Alpha*xx_std',tt,xx-args.Alpha*xx_std, ...
+    %     'FillType',[1 2;2 1], ...
+    %     'FillColor',FaceColor);
+    % for s = Sh.'
+    %     if isprop(s,'FaceAlpha')
+    %         s.FaceAlpha = args.FaceAlpha;
+    %     end
+    %     if isprop(s,'LineStyle')
+    %         s.LineStyle = 'none';
+    %     end
+    % end
+    % 
 
 end

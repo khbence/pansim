@@ -10,6 +10,8 @@ arguments
     args.FigNr = 1315
     args.XLineData = [];
     args.TrRateVarName = "TrRate"
+    args.TrRateStd = ""
+    args.TrRateMedian = ""
 end
 %%
 
@@ -34,7 +36,14 @@ Tl = tiledlayout(8,1,"TileSpacing","compact","Padding","compact","TileIndexing",
 
 
 Ax = nexttile; hold on
-Pl_Tr = stairs(XData,R.(args.TrRateVarName),'k','LineWidth',2)
+if ~isempty(args.TrRateStd)
+    Sh = plot_mean_var(XData,R.(args.TrRateVarName),R.(args.TrRateStd),[1,1,1]*0.5);
+else
+    Pl_Tr = stairs(XData,R.(args.TrRateVarName),'k','LineWidth',2);
+end
+if ~isempty(args.TrRateMedian)
+    Pl_Tr = plot(XData,R.(args.TrRateMedian),'LineWidth',2);
+end
 ylabel(TeX("tr. rate ($\beta$)"),Interpreter="latex")
 make_title('Estimated transmission rate')
 
@@ -49,7 +58,7 @@ Yl = yline(YData,'k');
 colormap(Ax(end),MyColorMap)
 view(Ax(end),[0 90]);
 yticks(YData(2:end)-0.5);
-yticklabels(policy_varnames);
+yticklabels(Vn.policy);
 make_title('Intervention')
 view([0 -90])
 

@@ -6,7 +6,8 @@
 % `Idx` should be set first
 
 fp = pcz_mfilename(mfilename("fullpath"));
-DIR = fullfile(fp.dir,'Output','Allcomb_2024-02-27');
+Result_ID = "2024-02-27";
+DIR = fullfile(fp.dir,"Output","Allcomb_" + Result_ID);
 
 ff = @(d) string(cellfun(@(s) {fullfile(s.folder,s.name)}, num2cell(d)));
 xlsnames = ff( dir(fullfile(DIR,'*.xls')) );
@@ -63,7 +64,19 @@ end
 D.IQ = int32(D.IQ);
 D = renamevars(D,"TrRateRec","TrRate");
 
-GS = groupsummary(D,"IQ",["mean","std"]);
+GS = groupsummary(D,"IQ",["mean","std","median"]);
+GS = renamevars(GS,["mean_TrRate","std_TrRate","median_TrRate"],["TrRate","TrRateStd","TrRateMedian"]);
 
+s = load(fullfile(fp.dir,"Input","PM_Allcomb.mat"));
+GS = join(s.T,GS);
 
+[~,idx] = sort(GS.TrRate);
+GS = GS(idx,:);
+
+fname = fullfile(fp.dir,"Output","Summary_" + Result_ID + ".xls");
+writetable(GS,fname);
+
+%%
+
+Visualize_Intervention_Simple(GS,TrRateStd="TrRateStd",TrRateMedian="TrRateMedian");
 
