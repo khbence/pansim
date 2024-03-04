@@ -108,7 +108,7 @@ R.Ir(2:end) = NaN;
 % .... there would be more, but those are not relevant
 
 % Append the reference trajectory to `R` as a new column
-Iref = Iref + R.I(1);
+Iref = Iref + (R.I(1) - Iref(1));
 R.Iref = Iref;
 
 % Append `k` (control term) and `d` (day) to `R` as new columns

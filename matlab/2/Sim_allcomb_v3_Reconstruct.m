@@ -60,7 +60,7 @@ for i = 1:length(xlsnames)
 
     T = renamevars(T,"NI","NewCases");
 
-    Knot_Density = 14;
+    Knot_Density = 28;
     Nr_Knots = height(T) / Knot_Density;
     Spline_Order = 5;
     dt = 0.1;
@@ -75,10 +75,18 @@ for i = 1:length(xlsnames)
     
     D(idx,:) = T(:,D.Properties.VariableNames);
     idx = idx + height(T);
+
+    fprintf('%d / %d\n',i,length(xlsnames))
 end
 
 D.IQ = int32(D.IQ);
 D = renamevars(D,"TrRateRec","TrRate");
+
+% figure, hold on, plot(D.NewCases / C.Np * 10000), plot(D.NewCasesRate)
+
+% Filter out if new cases are small
+D(D.NewCases ./ C.Np * 100000 < 10 , :) = [];
+D(D.NewCasesRate < 0,:) = [];
 
 GS = groupsummary(D,"IQ",["mean","std","median"]);
 GS = renamevars(GS,["mean_TrRate","std_TrRate","median_TrRate"],["TrRate","TrRateStd","TrRateMedian"]);
@@ -94,5 +102,17 @@ writetable(GS,fname);
 
 %%
 
-Visualize_Intervention_Simple(GS,TrRateStd="TrRateStd",TrRateMedian="TrRateMedian");
+fname = '/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Summary_2024-02-27.xls';
+% fname = '/home/ppolcz/_PanSim_HEAD/matlab/2/Output/Summary_2024-02-27.xls';
+opts = detectImportOptions(fname);
+opts = setvartype(opts,Vn.policy,"categorical");
+GS = readtable(fname,opts);
+
+Iq_k = GS.Properties.VariableNames(startsWith(GS.Properties.VariableNames,'Iq_'));
+GS.Iq = GS(:,Iq_k).Variables;
+GS(:,Iq_k) = [];
+
+GS.Pmx = (1:height(GS))';
+
+Visualize_Intervention_Simple(GS,TrRateStd="TrRateStd",TrRateMedian="TrRateMedian",FigNr=1231);
 
