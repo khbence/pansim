@@ -32,9 +32,10 @@ P = hp.param2table(P.Param);
 
 N = height(T)*numel(xlsnames);
 
-na = nan(N,1);
-D = table(na,na,'VariableNames',["IQ","TrRateRec"]);
-D(1,:) = [];
+
+VariableNames = ["NewCases","NewCasesRate","Rt","IQ","TrRateRec"];
+na = repmat({nan(N,1)},size(VariableNames));
+D = table(na{:},'VariableNames',VariableNames);
 
 idx = 1:height(T);
 for i = 1:length(xlsnames)
@@ -43,21 +44,36 @@ for i = 1:length(xlsnames)
 
     try
         Pr = readtimetable(xlsnames(i),'Sheet','Reconstruction');
-        TPr = [T,Pr];
+        T = [T,Pr];
     catch e
         if strcmp(e.identifier,'MATLAB:spreadsheet:book:openSheetName')
             
             TP = [T,P];
-            [TPr,NewVars] = rec_SLPIAHDR(TP);
+            [T,NewVars] = rec_SLPIAHDR(TP);
             Variables = [P.Properties.VariableNames , NewVars];        
             
-            writetimetable(TPr(:,Variables),xlsnames(i),'Sheet','Reconstruction','WriteMode','overwritesheet')
+            writetimetable(T(:,Variables),xlsnames(i),'Sheet','Reconstruction','WriteMode','overwritesheet')
         else
             MException(e.identifier,"[Pcz: unhandled exception] " + e.message)
         end
     end
+
+    T = renamevars(T,"NI","NewCases");
+
+    Knot_Density = 14;
+    Nr_Knots = height(T) / Knot_Density;
+    Spline_Order = 5;
+    dt = 0.1;
+
+    Day = days(T.Date - T.Date(1));
+    NI_sp = spap2(Nr_Knots,Spline_Order,Day,T.NewCases);
+    dNI_sp = fnder(NI_sp);
+
+    T.NewCasesRate = fnval(dNI_sp,Day);
+
+    T.Rt = T.TrRateRec .* (1./T.tauL + T.pI./T.tauI + T.qA.*(1 - T.pI)./T.tauA).*T.S/C.Np; 
     
-    D(idx,:) = TPr(:,D.Properties.VariableNames);
+    D(idx,:) = T(:,D.Properties.VariableNames);
     idx = idx + height(T);
 end
 
