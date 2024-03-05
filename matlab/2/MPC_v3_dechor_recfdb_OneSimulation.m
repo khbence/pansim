@@ -1,4 +1,4 @@
-% function MPC_v3_dechor_recfdb_OneSimulation(Tp,N,Iref,Name)
+function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name)
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Created on 2024. February 29. (2023a)
@@ -22,8 +22,8 @@ P = Epid_Par.Get(Q);
 
 %%
 
-[~,Pmx_Mindent_lezar] = max(vecnorm(T.Iq,1,2));
-[~,Pmx_Mindent_felenged] = min(vecnorm(T.Iq,1,2));
+% [~,Pmx_Mindent_lezar] = max(vecnorm(T.Iq,1,2));
+% [~,Pmx_Mindent_felenged] = min(vecnorm(T.Iq,1,2));
 
 %% First policy
 
@@ -54,10 +54,10 @@ import casadi.*
 % xx = nan(J.nx,N+1);
 
 % Policy measures
-PM = repmat(k0_PM,[N+1,1]);
+% PM = repmat(k0_PM,[N+1,1]);
 
 % Measured beta
-beta_msd = nan(1,N+1);
+% beta_msd = nan(1,N+1);
 
 %%
 
@@ -107,8 +107,11 @@ R.I(2:end) = NaN;
 R.Ir(2:end) = NaN;
 % .... there would be more, but those are not relevant
 
+% Update: 2024-03-05
+w = Epid_Par.Interp_Sigmoid_v2(1, 0, 12,10, 1, N+1)';
+
 % Append the reference trajectory to `R` as a new column
-Iref = Iref + (R.I(1) - Iref(1));
+% Iref = Iref.*w + (1-w)*R.I(1);
 R.Iref = Iref;
 
 % Append `k` (control term) and `d` (day) to `R` as new columns
@@ -134,8 +137,6 @@ wIerr = [ ones(1,h(1)) , Epid_Par.Sigmoid(1,0,h(2)) , zeros(1,h(3)) ] + 0.1;
 
 Now = datetime;
 Now.Format = "uuuu-MM-dd_HH-mm";
-% DIR = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2/Result_" + string(Now) + "_T" + num2str(Tp) + "_randref_aggr";
-% mkdir(DIR)
 
 for k = 0:Nr_Periods-1
     % This is the `k`th control term, which simulates `Tp` days
@@ -255,9 +256,6 @@ for k = 0:Nr_Periods-1
         R.d(Idx) = d;
 
     end
-    fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
-    drawnow
-    % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
 
     Pend = (k+1)*Tp;
     if Pend >= 7
@@ -265,6 +263,10 @@ for k = 0:Nr_Periods-1
     else
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
     end
+
+    fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+    drawnow
+    % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
 end
 clear pansim mex
 
@@ -273,15 +275,18 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
 
 fp = pcz_mfilename(mfilename("fullpath"));
-dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27.xls");
+dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",Name);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end
+Now = string(Now);
 
-exportgraphics(fig,dirname + "/" + Name + "_" + string(Now) + ".pdf",'ContentType','vector');
-exportgraphics(fig,dirname + "/" + Name + "_" + string(Now) + ".jpg",'ContentType','vector');
+exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
+exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
 
 R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4);
-writetimetable(R,dirname + "/" + Name + "_" + string(Now) + ".xls","Sheet","Result");
+writetimetable(R,fullfile(dirname,Now + ".xls"),"Sheet","Result");
 
 % movefile(DIR,DIR+"_Finalized")
+
+end

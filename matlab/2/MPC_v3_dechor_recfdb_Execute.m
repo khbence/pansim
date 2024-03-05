@@ -1,16 +1,9 @@
 
-Tp = 21;
-
 N = 6*7*4;
-Nr_Periods = N / Tp;
-
 t_sim = 0:N;
-d_sim = C.Start_Date + t_sim;
-
-%%
 
 fp = pcz_mfilename(mfilename("fullpath"));
-fname = fullfile(fp.dir,"Output","Summary_2024-02-27.xls");
+fname = fullfile(fp.dir,"Output","Summary_2024-02-27__2.xls");
 opts = detectImportOptions(fname);
 opts = setvartype(opts,Vn.policy,"categorical");
 T = readtable(fname,opts);
@@ -21,74 +14,84 @@ T(:,Iq_k) = [];
 
 T.Pmx = (1:height(T))';
 
-%________________________________________________________________
-%% Random reference
+%%
 
-% 0, 1, 3, 6, 14, 1996
-Rng_Int = round(rand*10000);
-% Rng_Int = 1996;
-% Rng_Int = 0;
-% Rng_Int = 3466;
+for Tp = [7,14,21]
+%%    
+    Tp_str = sprintf('%02d',Tp);
+    
+    %________________________________________________________________
+    %% Random reference
+    
+    % 0, 1, 3, 6, 14, 1996
+    % Rng_Int = round(rand*10000);
+    % Rng_Int = 1996;
+    % Rng_Int = 0;
+    % Rng_Int = 3466;
+    
+    Name = "Ketpupu_Teve_T" + Tp_str;
+    Rng_Int = 1647; % <---- 5 + 20 db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
+    
+    Iref = generate_path(Rng_Int,N);
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Random reference
+    
+    Name = "Erdekes_Teve_T" + Tp_str;
+    Rng_Int = 7597; % <---- 3db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
+    
+    Iref = generate_path(Rng_Int,N);
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Sigmoid reference
+    
+    h = [1 2 1 2 1]*N/7;
+    u = @(i,a) zeros(1,h(i))+a;
+    S = @(i,a,b) Epid_Par.Sigmoid(a,b,h(i));
+    Iref = [ ...
+        u(1,0) ...
+        S(2,0,1) ...
+        u(3,1) ...
+        S(4,1,0) ...
+        u(5,0), 0 ...
+        ]'*900 + 100;
+    
+    Name = "Sigmoid_T" + Tp_str;
+    save("Iref.mat","Iref","Tp","N","Name")
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Constant reference
+    
+    Iref = t_sim'*0 + 500;
+    
+    Name = "C590_T" + Tp_str;
+    save("Iref.mat","Iref","Tp","N","Name")
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Increasing reference
+    
+    Iref = t_sim(:) ./ N * 1500;
+    
+    Name = "Lin1500_T" + Tp_str;
+    save("Iref.mat","Iref","Tp","N","Name")
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Constant reference
+    
+    Iref = t_sim'*0 + 1000;
+    
+    Name = "C1090T" + Tp_str;
+    save("Iref.mat","Iref","Tp","N","Name")
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
 
-Name = "Ketpupu_Teve_T" + num2str(Tp);
-Rng_Int = 1647; % <---- 5 + 20 db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
-
-% Name = "Erdekes_TeveT" + num2str(Tp);
-% Rng_Int = 7597; % <---- 3db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
-
-Iref = generate_path(Rng_Int,N);
-
-% save("Iref.mat","Iref","Tp","N","Name")
-for i=1:20; MPC_v3_dechor_recfdb_OneSimulation; end
-
-%________________________________________________________________
-%% Constant reference
-
-Iref = t_sim'*0 + 500;
-
-Name = "C590T" + num2str(Tp);
-save("Iref.mat","Iref","Tp","N","Name")
-for i=1:20; MPC_v3_dechor_recfdb_OneSimulation; end
-
-%________________________________________________________________
-%% Increasing reference
-
-Iref = t_sim(:) ./ N * 1500;
-
-Name = "Lin1500T" + num2str(Tp);
-save("Iref.mat","Iref","Tp","N","Name")
-for i=1:20; MPC_v3_dechor_recfdb_OneSimulation; end
-
-%________________________________________________________________
-%% Sigmoid reference
-
-h = [1 2 1 2 1]*N/7;
-u = @(i,a) zeros(1,h(i))+a;
-S = @(i,a,b) Epid_Par.Sigmoid(a,b,h(i));
-Iref = [ ...
-    u(1,0) ...
-    S(2,0,1) ...
-    u(3,1) ...
-    S(4,1,0) ...
-    u(5,0), 0 ...
-    ]'*800;
-
-Name = "SigmoidT" + num2str(Tp);
-save("Iref.mat","Iref","Tp","N","Name")
-for i=1:20; MPC_v3_dechor_recfdb_OneSimulation; end
-
-%________________________________________________________________
-%% Constant reference
-
-Iref = t_sim'*0 + 1000;
-
-Name = "C1090T" + num2str(Tp);
-save("Iref.mat","Iref","Tp","N","Name")
-for i=1:20; MPC_v3_dechor_recfdb_OneSimulation; end
-
+end
 
 %%% ------------------------------------------------------------
-
 
 function Iref = generate_path(Rng_Int,N)
 
@@ -111,7 +114,7 @@ function Iref = generate_path(Rng_Int,N)
         hyp.sn = 25;
         hyp.ell = Tk;
 
-        hpy = GP_eval(hyp);
+        GP_eval(hyp);
         Iref = GP_eval(hyp,t_sim);
 
         wFnSup = 2.5;

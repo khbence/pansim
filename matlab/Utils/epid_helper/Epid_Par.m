@@ -250,11 +250,16 @@ methods (Static)
         Dates = Dates';
         Dates = Dates(:)';
 
-        assert(all(days(diff(Dates)) > 0),'Dates should be given in an increasing order.')
+        assert(all(diff(Dates) > 0),'Dates should be given in an increasing order.')
 
-        N = days(Dates(end) - Dates(1)) + 1;
+        N = Dates(end) - Dates(1) + 1;
+        t = Dates - Dates(1) + 1;
+        if isa(N,'duration')
+            % Update: 2024-03-05
+            N = days(N);
+            t = days(t);
+        end
 
-        t = days(Dates - Dates(1)) + 1;
         dd = Dates(1) + (0:N-1);
 
         pp = zeros(size(p,1),N);

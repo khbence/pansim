@@ -3,24 +3,32 @@
 %  Created on 2024. February 15. (2023a)
 %
 
-DIR = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2";
+fp = pcz_mfilename(mfilename("fullpath"));
+dirname = fullfile(fp.pdir,"Output","Ctrl_2024-02-27");
 
-DIR_Summary = fullfile(DIR,"Summary");
+DIR_Summary = fullfile(dirname,"Summary");
 if ~exist(DIR_Summary,'dir')
     mkdir(DIR_Summary)
 end
 
 Results = [
-    "C590"
-    "C1090"
-    "Ketpupu_Teve"
-    "Lin1500"
-    "Sigmoid900"
+    % "C590"
+    % "C1090"
+    "Ketpupu_Teve_T07"
+    "Ketpupu_Teve_T21"
+    "Erdekes_Teve_T07"
+    "Erdekes_Teve_T21"
+    % "Lin1500"
+    % "Sigmoid900"
     ]';
 
 for result = Results
 %%
-    xlsnames = string(cellfun(@(d) {fullfile(d.folder,d.name)}, num2cell(dir(fullfile(DIR,result,"*.xls")))));
+    xlsnames = string(cellfun(@(d) {fullfile(d.folder,d.name)}, num2cell(dir(fullfile(dirname,result,"*.xls")))));
+
+    if isempty(xlsnames)
+        continue
+    end
 
     n = numel(xlsnames);
     I_cell = cell(1,n);
@@ -38,8 +46,8 @@ for result = Results
 
     [fig,ret] = Visualize(Date,Iref,I_cell,b_cell);
     
-    bname = "MeanStd_" + result + ".pdf";
-    fname = fullfile(DIR,result,bname);
+    bname = "_MeanStd_" + result + ".pdf";
+    fname = fullfile(dirname,result,bname);
     exportgraphics(fig,fname,'ContentType','vector');
 
     copyfile(fname,fullfile(DIR_Summary,bname));
