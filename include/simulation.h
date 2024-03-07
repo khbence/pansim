@@ -874,6 +874,7 @@ public:
                 } else if (flag == "MA0.8") {
                     if (currentMaskValue != 0.8) {
                         if (diagnosticLevel > 0) std::cout << "Masks at 80%" << std::endl;
+                        currentMaskValue = 0.8;
                         double currentMaskValue_local = currentMaskValue;
                         int homeType_l = homeType;
                         thrust::for_each(
@@ -887,7 +888,6 @@ public:
                                     infectiousness = infectiousness * currentMaskValue_local;
                                 }
                             });
-                        currentMaskValue = 0.8;
                     }
                 }
             }
