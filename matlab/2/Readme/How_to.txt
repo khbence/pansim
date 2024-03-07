@@ -1,0 +1,19 @@
+
+
+
+git clone --recursive https://github.com/khbence/pansim.git
+cd pansim
+
+git clone https://github.com/NVIDIA/thrust.git --recursive
+
+mkdir build
+cd build
+cmake .. -DCMAKE_CXX_FLAGS="-I/home/ppolcz/_PanSim/thrust" -DUSE_GPU=OFF
+make -j2
+
+cd ..
+cp build/mexPanSim.mexa64 matlab
+
+wget https://users.itk.ppke.hu/~regiszo/inputs.tgz
+tar xfv inputs.tgz
+rm inputs.tgz

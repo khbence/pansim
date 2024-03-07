@@ -847,6 +847,8 @@ public:
                 if (diagnosticLevel > 0) std::cout << "Quarantine policy: " << flag << std::endl;
                 if (flag == "QU0") {
                     quarantinePolicy(0);
+                } else if (flag == "QU1") {
+                    quarantinePolicy(1);
                 } else if (flag == "QU2") {
                     quarantinePolicy(2);
                 } else if (flag == "QU3") {
