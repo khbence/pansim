@@ -1,4 +1,4 @@
-function R_ = rec_SLPIAHDR(R,DSpan,Np,args)
+function [R_,NewVariableNames] = rec_SLPIAHDR(R,DSpan,Np,args)
 arguments
     R
     DSpan = R.Date([1,end])
@@ -8,6 +8,7 @@ arguments
 
     args.WeightIError = 1;
     args.WeightBetaSlope = 1e6;
+    args.Visualize = false;
 end
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
@@ -102,21 +103,32 @@ x = x_fh( x_sol );
 
 R(:,Vn.SLPIAHDR + "r") = array2table(x');
 
+
+% 2024.02.29. (február 29, csütörtök), 14:07
+NewVariableNames = [ "TrRateRec" , Vn.SLPIAHDR+"r" ];
+for vn = NewVariableNames
+    if ~ismember(vn,R_.Properties.VariableNames)
+        R_ = addvars(R_,nan(height(R_),1),'NewVariableNames',vn);
+    end
+end
+
 R_(ldx,:) = R(:,R_.Properties.VariableNames);
 
 %%
 
-Fig = figure(61512);
-delete(Fig.Children)
-
-nexttile
-plot(R.Date,[R.TrRate , R.TrRateRec])
-title('Transmission rate')
-
-for i = 1:J.nx
+if args.Visualize
+    Fig = figure(61512);
+    delete(Fig.Children)
+    
     nexttile
-    plot(R.Date,[x_PanSim(i,:)' , x(i,:)'])
-    title(Vn.SLPIAHDR(i))
+    plot(R.Date,[R.TrRate , R.TrRateRec])
+    title('Transmission rate')
+    
+    for i = 1:J.nx
+        nexttile
+        plot(R.Date,[x_PanSim(i,:)' , x(i,:)'])
+        title(Vn.SLPIAHDR(i))
+    end
 end
 
 
