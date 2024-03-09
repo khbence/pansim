@@ -49,7 +49,7 @@ Pmx_Perms = zeros(N_sim,Nr_Periods);
 for i = 1:N_sim
     Perm = randperm(nP,Nr_Periods);
     Pmx_Perms(i,:) = Perm;
-    save(MAT_PM_combi(i),"Perm")+60
+    save(MAT_PM_combi(i),"Perm")
 end
 
 % fig = figure(12);
@@ -58,3 +58,12 @@ end
 for i = 1:N_sim
     Sim_allcomb_v3_Simplified(i);
 end
+
+return
+
+%%
+
+for i = 1:1000
+    Sim_allcomb_v3_Simplified(i);
+end
+

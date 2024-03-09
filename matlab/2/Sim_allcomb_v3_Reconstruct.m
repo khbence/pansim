@@ -6,11 +6,9 @@
 % `Idx` should be set first
 
 fp = pcz_mfilename(mfilename("fullpath"));
-Result_ID = "2024-02-27";
-DIR = fullfile(fp.dir,"Output","Allcomb_" + Result_ID);
 
 ff = @(d) string(cellfun(@(s) {fullfile(s.folder,s.name)}, num2cell(d)));
-xlsnames = ff( dir(fullfile(DIR,'*.xls')) );
+xlsnames = ff( dir(fullfile(fp.dir,"Output","Allcomb_*",'*.xls')) );
 
 opts = detectImportOptions(xlsnames(1));
 opts = setvartype(opts,opts.SelectedVariableNames,"double");
@@ -97,13 +95,12 @@ GS = join(s.T,GS);
 [~,idx] = sort(GS.TrRate);
 GS = GS(idx,:);
 
-fname = fullfile(fp.dir,"Output","Summary_" + Result_ID + ".xls");
+fname = fullfile(fp.dir,"Output","Summary_" + string(datetime('today','Format','uuuu-MM-dd')) + ".xls");
 writetable(GS,fname);
 
 %%
 
-fname = '/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Summary_2024-02-27.xls';
-% fname = '/home/ppolcz/_PanSim_HEAD/matlab/2/Output/Summary_2024-02-27.xls';
+fname = '/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Summary_2024-03-09.xls';
 opts = detectImportOptions(fname);
 opts = setvartype(opts,Vn.policy,"categorical");
 GS = readtable(fname,opts);

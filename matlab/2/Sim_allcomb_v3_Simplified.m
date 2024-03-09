@@ -32,6 +32,11 @@ N = Nr_Periods*Tp;
 DIR = s.DIR;
 MAT_Results = fullfile(DIR,sprintf("A%04d.xls",PM_comb_Idx));
 
+if exist(MAT_Results,"file")
+    fprintf('File `%s` already exists! Exiting ...\n',MAT_Results)
+    return
+end
+
 s = load(MAT_PM_combi(PM_comb_Idx));
 PM_Indices = s.Perm;
 
