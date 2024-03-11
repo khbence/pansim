@@ -81,10 +81,10 @@ R = [ ...
     hp.policy2table(k0_PM)              ... Applied policy measures in flags and values
     table(k0_TrRateExp,k0_TrRateExp,NaN,NaN,'VariableNames', ... Further variables:
         {'TrRateCmd','TrRateExp','TrRateRec','Ipred'})       ... Ipred: legacy
-    array2table(nan(1,Nr_Periods),'VariableNames',Vn.IQk(0:Nr_Periods-1)) ... Planned IQ in the different phases
-    array2table(nan(1,Nr_Periods),'VariableNames',Vn.TrRatek(0:Nr_Periods-1)) ... Estimated TrRate in the different phases
-    array2table(nan(1,Nr_Periods),'VariableNames',Vn.Ipredk(0:Nr_Periods-1)) ... Predicted I in the different phases
-    array2table(nan(1,Nr_Periods),'VariableNames',Vn.Hpredk(0:Nr_Periods-1)) ... Predicted H in the different phases
+    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.IQk(0:Nr_Periods-1)) ... Planned IQ in the different phases
+    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.TrRatek(0:Nr_Periods-1)) ... Estimated TrRate in the different phases
+    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.Ipredk(0:Nr_Periods-1)) ... Predicted I in the different phases
+    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.Hpredk(0:Nr_Periods-1)) ... Predicted H in the different phases
     array2table(nan(size(Vn.SLPIAHDR)),"VariableNames",Vn.SLPIAHDR+"r") ... Reconstructed state
     ];
 
@@ -237,10 +237,10 @@ for k = 0:Nr_Periods-1
 
     % Update prediction
     Idx = Tp*k+1:height(R);
-    R.(Vn.Ipredk(k))(Idx) = x(J.I,:)';
-    R.(Vn.Hpredk(k))(Idx) = x(J.H,:)';
-    R.(Vn.TrRatek(k))(Idx) = R.TrRateCmd(Idx);
-    R.(Vn.IQk(k))(Idx) = Vn.IQ(R(Idx,Vn.policy + "_Val"));
+    % R.(Vn.Ipredk(k))(Idx) = x(J.I,:)';
+    % R.(Vn.Hpredk(k))(Idx) = x(J.H,:)';
+    % R.(Vn.TrRatek(k))(Idx) = R.TrRateCmd(Idx);
+    % R.(Vn.IQk(k))(Idx) = Vn.IQ(R(Idx,Vn.policy + "_Val"));
     
     % -----------------------------------
     % Simulate and collect measurement
@@ -275,7 +275,7 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
 
 fp = pcz_mfilename(mfilename("fullpath"));
-dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",Name);
+dirname = fullfile(fp.dir,"Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end
