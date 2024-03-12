@@ -276,6 +276,8 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 
 fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.dir,"Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
+
+dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end

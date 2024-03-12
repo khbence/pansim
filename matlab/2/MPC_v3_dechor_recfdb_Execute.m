@@ -16,7 +16,7 @@ T.Pmx = (1:height(T))';
 
 %%
 
-for Tp = [1,14,21,7]
+for Tp = [21,1,14,7]
 %%    
     Tp_str = sprintf('%02d',Tp);
     
