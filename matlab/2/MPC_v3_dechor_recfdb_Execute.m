@@ -16,33 +16,9 @@ T.Pmx = (1:height(T))';
 
 %%
 
-for Tp = [7,14,21]
+for Tp = [21,1,14,7]
 %%    
     Tp_str = sprintf('%02d',Tp);
-    
-    %________________________________________________________________
-    %% Random reference
-    
-    % 0, 1, 3, 6, 14, 1996
-    % Rng_Int = round(rand*10000);
-    % Rng_Int = 1996;
-    % Rng_Int = 0;
-    % Rng_Int = 3466;
-    
-    Name = "Ketpupu_Teve_T" + Tp_str;
-    Rng_Int = 1647; % <---- 5 + 20 db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
-    
-    Iref = hp.generate_path(Rng_Int,N);
-    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
-    
-    %________________________________________________________________
-    %% Random reference
-    
-    Name = "Erdekes_Teve_T" + Tp_str;
-    Rng_Int = 7597; % <---- 3db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
-    
-    Iref = hp.generate_path(Rng_Int,N);
-    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
     
     %________________________________________________________________
     %% Sigmoid reference
@@ -67,7 +43,7 @@ for Tp = [7,14,21]
     
     Iref = t_sim'*0 + 500;
     
-    Name = "C590_T" + Tp_str;
+    Name = "C500_T" + Tp_str;
     save("Iref.mat","Iref","Tp","N","Name")
     for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
     
@@ -85,8 +61,32 @@ for Tp = [7,14,21]
     
     Iref = t_sim'*0 + 1000;
     
-    Name = "C1090T" + Tp_str;
+    Name = "C1000_T" + Tp_str;
     save("Iref.mat","Iref","Tp","N","Name")
     for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
 
+    %________________________________________________________________
+    %% Random reference
+    
+    % 0, 1, 3, 6, 14, 1996
+    % Rng_Int = round(rand*10000);
+    % Rng_Int = 1996;
+    % Rng_Int = 0;
+    % Rng_Int = 3466;
+    
+    Name = "Ketpupu_Teve_T" + Tp_str;
+    Rng_Int = 1647; % <---- 5 + 20 db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
+    
+    Iref = hp.generate_path(Rng_Int,N);
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
+    %________________________________________________________________
+    %% Random reference
+    
+    Name = "Erdekes_Teve_T" + Tp_str;
+    Rng_Int = 7597; % <---- 3db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
+    
+    Iref = hp.generate_path(Rng_Int,N);
+    for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
+    
 end
