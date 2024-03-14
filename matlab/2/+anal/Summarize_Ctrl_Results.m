@@ -5,6 +5,7 @@
 
 fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.pdir,"Output","Ctrl_2024-02-27");
+dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl";
 
 DIR_Summary = fullfile(dirname,"Summary");
 if ~exist(DIR_Summary,'dir')
@@ -12,14 +13,21 @@ if ~exist(DIR_Summary,'dir')
 end
 
 Results = [
-    % "C590"
-    % "C1090"
-    "Ketpupu_Teve_T07"
-    "Ketpupu_Teve_T21"
+    "C500_T01"
+    "C500_T07"
+    "C500_T14"
+    "C1000_T07"
+    "C1000_T14"
     "Erdekes_Teve_T07"
-    "Erdekes_Teve_T21"
-    % "Lin1500"
-    % "Sigmoid900"
+    "Erdekes_Teve_T14"
+    "Ketpupu_Teve_T07"
+    "Ketpupu_Teve_T14"
+    "Lin1500_T07"
+    "Lin1500_T14"
+    "Sigmoid_T01"
+    "Sigmoid_T07"
+    "Sigmoid_T14"
+    "Sigmoid_T21"
     ]';
 
 for result = Results
