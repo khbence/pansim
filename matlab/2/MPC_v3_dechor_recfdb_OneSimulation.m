@@ -1,4 +1,4 @@
-function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name)
+function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name)
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Created on 2024. February 29. (2023a)
@@ -81,10 +81,10 @@ R = [ ...
     hp.policy2table(k0_PM)              ... Applied policy measures in flags and values
     table(k0_TrRateExp,k0_TrRateExp,NaN,NaN,'VariableNames', ... Further variables:
         {'TrRateCmd','TrRateExp','TrRateRec','Ipred'})       ... Ipred: legacy
-    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.IQk(0:Nr_Periods-1)) ... Planned IQ in the different phases
-    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.TrRatek(0:Nr_Periods-1)) ... Estimated TrRate in the different phases
-    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.Ipredk(0:Nr_Periods-1)) ... Predicted I in the different phases
-    ... array2table(nan(1,Nr_Periods),'VariableNames',Vn.Hpredk(0:Nr_Periods-1)) ... Predicted H in the different phases
+... array2table(nan(1,Nr_Periods),'VariableNames',Vn.IQk(0:Nr_Periods-1)) ... Planned IQ in the different phases
+... array2table(nan(1,Nr_Periods),'VariableNames',Vn.TrRatek(0:Nr_Periods-1)) ... Estimated TrRate in the different phases
+    array2table(nan(1,Nr_Periods),'VariableNames',Vn.Ipredk(0:Nr_Periods-1)) ... Predicted I in the different phases
+... array2table(nan(1,Nr_Periods),'VariableNames',Vn.Hpredk(0:Nr_Periods-1)) ... Predicted H in the different phases
     array2table(nan(size(Vn.SLPIAHDR)),"VariableNames",Vn.SLPIAHDR+"r") ... Reconstructed state
     ];
 
@@ -128,7 +128,7 @@ beta_min_std = min(max(0,T.TrRate - 2*T.TrRateStd));
 beta_max_std = max(T.TrRate + 2*T.TrRateStd);
 R.TrRateRange = repmat([beta_min_std beta_max_std],[height(R),1]);
 
-Visualize_MPC_v3(R,0,0,"Tp",max(Tp,7));
+% Visualize_MPC_v3(R,0,0,"Tp",max(Tp,7));
 
 %%
 
@@ -237,7 +237,7 @@ for k = 0:Nr_Periods-1
 
     % Update prediction
     Idx = Tp*k+1:height(R);
-    % R.(Vn.Ipredk(k))(Idx) = x(J.I,:)';
+    R.(Vn.Ipredk(k))(Idx) = x(J.I,:)';
     % R.(Vn.Hpredk(k))(Idx) = x(J.H,:)';
     % R.(Vn.TrRatek(k))(Idx) = R.TrRateCmd(Idx);
     % R.(Vn.IQk(k))(Idx) = Vn.IQ(R(Idx,Vn.policy + "_Val"));
@@ -259,17 +259,18 @@ for k = 0:Nr_Periods-1
 
     Pend = (k+1)*Tp;
     if Pend >= 7
-        R = rec_SLPIAHDR(R,Start_Date + [0,Pend],C.Np,'WeightBetaSlope',1e4);
+        R = rec_SLPIAHDR(R,Start_Date + [0,Pend],'PWConstBeta',true);
     else
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
     end
 
-    fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
-    drawnow
+    % fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+    % drawnow
     % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
 end
 clear pansim mex
 
+R = rec_SLPIAHDR(R,'PWConstBeta',true);
 fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
@@ -278,6 +279,7 @@ fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.dir,"Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
 
 dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
+dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output",DirName,Name);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end

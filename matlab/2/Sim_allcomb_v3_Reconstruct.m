@@ -47,8 +47,9 @@ for i = 1:length(xlsnames)
         if strcmp(e.identifier,'MATLAB:spreadsheet:book:openSheetName')
             
             TP = [T,P];
-            [T,NewVars] = rec_SLPIAHDR(TP);
-            Variables = [P.Properties.VariableNames , NewVars];        
+            [T,NewVars] = rec_SLPIAHDR(TP,'PWConstBeta',true);
+            Variables = [P.Properties.VariableNames , NewVars];
+            % fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
             
             writetimetable(T(:,Variables),xlsnames(i),'Sheet','Reconstruction','WriteMode','overwritesheet')
         else

@@ -66,7 +66,7 @@ if isempty(INITIALIZED) || ~INITIALIZED || Idx == 0 || ~isvalid(Figure) || args.
         
     Ax = nexttile([2 1]); hold on
     Pl_Imsd = plot(R.Date,R.I,'DisplayName','Simulated by PanSim');
-    if ~all(isnan(R.Iref))
+    if ismember("Iref",R.Properties.VariableNames) && ~all(isnan(R.Iref))
         Pl_Iref = plot(R.Date,R.Iref,'DisplayName','Prescribed curve');
     end
     if ~all(isnan(Ipred))
@@ -81,10 +81,12 @@ if isempty(INITIALIZED) || ~INITIALIZED || Idx == 0 || ~isvalid(Figure) || args.
     make_title('Infected')
 
     Ax = [Ax nexttile([2 1])]; hold on
-    Pl_Int = plot_interval(R.Date,R.TrRateBounds(:,1),R.TrRateBounds(:,2));
-    Pl_Int(1).HandleVisibility = 'off';
-    Pl_Int(2).HandleVisibility = 'off';
-    Pl_Int(3).DisplayName = 'Mean range';
+    if ismember("TrRateBounds",R.Properties.VariableNames)
+        Pl_Int = plot_interval(R.Date,R.TrRateBounds(:,1),R.TrRateBounds(:,2));
+        Pl_Int(1).HandleVisibility = 'off';
+        Pl_Int(2).HandleVisibility = 'off';
+        Pl_Int(3).DisplayName = 'Mean range';
+    end
     if ismember("TrRateRange",R.Properties.VariableNames)
         Pl_Rnt = plot_interval(R.Date,R.TrRateRange(:,1),R.TrRateRange(:,2),Color_5);
         Pl_Rnt(1).HandleVisibility = 'off';
@@ -93,15 +95,11 @@ if isempty(INITIALIZED) || ~INITIALIZED || Idx == 0 || ~isvalid(Figure) || args.
     end
     Pl_Bmsd = plot(R.Date,R.TrRate,'Color',Color_1,'DisplayName','Measured by PanSim');
     Pl_BMmd = stairs(R.Date,MeanTrRate,'LineWidth',1.5,'Color',Pl_Bmsd.Color*0.8,'DisplayName','... its mean');
-    if ~all(isnan(R.TrRateCmd))
+    if ismember("TrRateCmd",R.Properties.VariableNames) && ~all(isnan(R.TrRateCmd))
         Pl_Bcmd = stairs(R.Date,R.TrRateCmd,'Color',Color_2,'LineWidth',1.5,'DisplayName','Prescribed by MPC');
-    else
-        Pl_Bcmd = stairs(R.Date,R.TrRateCmd,'HandleVisibility','off');
     end
-    if ~all(isnan(R.TrRateExp))
+    if ismember("TrRateExp",R.Properties.VariableNames) && ~all(isnan(R.TrRateExp))
         Pl_Bprd = stairs(R.Date,R.TrRateExp,'Color',Color_3,'DisplayName','Expected');
-    else
-        Pl_Bprd = stairs(R.Date,R.TrRateExp,'HandleVisibility','off');
     end
     if ~all(isnan(R.TrRateRec))
         Pl_Brec = plot(R.Date,R.TrRateRec,'Color',Color_5,'DisplayName','Reconstructed');
@@ -258,14 +256,18 @@ assert(numel(Pl_Bmsd.XData) == numel(Pl_Bmsd.YData))
 
 % Pl_Bcmd.XData = Pred.Date;
 % Pl_Bcmd.YData = Pred.TrRate;
-Pl_Bcmd.YData = R.TrRateCmd;
+if ~isempty(Pl_Bcmd)
+    Pl_Bcmd.YData = R.TrRateCmd;
+end
 
 Pl_BMmd.YDate = MeanTrRate;
 Pl_BMrc.YDate = MeanTrRateRec;
 
-Pl_Int(1).YData = R.TrRateBounds(:,1);
-Pl_Int(2).YData = R.TrRateBounds(:,2);
-Pl_Int(3).YData = [ Pl_Int(1).YData ; flip(Pl_Int(2).YData) ];
+if ~isempty(Pl_Int)
+    Pl_Int(1).YData = R.TrRateBounds(:,1);
+    Pl_Int(2).YData = R.TrRateBounds(:,2);
+    Pl_Int(3).YData = [ Pl_Int(1).YData ; flip(Pl_Int(2).YData) ];
+end
 
 if ~isempty(Pl_Rnt)
     Pl_Rnt(1).YData = R.TrRateRange(:,2);
@@ -274,9 +276,12 @@ if ~isempty(Pl_Rnt)
 end
 
 % Pl_Bprd.XData = R.Date;
-Pl_Bprd.YData = R.TrRateExp;
-Pl_Brec.YData = R.TrRateRec;
-assert(numel(Pl_Bprd.XData) == numel(Pl_Bprd.YData))
+if ~isempty(Pl_Bprd)
+    Pl_Bprd.YData = R.TrRateExp;
+end
+if ~isempty(Pl_Brec)
+    Pl_Brec.YData = R.TrRateRec;
+end
 
 Sf_Iq.ZData = R.Iq(:,[1:end,end])';
 

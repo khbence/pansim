@@ -3,25 +3,74 @@
 %  Created on 2024. February 15. (2023a)
 %
 
-DIR = "/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/PanSim_Results_2";
+fp = pcz_mfilename(mfilename("fullpath"));
+dirname = fullfile(fp.pdir,"Output","Ctrl_2024-02-27");
+dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/" + ...
+    "Ctrl_Sum2024-03-09";
 
-DIR_Summary = fullfile(DIR,"Summary");
+DIR_Summary = fullfile(dirname,"Summary");
 if ~exist(DIR_Summary,'dir')
-    mkdir(DIR)
+    mkdir(DIR_Summary)
+end
 
 Results = [
-    "C590"
-    "C1090"
-    "GenLUT"
-    "GenLUT_removed"
-    "Ketpupu_Teve"
-    "Lin1500"
-    "Sigmoid900"
+    "C1000_T07"
+    "C1000_T14"
+    "C500_T01"
+    "C500_T07"
+    "C500_T14"
+    "Erdekes_Teve_T07"
+    "Erdekes_Teve_T14"
+    "FreeSpread"
+    "Ketpupu_Teve_T07"
+    "Ketpupu_Teve_T14"
+    "Lin1500_T07"
+    "Lin1500_T14"
+    "Scenario_T07"
+    "Scenario_T14"
+    "Scenario_T21"
+    "Scenario_T28"
+    "Sigmoid_T01"
+    "Sigmoid_T07"
+    "Sigmoid_T14"
+    "Sigmoid_T21"
+    "Sigmoid_T28"
+
+    % "C500_T01"
+    % "C500_T07"
+    % "C500_T14"
+    % "C1000_T07"
+    % "C1000_T14"
+    % "Erdekes_Teve_T07"
+    % "Erdekes_Teve_T14"
+    % "Ketpupu_Teve_T07"
+    % "Ketpupu_Teve_T14"
+    % "Lin1500_T07"
+    % "Lin1500_T14"
+    % "Sigmoid_T01"
+    % "Sigmoid_T07"
+    % "Sigmoid_T14"
+    % "Sigmoid_T21"
+    % "FreeSpread"
+    
+    % "Scenario_T07"
+    % "Scenario_T14"
+    % "Scenario_T21"
+    % "Scenario_T28"
+    % "Sigmoid_T01"
+    % "Sigmoid_T07"
+    % "Sigmoid_T14"
+    % "Sigmoid_T21"
+    % "Sigmoid_T28"
     ]';
 
 for result = Results
 %%
-    xlsnames = string(cellfun(@(d) {fullfile(d.folder,d.name)}, num2cell(dir(fullfile(DIR,result,"*.xls")))));
+    xlsnames = string(cellfun(@(d) {fullfile(d.folder,d.name)}, num2cell(dir(fullfile(dirname,result,"*.xls")))));
+
+    if isempty(xlsnames)
+        continue
+    end
 
     n = numel(xlsnames);
     I_cell = cell(1,n);
@@ -29,28 +78,52 @@ for result = Results
 
     opts = detect(xlsnames(1));
     for i = 1:n
+        [~,bname,~] = fileparts(xlsnames(i));
+        fprintf('Reading %s/%s\n',result,bname);
         R = readtimetable(xlsnames(i),opts);
-        I_cell{i} = R.Ir;
+        % R = rec_SLPIAHDR(R,'WeightBetaSlope',1e5);
+
+        if any(~ismember(["Ir","TrRateRec"],R.Properties.VariableNames))
+            opts = detect(xlsnames(i));
+            R = readtimetable(xlsnames(i),opts);
+        end
+
+        I_cell{i} = R.I;
         b_cell{i} = R.TrRateRec;
     end
 
-    Iref = R.Iref;
+    if ismember("Iref",R.Properties.VariableNames)
+        Iref = R.Iref;
+    else
+        Iref = nan(height(R),1);
+    end
     Date = R.Date;
 
     [fig,ret] = Visualize(Date,Iref,I_cell,b_cell);
     
-    filename = fullfile(DIR,result,"MeanStd_" + result + ".pdf");
-    exportgraphics(fig,filename,'ContentType','vector');
+    bname = "_MeanStd_" + result + ".pdf";
+    fname = fullfile(dirname,result,bname);
+    exportgraphics(fig,fname,'ContentType','vector');
+
+    copyfile(fname,fullfile(DIR_Summary,bname));
 
 end
 
 function opts = detect(xls)
     opts = detectImportOptions(xls);
+
+    SelVarNames = ["Date","TrRate","TrRateRec","Iref","I","Ir"];
+    for i = numel(SelVarNames):-1:1
+        if ~ismember(SelVarNames(i),opts.VariableNames)
+            SelVarNames(i) = [];
+        end
+    end
+    opts.SelectedVariableNames = SelVarNames;
+
     opts = setvartype(opts,opts.SelectedVariableNames,"double");
     opts = setvartype(opts,Vn.policy,"categorical");
     opts = setvartype(opts,"Date","datetime");
-    opts = setvaropts(opts,"Date","DatetimeFormat","yyyy-MM-dd");
-    opts.SelectedVariableNames = ["Date","TrRate","TrRateRec","Iref","I","Ir"];
+    opts = setvaropts(opts,"Date","DatetimeFormat","yyyy-MM-dd");    
 end
 
 function [Figure,ret] = Visualize(Date,Iref,I_cell,b_cell,args)

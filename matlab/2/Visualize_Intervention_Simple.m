@@ -10,8 +10,8 @@ arguments
     args.FigNr = 1315
     args.XLineData = [];
     args.TrRateVarName = "TrRate"
-    args.TrRateStd = ""
-    args.TrRateMedian = ""
+    args.TrRateStd = ''
+    args.TrRateMedian = ''
 end
 %%
 
