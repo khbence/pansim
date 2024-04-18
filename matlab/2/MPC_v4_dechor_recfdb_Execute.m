@@ -53,16 +53,43 @@ CtrlStd = 48;
 CtrlPeak = 1500;
 Iref = normpdf(t_sim,CtrlMean,CtrlStd)';
 Iref = Iref / max(Iref) * CtrlPeak;
+
+CtrlMean = FreeMean + 3*7;
+CtrlStd = 36;
+CtrlPeak = 2500;
+Iref3 = normpdf(t_sim,CtrlMean,CtrlStd)';
+Iref3 = Iref3 / max(Iref3) * CtrlPeak;
+
+CtrlMean = FreeMean - 3*7;
+CtrlStd = 20;
+CtrlPeak = 1000;
+Iref41 = normpdf(t_sim,CtrlMean,CtrlStd)';
+Iref41 = Iref41 / max(Iref41) * CtrlPeak;
+
+CtrlMean = FreeMean + 9*7;
+CtrlStd = 20;
+CtrlPeak = 2000;
+Iref42 = normpdf(t_sim,CtrlMean,CtrlStd)';
+Iref42 = Iref42 / max(Iref42) * CtrlPeak;
+
+Iref4 = Iref41 + Iref42;
+Iref5 = flip(Iref4);
+
+% 2024.03.19. (március 19, kedd), 12:48
+x = linspace(0,1.3,numel(Iref))';
+Iref2 = Iref.^4;
+Iref2 = Iref2 / max(Iref2) * 2000;
+
 fig = figure(123); 
 delete(fig.Children)
 ax = axes(fig);
 hold on; grid on; box on;
-plot(Date,[Iref,Ifree]);
+plot(Date,[Iref,Ifree,Iref2,Iref3,Iref41,Iref4,Iref5]);
 plot(FreeT.Date,FreeT.I);
 xlim(Date([1,end]))
 ax.YLim(1) = 0;
 
-
+%%
 for Tp = [28,21,14,7]
     Name = "Scenario_T" + sprintf('%02d',Tp);
     for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name); end

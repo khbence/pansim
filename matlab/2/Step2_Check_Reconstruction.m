@@ -3,6 +3,7 @@
 %  Modified on 2023. July 14. (2023a)
 %
 %  Revised on 2023. October 16. (2023a)
+%  Revised on 2024. April 12. (2023a)
 
 %%
 
@@ -20,6 +21,7 @@ Start_Date = datetime(2020,10,01);
 End_Date = datetime(2021,01,31);
 
 R = R(isbetween(R.Date,Start_Date,End_Date),:);
+R.IQ = Vn.IQ(R); % Update: 2024-04-12
 
 %%
 
@@ -34,10 +36,13 @@ Q = Q(["Transient","Original","Future"],:);
 % Q("Original","Pr_D") = table(0.48);
 
 % 2024.02.26. (február 26, hétfő), 15:06
+Q("Original","Period_I") = table(4);
 Q("Original","Pr_I") = table(0.46);
 Q("Original","Period_L") = table(1.5);
 Q("Original","Period_P") = table(3.1);
 Q("Original","Period_A") = table(4);
+Q("Original","Pr_H") = table(0.09);
+Q("Original","Period_H") = table(10);
 Q("Original","Pr_D") = table(0.48);
 
 
@@ -50,7 +55,7 @@ K = Epid_Par.GetK;
 
 %%
 
-R = rec_SLPIAHDR(R,"Visualize",true);
+R = rec_SLPIAHDR(R,"Visualize",true,'PWConstBeta',false);
 
 %% Construct optimization
 
