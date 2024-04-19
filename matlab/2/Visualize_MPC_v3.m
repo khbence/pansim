@@ -27,9 +27,9 @@ MeanTrRate = repmat(mean(R.TrRate(indices),1),[args.Tp,1]);
 MeanTrRate = MeanTrRate(:);
 MeanTrRate = [MeanTrRate ; MeanTrRate(end)];
 
-MeanTrRateRec = repmat(mean(R.TrRateRec(indices),1),[args.Tp,1]);
-MeanTrRateRec = MeanTrRateRec(:);
-MeanTrRateRec = [MeanTrRateRec ; MeanTrRateRec(end)];
+% MeanTrRateRec = repmat(mean(R.TrRateRec(indices),1),[args.Tp,1]);
+% MeanTrRateRec = MeanTrRateRec(:);
+% MeanTrRateRec = [MeanTrRateRec ; MeanTrRateRec(end)];
 
 if ismember(Vn.Ipredk(k),R.Properties.VariableNames)
     Ipred = R.(Vn.Ipredk(k));
@@ -96,16 +96,16 @@ if isempty(INITIALIZED) || ~INITIALIZED || Idx == 0 || ~isvalid(Figure) || args.
     Pl_Bmsd = plot(R.Date,R.TrRate,'Color',Color_1,'DisplayName','Measured by PanSim');
     Pl_BMmd = stairs(R.Date,MeanTrRate,'LineWidth',1.5,'Color',Pl_Bmsd.Color*0.8,'DisplayName','... its mean');
     if ismember("TrRateCmd",R.Properties.VariableNames) && ~all(isnan(R.TrRateCmd))
-        Pl_Bcmd = stairs(R.Date,R.TrRateCmd,'Color',Color_2,'LineWidth',1.5,'DisplayName','Prescribed by MPC');
+        Pl_Bcmd = stairs(R.Date,R.TrRateCmd,'Color',Color_2,'LineWidth',1.5,'DisplayName','Prescribed');
     end
-    if ismember("TrRateExp",R.Properties.VariableNames) && ~all(isnan(R.TrRateExp))
-        Pl_Bprd = stairs(R.Date,R.TrRateExp,'Color',Color_3,'DisplayName','Expected');
-    end
+    % if ismember("TrRateExp",R.Properties.VariableNames) && ~all(isnan(R.TrRateExp))
+    %     Pl_Bprd = stairs(R.Date,R.TrRateExp,'Color',Color_3,'DisplayName','Expected');
+    % end
     if ~all(isnan(R.TrRateRec))
-        Pl_Brec = plot(R.Date,R.TrRateRec,'Color',Color_5,'DisplayName','Reconstructed');
-        Pl_BMrc = stairs(R.Date,MeanTrRateRec,'LineWidth',1.5,'Color',Pl_Brec.Color*0.8,'DisplayName','... its mean');
+        Pl_Brec = plot(R.Date,R.TrRateRec,'LineWidth',1.5,'Color',Color_5*0.8,'DisplayName','Reconstructed');
+        % Pl_BMrc = stairs(R.Date,MeanTrRateRec,'LineWidth',1.5,'Color',Pl_Brec.Color*0.8,'DisplayName','... its mean');
     else
-        Pl_Bprd = stairs(R.Date,R.TrRateRec,'HandleVisibility','off');
+        % Pl_Bprd = stairs(R.Date,R.TrRateRec,'HandleVisibility','off');
     end
     Leg = legend('Location','northwestoutside','Interpreter','latex','FontSize',12);
     Xl = [Xl Xline()];
@@ -261,7 +261,7 @@ if ~isempty(Pl_Bcmd)
 end
 
 Pl_BMmd.YDate = MeanTrRate;
-Pl_BMrc.YDate = MeanTrRateRec;
+% Pl_BMrc.YDate = MeanTrRateRec;
 
 if ~isempty(Pl_Int)
     Pl_Int(1).YData = R.TrRateBounds(:,1);
@@ -276,9 +276,9 @@ if ~isempty(Pl_Rnt)
 end
 
 % Pl_Bprd.XData = R.Date;
-if ~isempty(Pl_Bprd)
-    Pl_Bprd.YData = R.TrRateExp;
-end
+% if ~isempty(Pl_Bprd)
+%     Pl_Bprd.YData = R.TrRateExp;
+% end
 if ~isempty(Pl_Brec)
     Pl_Brec.YData = R.TrRateRec;
 end

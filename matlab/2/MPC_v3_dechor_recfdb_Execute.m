@@ -77,7 +77,7 @@ for Tp = [21,1,14,7]
     Name = "Ketpupu_Teve_T" + Tp_str;
     Rng_Int = 1647; % <---- 5 + 20 db szep eredmeny 2024.02.14. (február 14, szerda), 11:38
     
-    Iref = hp.generate_path(Rng_Int,N);
+    Iref = hp.generate_path(Rng_Int,N) * 0.5;
     for i=1:20; MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,Name); end
     
     %________________________________________________________________

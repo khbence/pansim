@@ -1,4 +1,9 @@
-function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name)
+function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name,args)
+arguments
+    T,Tp,N,Iref,DirName,Name
+    args.FreeSpreadFromDate = datetime(2030,01,01)
+    args.GenerateVideoFrames = false
+end
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Created on 2024. February 29. (2023a)
@@ -11,8 +16,6 @@ if exist('pansim','var')
 end
 clear mex
 
-%% Load parameters
-
 %% TODO
 
 fp = pcz_mfilename(mfilename('fullpath'));
@@ -22,8 +25,11 @@ P = Epid_Par.Get(Q);
 
 %%
 
-% [~,Pmx_Mindent_lezar] = max(vecnorm(T.Iq,1,2));
-% [~,Pmx_Mindent_felenged] = min(vecnorm(T.Iq,1,2));
+[~,Pmx_lezar] = max(T.IQ);
+[~,Pmx_free] = min(T.IQ);
+
+beta_free = T.TrRate(Pmx_free);
+beta_lezar = T.TrRate(Pmx_lezar);
 
 %% First policy
 
@@ -41,6 +47,9 @@ P = P(isbetween(P.Date,Start_Date,End_Date),:);
 
 t_sim = 0:N;
 d_sim = Start_Date + t_sim;
+
+FreeSpreadFromDay = days(args.FreeSpreadFromDate - Start_Date);
+FreeSpreadFromPeriod = round(FreeSpreadFromDay / Tp) + 1;
 
 %% Design controller
 
@@ -66,7 +75,7 @@ PanSim_args = ps.load_PanSim_args;
 
 %%%
 % Create simulator object
-DIR = fileparts(mfilename('fullpath'));
+DIR = fp.dir;
 pansim = ps.mexPanSim_wrap(ps.str2fun([DIR '/mexPanSim'])); % str2fun allows us to use the full path, so the mex need not be on our path
 pansim.initSimulation(PanSim_args);
 
@@ -138,6 +147,8 @@ wIerr = [ ones(1,h(1)) , Epid_Par.Sigmoid(1,0,h(2)) , zeros(1,h(3)) ] + 0.1;
 Now = datetime;
 Now.Format = "uuuu-MM-dd_HH-mm";
 
+DIRf = fullfile(DIR,"Output","FullSim_" + string(Now));
+
 for k = 0:Nr_Periods-1
     % This is the `k`th control term, which simulates `Tp` days
 
@@ -177,7 +188,7 @@ for k = 0:Nr_Periods-1
     I = eye(Nr_Periods-k);
     M = I(:,idx);
     
-    beta_guess = ones(1,Nr_Periods-k) * 0.33;
+    beta_guess = ones(1,Nr_Periods-k) * beta_free;
     beta_fh = @(beta_var) beta_var * M;
 
     % -----------------------------------
@@ -187,9 +198,14 @@ for k = 0:Nr_Periods-1
 
     x_var = helper.new_var('x',size(x_guess),1,'str','full','lb',0);
     x = x_fh(x_var);
+
+    ldx_ctrl = (k+1:Nr_Periods) < FreeSpreadFromPeriod;
+    ldx_free = ~ldx_ctrl;
     
     beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min,'ub',beta_max);
-    beta = beta_fh(beta_var);
+    beta_mod = SX(beta_guess);
+    beta_mod(find(ldx_ctrl)) = beta_var(find(ldx_ctrl));
+    beta = beta_fh(beta_mod);
     
     % Enforce the state equations
     for i = 1:N_MPC
@@ -197,8 +213,11 @@ for k = 0:Nr_Periods-1
         helper.add_eq_con( x_kp1 - x(:,i+1) );
     end
     
+    wI = wIerr(1:N_MPC);
+    wI(( 1:numel(wI) ) + k*Tp > FreeSpreadFromDay) = 0;
+
     % Minimize the tracking error
-    helper.add_obj('I_error',(x_var(J.I,:) - Iref_k).^2,wIerr(1:N_MPC));
+    helper.add_obj('I_error',(x_var(J.I,:) - Iref_k).^2,wI);
     
     % Construct the nonlinear solver object
     NL_solver = helper.get_nl_solver("Verbose",true);
@@ -213,6 +232,7 @@ for k = 0:Nr_Periods-1
 
     % Get the solution
     beta_sol = helper.get_value('beta');
+    beta_sol(ldx_free) = beta_guess(ldx_free);
     x_sol = helper.get_value('x');
     x = x_fh(x_sol);
 
@@ -255,6 +275,14 @@ for k = 0:Nr_Periods-1
         R.k(Idx) = k;
         R.d(Idx) = d;
 
+        if args.GenerateVideoFrames
+            fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+            drawnow
+            if ~exist(DIRf,'dir')
+                mkdir(DIRf)
+            end
+            exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Adv',k,Tp*k+d) + ".png")
+        end
     end
 
     Pend = (k+1)*Tp;
@@ -264,9 +292,11 @@ for k = 0:Nr_Periods-1
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
     end
 
-    % fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
-    % drawnow
-    % exportgraphics(fig,DIR + "/" + sprintf('Per%02d_Day%03d',k,Tp*k+d) + ".png")
+    fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+    drawnow
+    if args.GenerateVideoFrames
+        exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',k,Tp*k+d) + ".png")
+    end
 end
 clear pansim mex
 
@@ -276,9 +306,9 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
 
 fp = pcz_mfilename(mfilename("fullpath"));
-dirname = fullfile(fp.dir,"Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
-
-dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output","Ctrl_" + string(datetime('today','Format','uuuu-MM-dd')),Name);
+Today = string(datetime('today','Format','uuuu-MM-dd'));
+dirname = fullfile(fp.dir,"Output","Ctrl_" + Today,Name);
+dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output","Ctrl_" + Today,Name);
 dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output",DirName,Name);
 if ~exist(dirname,'dir')
     mkdir(dirname)
