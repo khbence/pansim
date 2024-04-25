@@ -1,4 +1,4 @@
-function MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name,args)
+function R = MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name,args)
 arguments
     T,Tp,N,Iref,DirName,Name
     args.FreeSpreadFromDate = datetime(2030,01,01)

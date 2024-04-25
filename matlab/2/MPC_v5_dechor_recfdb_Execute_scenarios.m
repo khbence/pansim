@@ -96,19 +96,21 @@ legend
 
 Tp = 21;
 Name = "Scenario41_Free_T" + sprintf('%02d',Tp);
+R = MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref4,CtrlDirName,Name, ...
+    "FreeSpreadFromDate",datetime(2020,12,20));
+
+Name = "Scenario41_Fixed_T" + sprintf('%02d',Tp);
 for i = 1:20
-    MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref4,CtrlDirName,Name, ...
-        "FreeSpreadFromDate",datetime(2020,12,20)); 
+    Sim_interventions(T,R.Pmx(1:Tp:end),Tp,CtrlDirName,Name, ...
+        "Visualize",true);
 end
 
 %%
 
 Tp = 21;
 Name = "Scenario3_Free_T" + sprintf('%02d',Tp);
-for i = 1:20
-    MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref3,CtrlDirName,Name, ...
-        "FreeSpreadFromDate",C.Start_Date + 21*5); 
-end
+MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref3,CtrlDirName,Name, ...
+    "FreeSpreadFromDate",C.Start_Date + 21*5); 
 
 %%
 
