@@ -1,0 +1,8 @@
+
+
+Egy olyan formara kellene hozni ezt az implementaciot, amelyet szivesen megosztanank masokkal.
+
+Az MPC es a rekonstrukcio lenyegeben ugyanaz, ezt jo volna egy fuggvenykent implementalni.
+
+MPC_v3_dechor_recfdb_OneSimulation.m
+rec_SLPIAHDR.m
