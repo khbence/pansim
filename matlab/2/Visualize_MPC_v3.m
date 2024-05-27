@@ -11,6 +11,7 @@ arguments
     args.FigDim = [1916 985]
     args.FigNr = 13
     args.Reset = true
+    args.BetaRange = [0 0.7]
 end
 %%
 
@@ -110,7 +111,7 @@ if isempty(INITIALIZED) || ~INITIALIZED || Idx == 0 || ~isvalid(Figure) || args.
     Leg = legend('Location','northwestoutside','Interpreter','latex','FontSize',12);
     Xl = [Xl Xline()];
     Pline();
-    ylim([0,0.7])
+    ylim(args.BetaRange)
     make_title('Transmission rate ($\beta$)')
 
     Ax = [Ax nexttile([2 1])]; hold on

@@ -11,6 +11,7 @@ arguments
     args.WeightBetaSlope = 1e6;
     args.Visualize = false;
     args.PWConstBeta = true;
+    args.PWConstBetaTp = 7;
     args.BetaRange = [0.01,0.5];
 end
 %%
@@ -53,7 +54,20 @@ x = x_fh(x_var);
 
 beta_min = args.BetaRange(1);
 beta_max = args.BetaRange(2);
-if args.PWConstBeta 
+if args.PWConstBeta && args.PWConstBetaTp > 0
+    NPer = ceil( (height(R)-1) / args.PWConstBetaTp );
+    Idx = zeros( args.PWConstBetaTp , NPer ) + (1:NPer);
+    Idx = Idx(:);
+    Idx = Idx(1:height(R)-1);
+
+    beta_guess = groupsummary(R.TrRate(1:end-1),Idx,"mean")';
+    beta_guess = min(max(beta_min,beta_guess),beta_max);
+    beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min,'ub',beta_max);
+
+    Idx(end+1) = Idx(end);
+    beta_fh = @(beta_var) beta_var(Idx');
+    beta = beta_fh(beta_var);    
+elseif args.PWConstBeta 
     [IQ_vals,idx,Idx] = unique(R.IQ(1:end-1));
     
     beta_guess = groupsummary(R.TrRate(1:end-1),Idx,"mean")';

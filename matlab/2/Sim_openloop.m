@@ -6,14 +6,23 @@
 % Feedback using the reconstructed, estimated epidemic state.
 
 
-Name = "FreeSpread";
+Name = "FreeSpread_Omicron";
+PanSim_Config = "Omicron";
+RecBetaRange = [0.01,2.5];
+
+% Name = "FreeSpread";
+% PanSim_Config = "Free";
+% RecBetaRange = [0.01,0.7];
 
 N = 6*7*4;
 Tp = 7;
 
+% 2024.05.25. (május 25, szombat), 18:10
 fp = pcz_mfilename(mfilename("fullpath"));
-fname = fullfile(fp.dir,"Output","Summary_2024-02-27__2.xls");
-opts = detectImportOptions(fname);
+% fname = fullfile(fp.dir,"Output","Summary_2024-02-27__2.xls");
+dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output";
+fname = fullfile(dirname,"Summary_2024-03-09.xls");opts = detectImportOptions(fname);
+
 opts = setvartype(opts,Vn.policy,"categorical");
 T = readtable(fname,opts);
 
@@ -73,7 +82,7 @@ d_sim = Start_Date + t_sim;
 Pmx = T.Pmx(find(T.IQ == 100000));
 
 % Load PanSim arguments
-PanSim_args = ps.load_PanSim_args;
+PanSim_args = ps.load_PanSim_args(PanSim_Config);
 
 %%%
 % Create simulator object
@@ -172,18 +181,28 @@ for k = 0:Nr_Periods-1
         O = hp.simout2table(simout);
         R(Idx+1,O.Properties.VariableNames) = O;
     
-        % if mod(Idx,21) == 0 && Idx > 7
-        %     R = rec_SLPIAHDR(R,Start_Date + [0,Idx],'WeightBetaSlope',1e4);
-        %     fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
-        %     drawnow
-        % end
+        % 2024.05.25. (május 25, szombat), 18:19
+        % Ezt erdemes kiszedni:
+        if mod(Idx,21) == 0 && Idx > 7
+            R = rec_SLPIAHDR(R,Start_Date+[0,Idx], ...
+                'WeightBetaSlope',1e4, ...
+                'PWConstBeta',true, ...
+                'PWConstBetaTp',7, ...
+                'BetaRange',RecBetaRange);
+            fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7), ...
+                "BetaRange",RecBetaRange.*[0,1]);
+            drawnow
+        end
     end
 end
 clear pansim mex
 
-R = rec_SLPIAHDR(R,'WeightBetaSlope',1e8,'PWConstBeta',true);
-fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
-
+R = rec_SLPIAHDR(R,'WeightBetaSlope',1e8, ...
+    'PWConstBeta',true, ...
+    'BetaRange',RecBetaRange);
+fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7), ...
+    "BetaRange",RecBetaRange.*[0,1]);
+    
 fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",Name);
 dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl",Name);

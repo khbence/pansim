@@ -3,6 +3,7 @@ arguments
     T,Tp,N,Iref,DirName,Name
     args.FreeSpreadFromDate = datetime(2030,01,01)
     args.GenerateVideoFrames = false
+    args.PanSimArgs = []
 end
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
@@ -70,8 +71,14 @@ import casadi.*
 
 %%
 
-% Load PanSim arguments
-PanSim_args = ps.load_PanSim_args;
+if isempty(args.PanSimArgs)
+    % Load PanSim arguments
+    PanSim_args = ps.load_PanSim_args;
+else
+    % PanSim_args allowed to be passed as an argument
+    % 2024.05.27. (május 27, hétfő), 09:48
+    PanSim_args = args.PanSimArgs;
+end
 
 %%%
 % Create simulator object
@@ -121,7 +128,7 @@ w = Epid_Par.Interp_Sigmoid_v2(1, 0, 12,10, 1, N+1)';
 
 % Append the reference trajectory to `R` as a new column
 % Iref = Iref.*w + (1-w)*R.I(1);
-R.Iref = Iref;
+R.Iref = Iref(1:height(R));
 
 % Append `k` (control term) and `d` (day) to `R` as new columns
 z = zeros(height(R),1);
@@ -287,7 +294,7 @@ for k = 0:Nr_Periods-1
 
     Pend = (k+1)*Tp;
     if Pend >= 7
-        R = rec_SLPIAHDR(R,Start_Date + [0,Pend],'PWConstBeta',true);
+        R = rec_SLPIAHDR(R,Start_Date + [0,Pend],'PWConstBeta',true,'PWConstBetaTp',Tp);
     else
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
     end
@@ -300,7 +307,7 @@ for k = 0:Nr_Periods-1
 end
 clear pansim mex
 
-R = rec_SLPIAHDR(R,'PWConstBeta',true);
+R = rec_SLPIAHDR(R,'PWConstBeta',true,'PWConstBetaTp',Tp);
 fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
@@ -318,7 +325,7 @@ Now = string(Now);
 exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
 exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
 
-R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4);
+% R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4,'PWConstBeta',false);
 writetimetable(R,fullfile(dirname,Now + ".xls"),"Sheet","Result");
 
 % movefile(DIR,DIR+"_Finalized")

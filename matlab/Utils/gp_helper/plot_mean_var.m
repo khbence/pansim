@@ -6,6 +6,7 @@ arguments
     args.LineWidth = 1.2;
     args.LineStyle = '-';
     args.PlotMean = true;
+    args.PlotLim = true;
     args.Alpha = 2;
     args.FaceAlpha = 0.2;
 end

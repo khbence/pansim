@@ -43,7 +43,7 @@ Q("Original","Period_P") = table(3.1);
 Q("Original","Period_A") = table(4);
 Q("Original","Pr_H") = table(0.09);
 Q("Original","Period_H") = table(10);
-Q("Original","Pr_D") = table(0.48);
+Q("Original","Pr_D") = table(0.42);
 
 
 P = Epid_Par.Get(Q);
