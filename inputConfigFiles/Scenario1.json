@@ -2,7 +2,7 @@
   "rules": [
     {
       "name": "ExposeToMutation",
-      "threshold": 110,
+      "threshold": 70,
       "threshold2": 1,
       "parameter": 10e-5,
       "conditionType": "afterDays",

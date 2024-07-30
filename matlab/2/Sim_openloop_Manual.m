@@ -6,17 +6,17 @@
 % Feedback using the reconstructed, estimated epidemic state.
 
 
-% Name = "FreeSpread_Omicron";
-% PanSim_Config = "Omicron";
+% CnfName = "FreeOmicron55";
 % RecBetaRange = [0.01,2.5];
-% 
-% Name = "NewScenario1";
-% PanSim_Config = "Scenario1";
-% RecBetaRange = [0.01,0.7];
+% InfectiousnessMultiplier = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
+% DiseaseProgressionScaling = [0.94,0.72,0.57,0.72,0.57,0.463,0.45];
+% Closures = "Scenario2.json";
 
-Name = "FreeSpread";
-PanSim_Config = "Free";
-RecBetaRange = [0.01,2.5];
+CnfName = "FreeAlpha55";
+RecBetaRange = [0.01,1.8];
+InfectiousnessMultiplier  = [0.98,1.81,2.58,2.58,4.32,6.8,6.8];
+DiseaseProgressionScaling = [0.94,1.03,0.57,0.72,0.57,0.463,0.45];
+Closures = "Scenario2.json";
 
 N = 6*7*4;
 Tp = 7;
@@ -73,21 +73,13 @@ d_sim = Start_Date + t_sim;
 
 %%
 
-% Measured state
-% xx = nan(J.nx,N+1);
-
-% Policy measures
-% PM = repmat(k0_PM,[N+1,1]);
-
-% Measured beta
-% beta_msd = nan(1,N+1);
-
-%%
-
 Pmx = T.Pmx(find(T.IQ == 100000));
 
 % Load PanSim arguments
-PanSim_args = ps.load_PanSim_args(PanSim_Config);
+PanSim_args = ps.load_PanSim_args("Manual", ...
+    "InfectiousnessMultiplier",InfectiousnessMultiplier, ...
+    "DiseaseProgressionScaling", DiseaseProgressionScaling, ...
+    "Closures",Closures);
 
 %%%
 % Create simulator object
@@ -209,12 +201,12 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7), ...
     "BetaRange",RecBetaRange.*[0,1]);
     
 fp = pcz_mfilename(mfilename("fullpath"));
-dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",Name);
-dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl",Name);
+dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",CnfName);
+dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl",CnfName);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end
-fname = Name + "_" + string(Now);
+fname = CnfName + "_" + string(Now);
 
 exportgraphics(fig,fullfile(dirname,fname + ".pdf"),'ContentType','vector');
 exportgraphics(fig,fullfile(dirname,fname + ".jpg"),'ContentType','vector');

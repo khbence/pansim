@@ -1,8 +1,21 @@
 %% Load LUT
 
-CnfName = "NewScenario1";
-PanSim_args = ps.load_PanSim_args("Scenario1");
-RecBetaRange = [0.01,0.7];
+% CnfName = "CtrlOmicron";
+% RecBetaRange = [0.01,2.5];
+% InfectiousnessMultiplier  = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
+% DiseaseProgressionScaling = [0.94,0.72,0.57,0.72,0.57,0.463,0.45];
+% Closures = "Scenario2.json";
+
+CnfName = "CtrlAlpha55";
+RecBetaRange = [0.01,1.8];
+InfectiousnessMultiplier  = [0.98,1.81,2.58,2.58,4.32,6.8,6.8];
+DiseaseProgressionScaling = [0.94,1.03,0.57,0.72,0.57,0.463,0.45];
+Closures = "Scenario2.json";
+
+PanSim_args = ps.load_PanSim_args("Manual", ...
+    "InfectiousnessMultiplier",InfectiousnessMultiplier, ...
+    "DiseaseProgressionScaling",DiseaseProgressionScaling, ...
+    "Closures",Closures);
 
 N = 6*7*4;
 t_sim = 0:N;
@@ -98,6 +111,23 @@ legend
 
 %%
 
+for i = 1:50
+%%
+    for Tp = [7,14,21,30]
+    %%
+        Name = CnfName + "_Flatten_T" + sprintf('%02d',Tp);
+        MPC_v6_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name, ...
+        "PanSimArgs",PanSim_args,"RecHorizonTp",-3);
+    end
+end
+
+return
+
+%%
+%%
+%%
+%%
+
 Tp = 7;
 Name = CnfName + "_Scenario41_Free_T" + sprintf('%02d',Tp);
 R = MPC_v6_dechor_recfdb_OneSimulation(T,Tp,9*7,Iref4,CtrlDirName,Name, ...
@@ -119,15 +149,6 @@ Name = CnfName + "_Scenario3_Free_T" + sprintf('%02d',Tp);
 MPC_v6_dechor_recfdb_OneSimulation(T,Tp,N,Iref3,CtrlDirName,Name, ...
     "FreeSpreadFromDate",C.Start_Date + 21*5, ...
     "PanSimArgs",PanSim_args,"RecHorizonTp",-3); 
-
-%%
-
-Tp = 30;
-for i = 1:20
-    Name = CnfName + "_Scenario1_T" + sprintf('%02d',Tp);
-    MPC_v6_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name, ...
-    "PanSimArgs",PanSim_args,"RecHorizonTp",-3);
-end
 
 %%
 
