@@ -149,7 +149,7 @@ if args.Visualize
     title('Transmission rate')
     
     for i = 1:J.nx
-        nexttile
+        nexttile, hold on, grid on, box on
         plot(R.Date,[x_PanSim(i,:)' , x(i,:)'])
         title(Vn.SLPIAHDR(i))
     end

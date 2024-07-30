@@ -43,6 +43,7 @@ methods
         
         opts = struct;
         % opts.ipopt.max_iter = 50000;
+        opts.ipopt.mumps_mem_percent = 8000; % 2024-06-03
         opts.verbose = false;
         opts.verbose_init = false;
         opts.print_time = false;

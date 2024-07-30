@@ -57,6 +57,11 @@ K = Epid_Par.GetK;
 
 R = rec_SLPIAHDR(R,"Visualize",true,'PWConstBeta',false);
 
+exportgraphics(gcf,['/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/Dokumentaciok/Docs_CsutakB_PhD/13_UNKP/fig/' ...
+    'ParamEst8.pdf'],'ContentType','vector')
+
+return
+
 %% Construct optimization
 
 import casadi.*
