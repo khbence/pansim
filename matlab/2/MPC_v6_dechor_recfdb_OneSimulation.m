@@ -1,9 +1,16 @@
-function R = MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name,args)
+function R = MPC_v6_dechor_recfdb_OneSimulation(T,Tp,N,Iref,DirName,Name,args)
 arguments
     T,Tp,N,Iref,DirName,Name
     args.FreeSpreadFromDate = datetime(2030,01,01)
     args.GenerateVideoFrames = false
     args.PanSimArgs = []
+    args.RecHorizonTp = -Inf
+    args.Limit = 1500;
+    args.PunishOvershoot = false;
+    args.InfCost = 1;
+    args.BetaCost = 1;
+    args.BetaSlopeCost = 1;
+    args.BetaMultiplier = true;
 end
 %%
 %  Author: Peter Polcz (ppolcz@gmail.com) 
@@ -32,6 +39,8 @@ P = Epid_Par.Get(Q);
 beta_free = T.TrRate(Pmx_free);
 beta_lezar = T.TrRate(Pmx_lezar);
 
+beta_multiplier = 1;
+
 %% First policy
 
 k0_Pmx = max(T.Pmx);
@@ -46,7 +55,7 @@ Start_Date = C.Start_Date;
 End_Date = Start_Date + N;
 P = P(isbetween(P.Date,Start_Date,End_Date),:);
 
-t_sim = 0:N;
+t_sim = 0:N;21
 d_sim = Start_Date + t_sim;
 
 FreeSpreadFromDay = days(args.FreeSpreadFromDate - Start_Date);
@@ -128,7 +137,14 @@ w = Epid_Par.Interp_Sigmoid_v2(1, 0, 12,10, 1, N+1)';
 
 % Append the reference trajectory to `R` as a new column
 % Iref = Iref.*w + (1-w)*R.I(1);
-R.Iref = Iref(1:height(R));
+if isempty(Iref)
+    R.Iref = ones(height(R),1) * args.Limit;
+else
+    R.Iref = nan(height(R),1);
+    Idx = min(numel(Iref),height(R));
+    R.Iref(1:Idx) = Iref(1:Idx);
+    R.Iref = fillmissing(R.Iref,"previous");
+end
 
 % Append `k` (control term) and `d` (day) to `R` as new columns
 z = zeros(height(R),1);
@@ -144,6 +160,10 @@ beta_min_std = min(max(0,T.TrRate - 2*T.TrRateStd));
 beta_max_std = max(T.TrRate + 2*T.TrRateStd);
 R.TrRateRange = repmat([beta_min_std beta_max_std],[height(R),1]);
 
+TrRateBounds = R.TrRateBounds;
+TrRateRange = R.TrRateRange;
+
+% beta_multipliers = ones(height(R),1);
 % Visualize_MPC_v3(R,0,0,"Tp",max(Tp,7));
 
 %%
@@ -165,7 +185,7 @@ for k = 0:Nr_Periods-1
     % Current reference
 
     Idx = Tp*k+1:N;
-    Iref_k = Iref(Idx+1)';
+    Iref_k = R.Iref(Idx+1)';
 
     %%%
     % Initial guess
@@ -195,7 +215,7 @@ for k = 0:Nr_Periods-1
     I = eye(Nr_Periods-k);
     M = I(:,idx);
     
-    beta_guess = ones(1,Nr_Periods-k) * beta_free;
+    beta_guess = ones(1,Nr_Periods-k) * beta_free*beta_multiplier;
     beta_fh = @(beta_var) beta_var * M;
 
     % -----------------------------------
@@ -207,9 +227,14 @@ for k = 0:Nr_Periods-1
     x = x_fh(x_var);
 
     ldx_ctrl = (k+1:Nr_Periods) < FreeSpreadFromPeriod;
+    % Az elso ciklusban is lehet intezkedes
+    % 2024.07.29., 19:23
+    % if k == 0
+    %     ldx_ctrl(1) = false;
+    % end
     ldx_free = ~ldx_ctrl;
     
-    beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min,'ub',beta_max);
+    beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min*beta_multiplier,'ub',beta_max*beta_multiplier);
     beta_mod = SX(beta_guess);
     beta_mod(find(ldx_ctrl)) = beta_var(find(ldx_ctrl));
     beta = beta_fh(beta_mod);
@@ -224,8 +249,37 @@ for k = 0:Nr_Periods-1
     wI(( 1:numel(wI) ) + k*Tp > FreeSpreadFromDay) = 0;
 
     % Minimize the tracking error
-    helper.add_obj('I_error',(x_var(J.I,:) - Iref_k).^2,wI);
+    if args.PunishOvershoot
+        % helper.add_obj('I_error',exp((x_var(J.I,:) - Iref_k)./Iref_k*10)*5,args.InfCost);
+        % helper.add_obj('beta_cost',-log(beta_var/0.5/beta_multiplier)*Tp*4,args.BetaCost);
+        % helper.add_obj('beta_slope_cost',(diff(beta_var)/beta_multiplier).^2*Tp*500,args.BetaSlopeCost);
+
+        helper.add_obj('I_error',(x_var(J.I,:) ./ Iref_k).^4 * 0.1,args.InfCost);
+        helper.add_obj('I2_error',(Iref_k./(x_var(J.I,:) - 2*Iref_k)).^2*0.1,args.InfCost);
+        helper.add_obj('beta_cost',-(beta_var/beta_multiplier).^2*Tp * 20,args.BetaCost);
+        helper.add_obj('beta_slope_cost',(diff(beta_var)/beta_multiplier).^2*Tp * 50,args.BetaSlopeCost);
+    else
+        helper.add_obj('I_error',(x_var(J.I,:) - Iref_k).^2,wI);
+    end
     
+    %{
+    %%
+        fig2 = figure(12);
+        Tl = tiledlayout(4,1);
+        nexttile;
+        II = linspace(0,2000,100);
+        plot(II,exp((II-1500)/1500*10)*5)
+        
+        nexttile;
+        beta = linspace(0.01,0.5,100);
+        plot(beta,-log(beta/0.5)*4)
+        
+        nexttile;
+        dbeta = linspace(-0.2,0.2,100);
+        plot(dbeta,dbeta.^2*500)
+    %%
+    %}
+
     % Construct the nonlinear solver object
     NL_solver = helper.get_nl_solver("Verbose",true);
     
@@ -247,7 +301,7 @@ for k = 0:Nr_Periods-1
     idx_sol = 1;
     for j = k:Nr_Periods-1
 
-        [~,Pmx] = min(abs(T.TrRate - beta_sol(idx_sol)));
+        [~,Pmx] = min(abs(T.TrRate - beta_sol(idx_sol)/beta_multiplier));
 
         Rp = T(Pmx,Vn.policy);
         for d = 1:Tp
@@ -255,11 +309,13 @@ for k = 0:Nr_Periods-1
             R.Pmx(Idx) = Pmx;
             R(Idx,Rp.Properties.VariableNames) = Rp;
             R.TrRateCmd(Idx) = beta_sol(idx_sol);
-            R.TrRateExp(Idx) = T.TrRate(Pmx);
+            R.TrRateExp(Idx) = T.TrRate(Pmx) * beta_multiplier;
         end
 
         idx_sol = idx_sol + 1;
     end
+    R.TrRateBounds(Tp*k+1:end,:) = TrRateBounds(Tp*k+1:end,:) * beta_multiplier;
+    R.TrRateRange(Tp*k+1:end,:) = TrRateRange(Tp*k+1:end,:) * beta_multiplier;
     R = Vn.quantify_policy(R);
 
     % Update prediction
@@ -298,17 +354,29 @@ for k = 0:Nr_Periods-1
         end
     end
 
+
+    Pstart = max(0,(k+1+args.RecHorizonTp)*Tp);
     Pend = (k+1)*Tp;
-    if Pend >= 7
-        R = rec_SLPIAHDR(R,Start_Date + [0,Pend],'PWConstBeta',true,'PWConstBetaTp',Tp);
+    if Pend-Pstart >= 7
+        R = rec_SLPIAHDR(R,Start_Date + [Pstart,Pend],'PWConstBeta',true,'PWConstBetaTp',Tp,'BetaRange',[0.01,0.5]*beta_multiplier);
     else
         R(:,Vn.SLPIAHDR + "r") = R(:,Vn.SLPIAHDR);
+    end
+
+    % keyboard
+
+    beta_rec = R.TrRateRec(Pend);
+    beta_exp = R.TrRateExp(Pend);
+    if args.BetaMultiplier && (beta_rec / beta_exp > 1.2)
+        beta_multiplier = beta_multiplier * (1 + (beta_rec / beta_exp - 1)/3);
     end
 
 end
 clear pansim mex
 
-R = rec_SLPIAHDR(R,'PWConstBeta',true,'PWConstBetaTp',Tp);
+Pstart = max(0,(Nr_Periods+args.RecHorizonTp)*Tp);
+Pend = N;
+R = rec_SLPIAHDR(R,Start_Date + [Pstart,Pend],'PWConstBeta',true,'PWConstBetaTp',Tp,'BetaRange',[0.01,0.5]*beta_multiplier);
 fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
@@ -326,7 +394,7 @@ Now = string(Now);
 exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
 exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
 
-% R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4,'PWConstBeta',false);
+% R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4,'PWConstBeta',false,'RecHorizon',args.RecHorizon);
 writetimetable(R,fullfile(dirname,Now + ".xls"),"Sheet","Result");
 
 % movefile(DIR,DIR+"_Finalized")

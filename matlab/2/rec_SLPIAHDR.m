@@ -46,7 +46,11 @@ x_PanSim = R(:,Vn.SLPIAHDR).Variables';
 % -----------------------------------
 % Create optimization problem
 
-x0 = x_PanSim(:,1);
+if days(Start_Date - R_.Date(1)) > 14
+    x0 = R(1,Vn.SLPIAHDR + "r").Variables';
+else
+    x0 = x_PanSim(:,1);
+end
 x_guess = x_PanSim(:,2:end) + randn(size(x_PanSim)-[0 1]);
 x_var = helper.new_var('x',size(x_guess),1,'str','full','lb',0,'ub',Np);
 x_fh = @(x_var) [x0 , x_var];
@@ -137,6 +141,19 @@ for vn = NewVariableNames
 end
 
 R_(ldx,:) = R(:,R_.Properties.VariableNames);
+
+
+%{
+
+beta = beta_fh(beta_sol);
+beta = beta_fh([0.001 0.4 0.4])
+for i = 1:N
+    x(:,i+1) = full(f.Fn(x(:,i),Param(i,:)',beta(i),0,0));
+end
+plot(x(J.I,:))
+
+%}
+
 
 %%
 

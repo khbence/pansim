@@ -8,7 +8,7 @@ if false
     fp = pcz_mfilename(mfilename("fullpath"));
     dirname = fullfile(fp.pdir,"Output","Ctrl_2024-02-27");
     dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/" + ...
-        "Ctrl_Sum2024-04-19";
+        "Ctrl_Sum2024-05-30";
     
     DIR_Summary = fullfile(dirname,"Summary");
     if ~exist(DIR_Summary,'dir')
@@ -16,10 +16,17 @@ if false
     end
     
     Results = [
-        "Scenario1_T30"
-        "Scenario3_T21"
-        "Scenario2_T21"
-        "Scenario4_T21"
+        % "Simple_Scenario4_T14"
+        % "NewScenario1_Scenario4_T14"
+        % "ContWithOmicron_Scenario4_T14"
+        % "ContWithOmicron_noMtp_Scenario4_T14"
+        % "CtrlAlpha55_Flatten_T07"
+        "CtrlAlpha55_Flatten_T14"
+        % "CtrlAlpha55_Flatten_T21"
+        % "CtrlAlpha55_Flatten_T30"
+        "CtrlOmicron55_Flatten_T07"
+        "CtrlOmicron55_Flatten_T14"
+        "CtrlOmicron55_Flatten_T21"
         ]';
     pattern = '_T(\d+)';
     
@@ -43,13 +50,20 @@ end
 
 %%
 
-[fig,links] = Visualize(R,[1,3],"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1);
-exportgraphics(fig,fullfile(DIR_Summary,"Summary13.pdf"));
-exportgraphics(fig,fullfile(DIR_Summary,"Summary13.png"));
+Names = [
+    "A" "Wild variant"
+    "B" "Alpha variant emerges"
+    "C" "Omicron variant emerges"
+    "D" "Omicron variant emerges"
+    ];
 
-[fig,links] = Visualize(R,[2,4],"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1);
-exportgraphics(fig,fullfile(DIR_Summary,"Summary24.pdf"));
-exportgraphics(fig,fullfile(DIR_Summary,"Summary24.png"));
+[fig,links] = Visualize(R,Names,[1,3],"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1,"FigNr",123);
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary13.pdf"));
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary13.png"));
+
+[fig,links] = Visualize(R,Names,[2,4],"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1,"FigNr",124);
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary24.pdf"));
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary24.png"));
 
 
 function opts = detect(xls)
@@ -154,9 +168,10 @@ function R = load_free_spread(dirname)
 
 end
 
-function [Figure,ret] = Visualize(Rs,Idx,args)
+function [Figure,ret] = Visualize(Rs,Names,Idx,args)
 arguments
     Rs
+    Names
     Idx
     args.Tp = 7
     args.FigDim = [1070 700] % [735 566]
@@ -228,24 +243,11 @@ end
     fill(Okt23,[1,1],Col.r_2,'DisplayName','~High')
     
     LegI = legend('Location','northoutside','Interpreter','latex','FontSize',12,'NumColumns',4,'Box','off');    
-
-
-    if false
-        %%
-        Visualize(R,"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1);
-    end
     
-    Names = [
-        "Flatten the curve"
-        "Almost free but delayed"
-        "We give more time"
-        "Two waves"
-        ];
-
     for i = Idx
         R = Rs{i};
     
-        Label = @(j) [ char('A' + i-1) num2str(j) ];
+        Label = @(j) Names(i,1) + num2str(j);
         % Cnt(double('A')-1 + 4*LabelOffset(i));
 
         Date = R.Date;
@@ -284,10 +286,10 @@ end
     
         plot(Date,R.Iref,'LineWidth',2,'Color',Col.r_2,'HandleVisibility','off');
      
-        ILim = [0,3500];
+        ILim = [0,5000];
         ylim(ILim)
         
-        make_title_labeled(Label(1),"Infected \textit{(" + Names(i) + ")}");
+        make_title_labeled(Label(1),"Infected \textit{(" + Names(i,2) + ")}");
     
         %% Plot B.
     
