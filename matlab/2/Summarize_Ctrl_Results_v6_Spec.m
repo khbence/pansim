@@ -2,9 +2,12 @@
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Created on 2024. February 15. (2023a)
 %
+% Ez az abra kerul bele a cikkbe
+% 
+%  !!!!!!!!!!!! VEDETT !!!!!!!!!!
 
 if false
-
+%%
     fp = pcz_mfilename(mfilename("fullpath"));
     dirname = fullfile(fp.pdir,"Output","Ctrl_2024-02-27");
     dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/" + ...
@@ -40,13 +43,23 @@ if false
         Tp(i) = str2double(matches{1}{1});
     end
 
+    N = height(R{2})-1;
+    t_sim = 0:N;
+        
+    Mean = 123;
+    Std = 34;
+    Peak = 2200;
+    Iref = normpdf(t_sim,Mean,Std)';
+    Iref = Iref / max(Iref) * Peak;
+
+    R{2}.Iref = Iref;
 end
 
 %%
 
 [fig,links] = Visualize(R,"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1);
-exportgraphics(fig,fullfile(DIR_Summary,"Summary.pdf"));
-exportgraphics(fig,fullfile(DIR_Summary,"Summary.png"));
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary.pdf"));
+% exportgraphics(fig,fullfile(DIR_Summary,"Summary.png"));
 
 
 function opts = detect(xls)
