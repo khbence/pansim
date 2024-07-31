@@ -6,19 +6,20 @@
 % Feedback using the reconstructed, estimated epidemic state.
 
 
-% CnfName = "FreeOmicron55";
+% CnfName = "FreeOmicron70_210_7days";
 % RecBetaRange = [0.01,2.5];
 % InfectiousnessMultiplier = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
 % DiseaseProgressionScaling = [0.94,0.72,0.57,0.72,0.57,0.463,0.45];
 % Closures = "Scenario2.json";
 
-CnfName = "FreeAlpha55";
+CnfName = "FreeAlpha70_210_7days";
 RecBetaRange = [0.01,1.8];
 InfectiousnessMultiplier  = [0.98,1.81,2.58,2.58,4.32,6.8,6.8];
 DiseaseProgressionScaling = [0.94,1.03,0.57,0.72,0.57,0.463,0.45];
 Closures = "Scenario2.json";
 
 N = 6*7*4;
+N = 210;
 Tp = 7;
 
 % 2024.05.25. (május 25, szombat), 18:10
@@ -202,7 +203,7 @@ fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7), ...
     
 fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.dir,"Output","Ctrl_2024-02-27",CnfName);
-dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl",CnfName);
+dirname = fullfile("/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl_Sum2024-05-30",CnfName);
 if ~exist(dirname,'dir')
     mkdir(dirname)
 end

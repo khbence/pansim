@@ -2,11 +2,11 @@
   "rules": [
     {
       "name": "ExposeToMutation",
-      "threshold": 55,
+      "threshold": 70,
       "threshold2": 1,
       "parameter": 10e-5,
       "conditionType": "afterDays",
-      "openAfter": 1,
+      "openAfter": 7,
       "closeAfter": -1,
       "locationTypesToClose": []
     }
