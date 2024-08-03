@@ -1,16 +1,22 @@
 %% Load LUT
 
-% CnfName = "CtrlOmicron";
+% CnfName = "CtrlOmicron70_7days";
 % RecBetaRange = [0.01,2.5];
 % InfectiousnessMultiplier  = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
 % DiseaseProgressionScaling = [0.94,0.72,0.57,0.72,0.57,0.463,0.45];
 % Closures = "Scenario2.json";
 
-CnfName = "CtrlAlpha55";
-RecBetaRange = [0.01,1.8];
-InfectiousnessMultiplier  = [0.98,1.81,2.58,2.58,4.32,6.8,6.8];
-DiseaseProgressionScaling = [0.94,1.03,0.57,0.72,0.57,0.463,0.45];
-Closures = "Scenario2.json";
+% CnfName = "CtrlAlpha70_7days";
+% RecBetaRange = [0.01,1.8];
+% InfectiousnessMultiplier  = [0.98,1.81,2.58,2.58,4.32,6.8,6.8];
+% DiseaseProgressionScaling = [0.94,1.03,0.57,0.72,0.57,0.463,0.45];
+% Closures = "Scenario2.json";
+
+CnfName = "CtrlStartOmicron";
+RecBetaRange = [0.01,2.5];
+InfectiousnessMultiplier  = [2.58,1,1,1,1,1,1];
+DiseaseProgressionScaling = [0.72,1,1,1,1,1,1];
+Closures = "emptybbRules.json";
 
 PanSim_args = ps.load_PanSim_args("Manual", ...
     "InfectiousnessMultiplier",InfectiousnessMultiplier, ...
@@ -111,9 +117,9 @@ legend
 
 %%
 
-for i = 1:50
+for i = 1:48
 %%
-    for Tp = [7,14,21,30]
+    for Tp = [21,30] % [7,14]%,21,30]
     %%
         Name = CnfName + "_Flatten_T" + sprintf('%02d',Tp);
         MPC_v6_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name, ...

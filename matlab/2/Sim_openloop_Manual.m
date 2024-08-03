@@ -8,9 +8,15 @@
 
 % CnfName = "FreeOmicron70_210_7days";
 % RecBetaRange = [0.01,2.5];
-% InfectiousnessMultiplier = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
+% InfectiousnessMultiplier  = [0.98,2.58,2.58,2.58,4.32,6.8,6.8];
 % DiseaseProgressionScaling = [0.94,0.72,0.57,0.72,0.57,0.463,0.45];
 % Closures = "Scenario2.json";
+
+% CnfName = "FreeStartOmicron_60";
+% RecBetaRange = [0.01,2.5];
+% InfectiousnessMultiplier  = [2.58,1,1,1,1,1,1];
+% DiseaseProgressionScaling = [0.72,1,1,1,1,1,1];
+% Closures = "emptybbRules.json";
 
 CnfName = "FreeAlpha70_210_7days";
 RecBetaRange = [0.01,1.8];
@@ -20,7 +26,8 @@ Closures = "Scenario2.json";
 
 N = 6*7*4;
 N = 210;
-Tp = 7;
+% N = 60;
+Tp = 30;
 
 % 2024.05.25. (május 25, szombat), 18:10
 fp = pcz_mfilename(mfilename("fullpath"));
@@ -149,8 +156,8 @@ Visualize_MPC_v3(R,0,0,"Tp",max(Tp,7));
 
 %%
 
-h = [2 2 3]*N/7;
-wIerr = [ ones(1,h(1)) , Epid_Par.Sigmoid(1,0,h(2)) , zeros(1,h(3)) ] + 0.1;
+% h = [2 2 3]*N/7;
+% wIerr = [ ones(1,h(1)) , Epid_Par.Sigmoid(1,0,h(2)) , zeros(1,h(3)) ] + 0.1;
 
 Now = datetime;
 Now.Format = "uuuu-MM-dd_HH-mm";
@@ -181,16 +188,16 @@ for k = 0:Nr_Periods-1
     
         % 2024.05.25. (május 25, szombat), 18:19
         % Ezt erdemes kiszedni:
-        if mod(Idx,21) == 0 && Idx > 7
-            R = rec_SLPIAHDR(R,Start_Date+[0,Idx], ...
-                'WeightBetaSlope',1e4, ...
-                'PWConstBeta',true, ...
-                'PWConstBetaTp',7, ...
-                'BetaRange',RecBetaRange);
-            fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7), ...
-                "BetaRange",RecBetaRange.*[0,1]);
-            drawnow
-        end
+        % if mod(Idx,21) == 0 && Idx > 7
+        %     R = rec_SLPIAHDR(R,Start_Date+[0,Idx], ...
+        %         'WeightBetaSlope',1e4, ...
+        %         'PWConstBeta',true, ...
+        %         'PWConstBetaTp',7, ...
+        %         'BetaRange',RecBetaRange);
+        %     fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7), ...
+        %         "BetaRange",RecBetaRange.*[0,1]);
+        %     drawnow
+        % end
     end
 end
 clear pansim mex
