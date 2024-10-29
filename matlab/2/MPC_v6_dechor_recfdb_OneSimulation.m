@@ -391,7 +391,7 @@ if ~exist(dirname,'dir')
 end
 Now = string(Now);
 
-exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
+% exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
 exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
 
 % R = rec_SLPIAHDR(R,'WeightBetaSlope',1e4,'PWConstBeta',false,'RecHorizon',args.RecHorizon);

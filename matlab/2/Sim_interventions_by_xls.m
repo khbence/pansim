@@ -53,6 +53,6 @@ Now = string(Now);
 
 writetimetable(R,fullfile(dirname,Now + ".xls"),"Sheet","Results");
 % exportgraphics(fig,fullfile(dirname,Now + ".pdf"),'ContentType','vector');
-exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
+% exportgraphics(fig,fullfile(dirname,Now + ".jpg"),'ContentType','vector');
 
 end
