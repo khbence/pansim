@@ -386,9 +386,9 @@ end
 end
 
 function make_title(str)
-    title(TeX("\makebox[8cm]{\textbf{"+char(Cnt)+".} " + str + "\hfill}"),"FontSize",13,"Interpreter","latex")
+    title(TeX("\makebox[8cm]{\textbf{"+char(Cnt)+".} " + str + "\hfill}"),"FontSize",14,"Interpreter","latex")
 end
 
 function make_title_labeled(label,str)
-    title(TeX("\makebox[8cm]{\textbf{"+label+".} " + str + "\hfill}"),"FontSize",13,"Interpreter","latex")
+    title(TeX("\makebox[8cm]{\textbf{"+label+".} " + str + "\hfill}"),"FontSize",14,"Interpreter","latex")
 end
