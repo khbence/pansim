@@ -58,8 +58,10 @@ end
 %%
 
 [fig,links] = Visualize(R,"Tp",Tp,"Tcmp1",T_fsp,"Tcmp2",T_fx1);
-% exportgraphics(fig,fullfile(DIR_Summary,"Summary.pdf"));
-% exportgraphics(fig,fullfile(DIR_Summary,"Summary.png"));
+
+DIR_Summary = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl_Sum2024-05-30/Summary";
+exportgraphics(fig,fullfile(DIR_Summary,"Summary.pdf"));
+exportgraphics(fig,fullfile(DIR_Summary,"Summary.png"));
 
 
 function opts = detect(xls)
@@ -168,7 +170,7 @@ function [Figure,ret] = Visualize(Rs,args)
 arguments
     Rs
     args.Tp = 7
-    args.FigDim = [1070 1300] % [735 566]
+    args.FigDim = [1070 1250] % [735 566]
     args.FigNr = 16
     args.Reset = true
     args.Tcmp1 = []
@@ -180,8 +182,8 @@ end
     MyColorMap = interp1([0;0.5;1],MyColorMap,linspace(0,1,100));
     
     height_A = 13;
-    height_B = 10;
-    height_C = 10;
+    height_B = 12;
+    height_C = 12;
     height_D = 9;
 
     height = height_A + height_B + height_C + height_D;
@@ -189,7 +191,7 @@ end
 
     Figure = figure(args.FigNr);
     Figure.Position([3 4]) = args.FigDim;
-    Tl = tiledlayout(height,2,"TileSpacing","compact","Padding","compact","TileIndexing","columnmajor");
+    Tl = tiledlayout(height,2,"TileSpacing","compact","Padding","tight","TileIndexing","columnmajor");
         
     Ax = nexttile([height_A 1]); hold on
 
@@ -211,7 +213,7 @@ end
             'FaceAlpha',0.2, ...
             'EdgeAlpha',1, ...
             'LineWidth',1.5, ...
-            'DisplayName','~Controlled spread through interventions (mean\,$\pm$\,2\,std)~');
+            'DisplayName','~Controlled spread (mean\,$\pm$\,2\,std)~');
     patch(Okt23([1 2 2 1]),[1 1 2 2],Col.r_5, ...
             'EdgeColor',Col.r_5, ...
             'FaceAlpha',0.2, ...
@@ -223,20 +225,20 @@ end
             'FaceAlpha',0.2, ...
             'EdgeAlpha',1, ...
             'LineWidth',1.5, ...
-            'DisplayName','~Free spread of 2nd wave in Plot \textbf{D1} (mean\,$\pm$\,2\,std)~~');
+            'DisplayName','~Free spread of 2nd wave in Plot \textbf{D1}~~');
 
 
-    plot(Okt23,[1,1],'Color',Color.Light_Gray,'DisplayName','~Multiple simulations in PanSim~~');
+    plot(Okt23,[1,1],'Color',Color.Light_Gray,'DisplayName','~Multiple (20) simulations in PanSim~~');
     plot(Okt23,[1,1],'Color',Color.Black,'DisplayName','~Highlighted curves of controlled');
     LegEntry('~simulations resulted by interventions')
     LegEntry('~in Plots \textbf{\{A,B,C,D\}2}')
     
-    plot(Okt23,[1,1],'.w','DisplayName','Intervention')
+    plot(Okt23,[1,1],'.w','DisplayName','Intervention~~~~~~~~~~~~')
     fill(Okt23,[1,1],Col.r_5,'DisplayName','~Low')
     fill(Okt23,[1,1],Col.r_3,'DisplayName','~Medium')
     fill(Okt23,[1,1],Col.r_2,'DisplayName','~High')
     
-    LegI = legend('Location','northoutside','Interpreter','latex','FontSize',12,'NumColumns',4,'Box','off');    
+    LegI = legend('Location','northoutside','Interpreter','latex','FontSize',14,'NumColumns',4,'Box','off');    
 
 
     if false
@@ -268,36 +270,44 @@ end
             Ax = [Ax nexttile([height_A,1])]; hold on
         end
 
+        ILim = [0,3500];
+        s = 1;
+        YLineAt = 5000;
+
+        ILim = [0,2000];
+        s = 100000 / C.Np;
+        YLineAt = 2000;
+
         if ~isempty(args.Tcmp1)
-            plot(args.Tcmp1.Date,args.Tcmp1.I,'Color',Color.Light_Gray,'HandleVisibility','off');
-            Hide = plot_mean_var(args.Tcmp1.Date,args.Tcmp1.Mean,args.Tcmp1.Std,Col.r_5,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
+            plot(args.Tcmp1.Date,args.Tcmp1.I*s,'Color',Color.Light_Gray,'HandleVisibility','off');
+            Hide = plot_mean_var(args.Tcmp1.Date,args.Tcmp1.Mean*s,args.Tcmp1.Std*s,Col.r_5,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
             for pl = Hide'
                 pl.HandleVisibility = 'off';
             end
         end
         
         if ~isempty(args.Tcmp2) && i == 4
-            plot(args.Tcmp2.Date,args.Tcmp2.I,'Color',Color.Light_Gray,'HandleVisibility','off');
-            Hide = plot_mean_var(args.Tcmp2.Date,args.Tcmp2.Mean,args.Tcmp2.Std,Col.r_6,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
+            plot(args.Tcmp2.Date,args.Tcmp2.I*s,'Color',Color.Light_Gray,'HandleVisibility','off');
+            Hide = plot_mean_var(args.Tcmp2.Date,args.Tcmp2.Mean*s,args.Tcmp2.Std*s,Col.r_6,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
             for pl = Hide'
                 pl.HandleVisibility = 'off';
             end
         end
         
-        plot(R.Date,R.I,'Color',Color.Light_Gray,'HandleVisibility','off');
+        plot(R.Date,R.I*s,'Color',Color.Light_Gray,'HandleVisibility','off');
     
-        Hide = plot_mean_var(R.Date,R.mean_I,R.std_I,Col.r_3,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
+        Hide = plot_mean_var(R.Date,R.mean_I*s,R.std_I*s,Col.r_3,"Alpha",2,"LineWidth",2,"PlotLim",false,"FaceAlpha",0.5);
         for pl = Hide'
             pl.HandleVisibility = 'off';
         end
-        plot(R.Date,R.typical_I,'Color',Color.Black,'HandleVisibility','off');
+        plot(R.Date,R.typical_I*s,'Color',Color.Black,'HandleVisibility','off');
     
-        plot(Date,R.Iref,'LineWidth',2,'Color',Col.r_2,'HandleVisibility','off');
+        plot(Date,R.Iref*s,'LineWidth',2,'Color',Col.r_2,'HandleVisibility','off');
      
-        ILim = [0,3500];
+        % yline(YLineAt,'Color',Col.r_2,'LineWidth',1);
         ylim(ILim)
         
-        make_title_labeled(Label(1),"Infected \textit{(" + Names(i) + ")}");
+        make_title_labeled(Label(1),"\textbf{" + Names(i) + "}");
     
         %% Plot B.
     
@@ -389,13 +399,14 @@ end
         
         for ax = [ Ax Ax_NO_GRID ]
             ax.TickLabelInterpreter = "latex";
-            ax.FontSize = 12;
+            ax.FontSize = 13;
             
             if ~ismember(ax,Ax_NO_GRID)
                 ax.XMinorGrid = 'on';
             else
-                ax.YAxis.FontSize = 10;
+                ax.YAxis.FontSize = 12;
             end
+            ax.XAxis.FontSize = 13;
             ax.XTick = Date(day(Date) == 1 & mod(month(Date),2)==0);
             ax.XAxis.MinorTick = 'off';
             ax.XAxis.MinorTickValues = Date(weekday(Date) == 1); 
@@ -410,5 +421,5 @@ function make_title(str)
 end
 
 function make_title_labeled(label,str)
-    title(TeX("\makebox[8cm]{\textbf{"+label+".} " + str + "\hfill}"),"FontSize",13,"Interpreter","latex")
+    title(TeX("\makebox[8cm]{\textbf{"+label+".} " + str + "\hfill}"),"FontSize",14,"Interpreter","latex")
 end

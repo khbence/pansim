@@ -160,4 +160,34 @@ GS(:,Iq_k) = [];
 
 GS.Pmx = (1:height(GS))';
 
-Visualize_Intervention_Simple(GS,TrRateStd="TrRateStd",FigNr=1231);
+size(GS)
+summary(GS.TrRateStd,'all')
+
+GS(GS.QU == "QU2",:) = [];
+
+TrRateStd = GS.TrRateStd;
+GS.TrRateStd = movmean(TrRateStd,5);
+Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1230);
+GS.TrRateStd = TrRateStd;
+
+[~,Idx] = sort(GS.CF,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.PL,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.MA,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.QU,'descend'); GS = GS(Idx,:);
+
+TrRateStd = GS.TrRateStd;
+GS.TrRateStd = movmean(TrRateStd,5);
+Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1231);
+GS.TrRateStd = TrRateStd;
+
+[~,Idx] = sort(GS.TP,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.SO,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.CF,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.PL,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.MA,'ascend'); GS = GS(Idx,:);
+[~,Idx] = sort(GS.QU,'descend'); GS = GS(Idx,:);
+
+TrRateStd = GS.TrRateStd;
+GS.TrRateStd = movmean(TrRateStd,5);
+Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1232);
+GS.TrRateStd = TrRateStd;
