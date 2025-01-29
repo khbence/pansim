@@ -83,6 +83,7 @@ R(1,O.Properties.VariableNames) = O;
 
 %%
 
+tic
 for k = 0:Nr_Periods-1
 
     Pmx = PM_Indices(k+1);
@@ -101,6 +102,7 @@ for k = 0:Nr_Periods-1
         R(Idx+1,O.Properties.VariableNames) = O;
     end
 end
+toc
 clear pansim mex
 
 R = Vn.quantify_policy(R);
