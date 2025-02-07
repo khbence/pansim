@@ -3,6 +3,7 @@ arguments
     T,Tp,N,Iref,DirName,Name
     args.FreeSpreadFromDate = datetime(2030,01,01)
     args.GenerateVideoFrames = false
+    args.GenerateSparseFrames = false
     args.PanSimArgs = []
 end
 %%
@@ -144,7 +145,7 @@ beta_min_std = min(max(0,T.TrRate - 2*T.TrRateStd));
 beta_max_std = max(T.TrRate + 2*T.TrRateStd);
 R.TrRateRange = repmat([beta_min_std beta_max_std],[height(R),1]);
 
-% Visualize_MPC_v3(R,0,0,"Tp",max(Tp,7));
+% Visualize_MPC_v8(R,0,0,"Tp",max(Tp,7));
 
 %%
 
@@ -155,6 +156,9 @@ Now = datetime;
 Now.Format = "uuuu-MM-dd_HH-mm";
 
 DIRf = fullfile(DIR,"Output","FullSim_" + string(Now));
+if ~exist(DIRf,"dir")
+    mkdir(DIRf)
+end
 
 for k = 0:Nr_Periods-1
     % This is the `k`th control term, which simulates `Tp` days
@@ -269,10 +273,13 @@ for k = 0:Nr_Periods-1
     % R.(Vn.TrRatek(k))(Idx) = R.TrRateCmd(Idx);
     % R.(Vn.IQk(k))(Idx) = Vn.IQ(R(Idx,Vn.policy + "_Val"));
 
-    fig = Visualize_MPC_v3(R,Tp*k+1,k,"Tp",max(Tp,7));
+    fig = Visualize_MPC_v8(R,Tp*k+1,k,"Tp",max(Tp,7));
     drawnow
     if args.GenerateVideoFrames
         exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',k,Tp*k+d) + ".png")
+    end
+    if args.GenerateSparseFrames
+        exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',k,Tp*k+d) + ".pdf",'ContentType',"vector")
     end
 
     % -----------------------------------
@@ -289,11 +296,8 @@ for k = 0:Nr_Periods-1
         R.d(Idx) = d;
 
         if args.GenerateVideoFrames
-            fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+            fig = Visualize_MPC_v8(R,Idx+1,k,"Tp",max(Tp,7));
             drawnow
-            if ~exist(DIRf,'dir')
-                mkdir(DIRf)
-            end
             exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Adv',k,Tp*k+d) + ".png")
         end
     end
@@ -309,7 +313,14 @@ end
 clear pansim mex
 
 R = rec_SLPIAHDR(R,'PWConstBeta',true,'PWConstBetaTp',Tp);
-fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
+fig = Visualize_MPC_v8(R,N+1,Nr_Periods,"Tp",max(Tp,7));
+drawnow
+if args.GenerateVideoFrames
+    exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',Nr_Periods,N) + ".png")
+end
+if args.GenerateSparseFrames
+    exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',Nr_Periods,N) + ".pdf",'ContentType',"vector")
+end
 
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
 

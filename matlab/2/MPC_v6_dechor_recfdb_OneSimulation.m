@@ -55,7 +55,7 @@ Start_Date = C.Start_Date;
 End_Date = Start_Date + N;
 P = P(isbetween(P.Date,Start_Date,End_Date),:);
 
-t_sim = 0:N;21
+t_sim = 0:N;
 d_sim = Start_Date + t_sim;
 
 FreeSpreadFromDay = days(args.FreeSpreadFromDate - Start_Date);
@@ -325,7 +325,7 @@ for k = 0:Nr_Periods-1
     % R.(Vn.TrRatek(k))(Idx) = R.TrRateCmd(Idx);
     % R.(Vn.IQk(k))(Idx) = Vn.IQ(R(Idx,Vn.policy + "_Val"));
 
-    fig = Visualize_MPC_v3(R,Tp*k+1,k,"Tp",max(Tp,7));
+    fig = Visualize_MPC_v8(R,Tp*k+1,k,"Tp",max(Tp,7));
     drawnow
     if args.GenerateVideoFrames
         exportgraphics(fig,DIRf + "/" + sprintf('Per%02d_Day%03d_Rec',k,Tp*k+d) + ".png")
@@ -345,7 +345,7 @@ for k = 0:Nr_Periods-1
         R.d(Idx) = d;
 
         if args.GenerateVideoFrames
-            fig = Visualize_MPC_v3(R,Idx+1,k,"Tp",max(Tp,7));
+            fig = Visualize_MPC_v8(R,Idx+1,k,"Tp",max(Tp,7));
             drawnow
             if ~exist(DIRf,'dir')
                 mkdir(DIRf)
@@ -377,7 +377,7 @@ clear pansim mex
 Pstart = max(0,(Nr_Periods+args.RecHorizonTp)*Tp);
 Pend = N;
 R = rec_SLPIAHDR(R,Start_Date + [Pstart,Pend],'PWConstBeta',true,'PWConstBetaTp',Tp,'BetaRange',[0.01,0.5]*beta_multiplier);
-fig = Visualize_MPC_v3(R,N+1,Nr_Periods,"Tp",max(Tp,7));
+fig = Visualize_MPC_v8(R,N+1,Nr_Periods,"Tp",max(Tp,7));
 
 % writetimetable(R,DIR + "/A.xls","Sheet","Result");
 

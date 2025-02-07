@@ -1,8 +1,5 @@
 %% Load LUT
 
-N = 6*7*4;
-t_sim = 0:N;
-
 fp = pcz_mfilename(mfilename("fullpath"));
 dirname = fullfile(fp.dir,"Output");
 dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output";
@@ -115,10 +112,11 @@ MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref3,CtrlDirName,Name, ...
 %%
 
 Tp = 30;
-for i = 1:20
+% for i = 1:20
     Name = "Scenario1_T" + sprintf('%02d',Tp);
-    MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name);
-end
+    MPC_v3_dechor_recfdb_OneSimulation(T,Tp,N,Iref,CtrlDirName,Name, ...
+        'GenerateSparseFrames',true);
+% end
 
 %%
 

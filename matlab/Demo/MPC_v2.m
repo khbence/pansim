@@ -6,15 +6,15 @@
 % Feedback using the reconstructed, estimated epidemic state.
 
 p_val = [
-    0.667
-    0.323
-    0.244
-    0.250
-    0.083
-    0.750
-    0.480
-    0.076
-    0.480
+    0.6667 % tauL
+    0.3226 % tauP
+    0.2439 % tauA
+    0.2500 % tauI
+    0.0833 % tauH
+    0.7500 % qA
+    0.4800 % pI
+    0.0760 % pH
+    0.4800 % pD
     ];
 
 %% Letrehozok Matlab Symbolic Math Toolbox-fele szimbolikus valtozokat
@@ -73,7 +73,7 @@ beta_Cas = SX.sym('beta');
 
 Infectious = P + I + qA*A + 0.1*H;
 
-Np = 970000; % Population of Hungary
+Np = 179500; % Population of Hungary
 dS = -beta*Infectious*S/Np - nu*S;
 dL = beta*Infectious*S/Np - tauL*L;
 dP = tauL*L - tauP*P;
@@ -97,15 +97,73 @@ Ts = 1;
 f_Cas = x_Cas + Ts*Fn_SLPIAHDR_ode(x_Cas,p_Cas,beta_Cas,nu_Cas);
 f_Fn = Function('f',{x_Cas,p_Cas,beta_Cas,nu_Cas},{f_Cas},{'x','p','beta','nu'},{'f(x,u,p,v)'});
 
-%%
+%% Control goal: flatten the curve
 
-% Prediction horizon
-N = 24*7;
+FreeT = readtimetable('/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl_Sum2024-03-09/FreeSpread/FreeSpread_2024-03-14_08-56.xls');
 
-% Reference curve:
-Iref = normpdf(1:N,N/2,N/5);
-Iref = Iref - Iref(1);
-Iref = Iref / max(Iref) * 10000;
+N = 210;
+t_sim = 0:N-1;
+
+FreeMean = 72;
+FreeStd = 24;
+FreePeak = 3300;
+Date = t_sim+C.Start_Date;
+Ifree = normpdf(t_sim,FreeMean,FreeStd);
+Ifree = Ifree / max(Ifree) * FreePeak;
+
+CtrlMean = FreeMean + 7*7;
+CtrlStd = 48;
+CtrlPeak = 1500;
+Iref1 = normpdf(t_sim,CtrlMean,CtrlStd);
+Iref1 = Iref1 / max(Iref1) * CtrlPeak;
+
+CtrlMean = FreeMean + 8*7;
+CtrlStd = 36;
+CtrlPeak = 2500;
+Iref3 = normpdf(t_sim,CtrlMean,CtrlStd);
+Iref3 = Iref3 / max(Iref3) * CtrlPeak;
+
+CtrlMean = FreeMean - 3*7;
+CtrlStd = 20;
+CtrlPeak = 750;
+Iref41 = normpdf(t_sim,CtrlMean,CtrlStd);
+Iref41 = Iref41 / max(Iref41) * CtrlPeak;
+
+CtrlMean = FreeMean + 14*7;
+CtrlStd = 30;
+CtrlPeak = 1000;
+Iref42 = normpdf(t_sim,CtrlMean,CtrlStd);
+Iref42 = Iref42 / max(Iref42) * CtrlPeak;
+
+Iref4 = Iref41 + Iref42;
+Iref5 = flip(Iref4);
+
+% 2024.03.19. (március 19, kedd), 12:48
+CtrlMean = FreeMean + 12*7;
+CtrlStd = 48;
+CtrlPeak = 1500;
+Iref2 = normpdf(t_sim,CtrlMean,CtrlStd);
+Iref2 = Iref2 / max(Iref2) * CtrlPeak;
+Iref2 = Iref2.^4;
+Iref2 = Iref2 / max(Iref2) * 2000;
+
+fig = figure(123); 
+delete(fig.Children)
+ax = axes(fig);
+hold on; grid on; box on;
+plot(Date,Iref1,'DisplayName','Scenario 1','LineWidth',2);
+plot(Date,Ifree,'DisplayName','Free spread');
+plot(Date,Iref2,'DisplayName','Scenario 2','LineWidth',2);
+plot(Date,Iref3,'DisplayName','Scenario 3');
+plot(Date,Iref4,'DisplayName','Scenario 4','LineWidth',3);
+plot(FreeT.Date,FreeT.I,'DisplayName','Free spread');
+xlim(Date([1,end]))
+ax.YLim(1) = 0;
+legend
+
+Iref = Iref1;
+Tp = 21;
+Tp = 30;
 
 %% Initial guess
 % (Vedd eszre, hogy az MPC ismeretlenjeit eleve ugy hozom letre, hogy mar egy potencialis
@@ -130,14 +188,14 @@ x_guess = [
 
 % Initial states
 x0 = [
-    Np - 200
-    50
-    50
-    50
-    50
+    178159
+    135
+    244
+    72
+    75
+    9
     0
-    0
-    0
+    806
     ];
 
 x_fh = @(x_var) [x0 , x_var];
@@ -146,7 +204,6 @@ x_fh = @(x_var) [x0 , x_var];
 %  Create a matrix: M = [ 1 1 1 1 1 1 1 , 0 0 0 ...
 %                         0 0 0 0 0 0 0 , 1 1 1 ... ]
 %  Control input can be changed only weekly
-Tp = 21;
 Nr_Periods = N / Tp;
 idx = reshape(ones(Tp,1) * (1:Nr_Periods),N,1);
 I = eye(Nr_Periods);
@@ -162,8 +219,15 @@ helper = Pcz_CasADi_Helper('SX');
 x_var = helper.new_var('x',size(x_guess),1,'str','full','lb',0);
 x = x_fh(x_var);
 
-beta_min = 0.05;
-beta_max = 0.33;
+% Statistics of the estimated transmission rate for the different interventions
+% Min             0.1212  
+% Median          0.1648  
+% Max             0.2301  
+% Mean            0.1688  
+% Std             0.0208  
+
+beta_min = 0.1212;
+beta_max = 0.2301;
 beta_var = helper.new_var('beta',size(beta_guess),1,'str','full','lb',beta_min,'ub',beta_max);
 beta = beta_fh(beta_var);
 

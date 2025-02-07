@@ -27,6 +27,8 @@ PanSim_args = ps.load_PanSim_args("Manual", ...
     "DiseaseProgressionScaling", DiseaseProgressionScaling, ...
     "Closures",Closures);
 
+PanSim_args = ps.load_PanSim_args("Free");
+
 % Simulate interventions of:
 xlsname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Ctrl_Sum2024-04-19/Scenario1_T30/2024-04-19_17-21_typical.xls";
 
@@ -36,6 +38,8 @@ DirName = "Ctrl_Sum2024-05-30";
 Name = CnfName + "__Sc1typical_T30";
 
 % Simulate
-for i = 1:10 
+tic
+for i = 1:1
     Sim_interventions_by_xls(xlsname,PanSim_args,DirName,Name);
 end
+toc
