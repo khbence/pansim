@@ -1,7 +1,7 @@
 
 
 addpath('build')
-addpath('matlab/2')
+addpath('matlab/Study2')
 addpath(genpath('matlab/Utils'))
 addpath(genpath('matlab/Toolboxes'))
 disp('PanSim startup file executed')

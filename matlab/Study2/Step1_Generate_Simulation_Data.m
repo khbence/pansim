@@ -1,13 +1,56 @@
-function Sim_allcomb_v3_Simplified(PM_comb_Idx)
-%%
-%  Author: Peter Polcz (ppolcz@gmail.com) 
-%  Modified on 2023. July 14. (2023a)
-%
-% 
-% ` PM_comb_Idx ` should be set first
+function Step1_Generate_Simulation_Data
+arguments
+end
 
-VISUALIZE = false;
+fp = pcz_mfilename(mfilename("fullpath"));
+DIR_Input = fullfile(fp.dir,'Input');
+DIR_Output = fullfile(fp.dir,'Output');
+MAT_PM_Allcomb = fullfile(DIR_Input,'PM_Allcomb.mat');
+MAT_PM_combi = @(i) fullfile(DIR_Input,sprintf('PM_comb%04d.mat',i));
 
+Today = string(datetime('today','Format','uuuu-MM-dd'));
+DIR = fullfile(DIR_Output,"Allcomb_" + Today);
+
+if ~exist(DIR_Input,"dir")
+    mkdir(DIR_Input)
+end
+
+if ~exist(DIR_Output,"dir")
+    mkdir(DIR_Output)
+end
+
+if ~exist(DIR,"dir")
+    mkdir(DIR);
+end
+
+%% PM_Allcomb.mat
+
+T = Vn.allcomb;
+nP = height(T);
+
+Tp = 7; % 28; 
+Nr_Periods = 3; % 6;
+save(MAT_PM_Allcomb,"DIR","T","Tp","Nr_Periods")
+
+%% PM_comb000i.mat
+
+N_sim = 5; % 1000;
+Pmx_Perms = zeros(N_sim,Nr_Periods);
+for i = 1:N_sim
+    Perm = randperm(nP,Nr_Periods);
+    Pmx_Perms(i,:) = Perm;
+    save(MAT_PM_combi(i),"Perm")
+end
+
+fig = figure(12);
+histogram(Pmx_Perms(:)-0.5,'BinEdges',(0:nP));
+
+for i = 1:N_sim
+    Simulate_Interventions(i);
+end
+end
+
+function Simulate_Interventions(PM_comb_Idx)
 %%
 
 if exist('pansim','var')
@@ -31,6 +74,11 @@ N = Nr_Periods*Tp;
 
 DIR = s.DIR;
 MAT_Results = fullfile(DIR,sprintf("A%04d.xls",PM_comb_Idx));
+
+if exist(MAT_Results,"file")
+    fprintf('File `%s` already exists! Exiting ...\n',MAT_Results)
+    return
+end
 
 s = load(MAT_PM_combi(PM_comb_Idx));
 PM_Indices = s.Perm;
@@ -78,6 +126,7 @@ R(1,O.Properties.VariableNames) = O;
 
 %%
 
+tic
 for k = 0:Nr_Periods-1
 
     Pmx = PM_Indices(k+1);
@@ -96,8 +145,10 @@ for k = 0:Nr_Periods-1
         R(Idx+1,O.Properties.VariableNames) = O;
     end
 end
+toc
 clear pansim mex
 
 R = Vn.quantify_policy(R);
 
 writetimetable(R,MAT_Results,"Sheet","Results");
+end
