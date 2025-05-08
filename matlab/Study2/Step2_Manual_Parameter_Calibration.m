@@ -8,6 +8,8 @@ ff = @(d) string(cellfun(@(s) {fullfile(s.folder,s.name)}, num2cell(d)));
 dirname = fullfile(fp.dir,"Output/OpenLoop_Simulations");
 xlsnames = ff( dir(fullfile(dirname,"*.xls")) );
 
+for i = 1:10
+
 Nr = ceil(rand(1)*numel(xlsnames));
 xls = xlsnames(Nr);
 R = readtimetable(xls);
@@ -79,6 +81,7 @@ plot(R.Date,[R.TrRate , R1.TrRateRec , R2.TrRateRec],'LineWidth',1.2)
 title('$\beta$','Interpreter','latex','FontSize',12)
 Ax.XTickLabels = {};
 
+[~,simname] = fileparts(xls);
 for i = 1:J.nx
     Ax = [Ax , nexttile]; hold on, grid on, box on
     Pl = plot(R.Date,[x_PanSim(:,i) , x1(:,i) , x2(:,i)],'LineWidth',1.2);
@@ -90,8 +93,7 @@ for i = 1:J.nx
 
     % Legend
     if Vn.SLPIAHDR(i) == "S"
-        [~,bn] = fileparts(xls);
-        Pl(1).DisplayName = "Simulator's output (" + bn + ".xls)";
+        Pl(1).DisplayName = "Simulator's output (" + simname + ".xls)";
         Pl(2).DisplayName = "Reconstruction using parameters from previous work~~~~~";
         Pl(3).DisplayName = "Reconstruction using calibrated parameters";
         legend('Location','northoutside','Box','off','Interpreter','latex','FontSize',13)
@@ -101,4 +103,9 @@ end
 for ax = Ax
     ax.TickLabelInterpreter = "latex";
     ax.FontSize = 12;
+end
+
+exportgraphics(Fig,fullfile(fp.dir,"Output","Model_Fit_" + simname + ".jpg"))
+
+
 end
