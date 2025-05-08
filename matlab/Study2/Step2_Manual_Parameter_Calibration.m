@@ -3,14 +3,13 @@ function Step2_Manual_Parameter_Calibration
 %  Author: Peter Polcz (ppolcz@gmail.com) 
 %  Revised on 2025. May 08. (2024b)
 
-%%s
-
-% Population in the simulator
-Np = C.Np;
-
 fp = pcz_mfilename(mfilename("fullpath"));
-Nr = sprintf('%03d',ceil(rand(1)*122)); % '093' pl. szep
-xls = fullfile(fp.dir,"Output/OpenLoop_Simulations/A" + Nr + ".xls");
+ff = @(d) string(cellfun(@(s) {fullfile(s.folder,s.name)}, num2cell(d)));
+dirname = fullfile(fp.dir,"Output/OpenLoop_Simulations");
+xlsnames = ff( dir(fullfile(dirname,"*.xls")) );
+
+Nr = ceil(rand(1)*numel(xlsnames));
+xls = xlsnames(Nr);
 R = readtimetable(xls);
 R.Date.Format = 'uuuu-MM-dd';
 
@@ -23,9 +22,9 @@ R.IQ = Vn.IQ(R);
 %%
 
 fp = pcz_mfilename(mfilename('fullpath'));
-Q = readtable(string(fp.pdir) + "/Parameters/Par_HUN_2023-12-19_JN1.xlsx", ...
+Q = readtable(string(fp.pdir) + "/Parameters/Par_HUN_2024-02-26_Agens_Wild.xlsx", ...
     "ReadRowNames",true,"Sheet","Main");
-Q = Q(["Transient","Original","Future"],:);
+Q = Q(["Transient","Original","Alpha"],:);
 
 % Water Research cikkben levo parameterek
 Q("Original","Period_I") = table(3);
@@ -53,6 +52,8 @@ Q("Original","Period_A") = table(4);
 Q("Original","Pr_H") = table(0.076);
 Q("Original","Period_H") = table(12);
 Q("Original","Pr_D") = table(0.48);
+
+display(rows2vars(Q("Original",5:end-4)),'Parameters')
 
 P = Epid_Par.Get(Q);
 P = P(isbetween(P.Date,Start_Date,End_Date),:);

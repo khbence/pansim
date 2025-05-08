@@ -28,8 +28,8 @@ end
 T = Vn.allcomb;
 nP = height(T);
 
-Tp = 7; % 28; 
-Nr_Periods = 3; % 6;
+Tp = 28; 
+Nr_Periods = 6;
 save(MAT_PM_Allcomb,"DIR","T","Tp","Nr_Periods")
 
 %% PM_comb000i.mat
