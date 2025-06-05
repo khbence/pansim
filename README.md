@@ -100,3 +100,6 @@ This work is licensed under a
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
+# Acknowledgements
+PanSim was developed as part of the National Lab of Health Secority in Hungary (RRF-2.3.1-21-2022-00006)
