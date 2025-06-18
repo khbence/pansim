@@ -12,6 +12,22 @@ dirname = fullfile(fp.dir,"Output");
 dirname = "/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output";
 xlsnames = ff( dir(fullfile(dirname,"Allcomb_*",'*.xls')) );
 
+%{
+% 2025.05.08. (május  8, csütörtök), 10:42
+newdir = '/home/ppolcz/Dropbox/Peti/NagyGep/PanSim_Output/Allcomb_2024-03_collected';
+for i = 1:numel(xlsnames)
+    newname = fullfile(newdir,sprintf('A%04d.xls',i));
+    copyfile(xlsnames(i),newname)
+end
+%}
+
+%%
+
+recdir = fullfile(dirname,"AllCombRec_2025-02-10");
+if ~exist(recdir,"dir")
+    mkdir(recdir)
+end
+
 opts = detectImportOptions(xlsnames(1));
 opts = setvartype(opts,opts.SelectedVariableNames,"double");
 opts = setvartype(opts,Vn.policy,"categorical");
@@ -41,7 +57,7 @@ na = repmat({nan(N,1)},size(VariableNames));
 D = table(na{:},'VariableNames',VariableNames);
 
 idx = 1:height(T);
-for i = 21:length(xlsnames)
+for i = 1:length(xlsnames)
     tic
 
     T = readtimetable(xlsnames(i),opts,'Sheet','Results');
@@ -107,6 +123,8 @@ for i = 21:length(xlsnames)
     writetimetable(T(:,Variables),xlsnames(i),'Sheet','Reconstruction','WriteMode','overwritesheet')
     exportgraphics(fig,strrep(xlsnames(i),".xls",".jpg"));
     fprintf('%d / %d\n',i,length(xlsnames))
+
+    % fullfile(recdir,"Pmx" + sprintf('_%d',T.Pmx(find(diff(T.Pmx)))) + "_i" + num2str(i) );
     toc
 end
 
@@ -167,8 +185,9 @@ GS(GS.QU == "QU2",:) = [];
 
 TrRateStd = GS.TrRateStd;
 GS.TrRateStd = movmean(TrRateStd,5);
-Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1230);
+Visualize_Intervention_Simple3(GS,TrRateStd="TrRateStd",FigNr=1230);
 GS.TrRateStd = TrRateStd;
+exportgraphics(gcf,"/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/Dokumentaciok/Docs_CsutakB_PhD/11_Epid_MPC_Agent/actual/fig_Other/Fig1230.png")
 
 [~,Idx] = sort(GS.CF,'ascend'); GS = GS(Idx,:);
 [~,Idx] = sort(GS.PL,'ascend'); GS = GS(Idx,:);
@@ -177,10 +196,15 @@ GS.TrRateStd = TrRateStd;
 
 TrRateStd = GS.TrRateStd;
 GS.TrRateStd = movmean(TrRateStd,5);
-Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1231);
+Visualize_Intervention_Simple3(GS,TrRateStd="TrRateStd",FigNr=1231);
 GS.TrRateStd = TrRateStd;
+exportgraphics(gcf,"/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/Dokumentaciok/Docs_CsutakB_PhD/11_Epid_MPC_Agent/actual/fig_Other/Fig1231.png")
 
-[~,Idx] = sort(GS.TP,'ascend'); GS = GS(Idx,:);
+GS.TP(GS.TP == "TPdef") = "TP05";
+GS.TP(GS.TP == "TP015") = "TP15";
+GS.TP(GS.TP == "TP035") = "TP35";
+
+[~,Idx] = sort(GS.TP,'descend'); GS = GS(Idx,:);
 [~,Idx] = sort(GS.SO,'ascend'); GS = GS(Idx,:);
 [~,Idx] = sort(GS.CF,'ascend'); GS = GS(Idx,:);
 [~,Idx] = sort(GS.PL,'ascend'); GS = GS(Idx,:);
@@ -189,5 +213,7 @@ GS.TrRateStd = TrRateStd;
 
 TrRateStd = GS.TrRateStd;
 GS.TrRateStd = movmean(TrRateStd,5);
-Visualize_Intervention_Simple2(GS,TrRateStd="TrRateStd",FigNr=1232);
+Visualize_Intervention_Simple3(GS,TrRateStd="TrRateStd",FigNr=1232);
 GS.TrRateStd = TrRateStd;
+exportgraphics(gcf,"/home/ppolcz/Dropbox/Peti/Munka/01_PPKE_2020/Dokumentaciok/Docs_CsutakB_PhD/11_Epid_MPC_Agent/actual/fig_Other/Fig1232.png")
+
