@@ -1,5 +1,5 @@
 # Pansim
-Pansim is a pandemic simulation framework of PPCU university. It uses agent-based modelling to simulate the spread of the disease. Every agent represents a person, which has movement depending on its schedule and locations. Infectiousness is spreading between agents in the same locations in a stochastic way. The main goal and the default parameters are specialized for the current COVID-19 pandemic, but with correct parameters it can be applied for many epidemic situations.
+Pansim is a pandemic simulation framework of PPCU university, developed as part of the National Lab of Health Security. It uses agent-based modelling to simulate the spread of the disease. Every agent represents a person, which has movement depending on its schedule and locations. Infectiousness is spreading between agents in the same locations in a stochastic way. The main goal and the default parameters are specialized for the current COVID-19 pandemic, but with correct parameters it can be applied for many epidemic situations.
 
 ## Technical parameters
 The simulation can be run on CPU only using OpenMP to accelerate or it can also use CUDA capable GPU. On a larger 16 GB RAM GPU we can simulate up to 50 million agents, but even on a smaller regular GPU a few million agent can be simulated safely.
@@ -102,4 +102,6 @@ This work is licensed under a
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 
 # Acknowledgements
-PanSim was developed as part of the National Lab of Health Secority in Hungary (RRF-2.3.1-21-2022-00006)
+PanSim was developed as part of the National Lab of Health Security in Hungary (RRF-2.3.1-21-2022-00006)
+![Szecsenyi](https://terepi.semmelweis.hu/_next/image?url=%2Fimages%2Fszecsenyi.png&w=750&q=75)
+
