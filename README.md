@@ -102,6 +102,6 @@ This work is licensed under a
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 
 # Acknowledgements
-PanSim was developed as part of the National Lab of Health Security in Hungary (RRF-2.3.1-21-2022-00006)
-![Szecsenyi](https://terepi.semmelweis.hu/_next/image?url=%2Fimages%2Fszecsenyi.png&w=750&q=75)
+PanSim was developed as part of the National Laboratory for Health Security project, supported by the National Research, Development and Innovation Office, Hungary , grants RRF-2.3.1-21-2022-00006
+![Szecsenyi](logo.jpg)
 
