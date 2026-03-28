@@ -30,8 +30,20 @@ int main(int argc, char** argv) {
         return EXIT_SUCCESS;
     }
 
+    if (result.count("threads") != 0) {
+        const int requestedThreads = result["threads"].as<int>();
+        if (requestedThreads < 1) {
+            std::cerr << "--threads must be at least 1\n";
+            return EXIT_FAILURE;
+        }
+        omp_set_dynamic(0);
+        omp_set_num_threads(requestedThreads);
+    }
+
+    const std::uint64_t seed = result.count("seed") != 0 ? result["seed"].as<std::uint64_t>() : std::random_device{}();
+
     BEGIN_PROFILING("Device/RNG init");
-    RandomGenerator::init(omp_get_max_threads());
+    RandomGenerator::init(omp_get_max_threads(), seed);
     END_PROFILING("Device/RNG init");
     try {
         config::Simulation_t s{ result };

@@ -41,6 +41,12 @@ cxxopts::Options defineProgramParameters() {
         "stateDistribution.")("outAgentStat",
         "name of the agent stat output file, if not set there will be no print",
         cxxopts::value<std::string>()->default_value(""))(
+        "seed",
+        "Base RNG seed used for deterministic random streams.",
+        cxxopts::value<std::uint64_t>())(
+        "threads",
+        "Override the OpenMP thread count before simulation setup.",
+        cxxopts::value<int>())(
         "diags", "level of diagnositcs to print", cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))));
 
         

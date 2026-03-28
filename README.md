@@ -26,6 +26,8 @@ Details about the format and contents in input json files are discussed [here](i
 |    | --closures                | List of closure rules. (default: inputConfigFiles/closureRules.json)
 |  -r| --randomStates            | Change the states from the agents file with the configRandom file's stateDistribution.
 |    | --outAgentStat            | name of the agent stat output file, if not set there will be no print (default: "")
+|    | --seed                    | Base RNG seed used for deterministic random streams
+|    | --threads                 | Override the OpenMP thread count before simulation setup
 |    | --diags                   | level of diagnositcs to print (default: 0)
 |    | --otherDisease            | Enable (1) or disable (0) non-COVID related hospitalization and sudden death  (default: 1)
 |    | --infectiousnessMultiplier      | infectiousness multiplier for different strains of tje virus (default: 1.0)
@@ -73,6 +75,15 @@ Use the [Makefile](Makefile) to build it for GPU or CPU, run the buildCPU or bui
 
 > make buildGPU
 
+For deterministic CPU runs, use a fixed seed and a single thread. Example:
+> ./build_cpu/panSim --seed 1234 --threads 1 -n 1000 -N 100 -w 1 --outAgentStat stats.json
+
+For a reference-based determinism regression test, configure with testing enabled and run:
+> cmake .. -DUSE_GPU=OFF -DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS="-I/usr/local/cuda/targets/x86_64-linux/include/cccl/"
+> ctest --output-on-failure -R deterministic_cpu_reference
+
+The reference fixture lives in [test/reference](test/reference) and is defined for `--seed 1234 --threads 1`.
+
 ### **Parameters for Szeged simulation**
 To run a simplified Szeged simulation with a default scenario, use the following arguments:
 
@@ -104,4 +115,3 @@ This work is licensed under a
 # Acknowledgements
 PanSim was developed as part of the National Laboratory for Health Security project, supported by the National Research, Development and Innovation Office, Hungary , grants RRF-2.3.1-21-2022-00006
 ![Szecsenyi](logo.jpg)
-

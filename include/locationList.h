@@ -4,6 +4,7 @@
 #include "agent.h"
 #include <cmath>
 #include <algorithm>
+#include <iterator>
 #include <random>
 #include "randomGenerator.h"
 #include "statistics.h"
@@ -194,7 +195,7 @@ public:
         for (unsigned i = 0; i < schools_h.size(); i++) {
             auto it = thrust::find(schoolIdForClassroom.begin(), schoolIdForClassroom.end(), schools_h[i]);
             if (it != schoolIdForClassroom.end())
-                classroomOffsets_h.push_back(thrust::distance(schoolIdForClassroom.begin(), it));
+                classroomOffsets_h.push_back(std::distance(schoolIdForClassroom.begin(), it));
             else {
                 // printf("School %d (%s) has no classrooms\n", schools_h[i], schoolIDs_h[i].c_str());
                 if (classroomOffsets_h.size() == 0) classroomOffsets_h.push_back(0);
