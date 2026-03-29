@@ -6,7 +6,7 @@
 #include "operators.h"
 #include "locationTypesFormat.h"
 namespace ClosureHelpers {
-    std::vector<std::string> splitHeader(std::string& header) {
+    inline std::vector<std::string> splitHeader(std::string& header) {
         std::stringstream ss(header);
         std::string arg;
         std::vector<std::string> params;
@@ -26,7 +26,7 @@ namespace ClosureHelpers {
         }
         return params;
     }
-    int mod(int a, int b) {
+    inline int mod(int a, int b) {
         int r = a % b;
         return r < 0 ? r + b : r;
     }

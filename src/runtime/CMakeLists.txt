@@ -2,6 +2,10 @@ add_library(
     panSimRuntime
     OBJECT
         ${CMAKE_CURRENT_LIST_DIR}/programOptions.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/agentsListRuntime.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/immunizationRuntime.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/locationListRuntime.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/simulationOrchestration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/simulationRuntime.cpp)
 target_include_directories(
     panSimRuntime

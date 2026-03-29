@@ -101,6 +101,3 @@ BootstrapResult bootstrapSimulation(const std::vector<std::string>& args) {
 }
 
 } // namespace runtime
-
-#include "locationListRuntime.cpp"
-#include "simulationOrchestration.cpp"

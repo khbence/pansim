@@ -69,7 +69,7 @@ namespace RealMovementOps {
     constexpr unsigned noWorkNoRequest = std::numeric_limits<unsigned>::max();
     constexpr unsigned noWorkNeedsSelection = std::numeric_limits<unsigned>::max() - 1;
 
-    [[nodiscard]] HD unsigned findActualLocationForType(unsigned agent,
+    [[nodiscard]] inline HD unsigned findActualLocationForType(unsigned agent,
         unsigned locType,
         unsigned long* locationOffsetPtr,
         unsigned* possibleLocationsPtr,
@@ -1172,7 +1172,7 @@ namespace RealMovementOps {
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     __device__
 #endif
-        void
+        inline void
         finalizeNoWorkToday(unsigned locationIdx, unsigned numberOfAgents, const unsigned* noWorkLocPtr, uint8_t* noWorkAgentPtr) {
         const unsigned selectedAgent = noWorkLocPtr[locationIdx];
         if (isSelectedNoWorkAgent(selectedAgent, numberOfAgents)) noWorkAgentPtr[selectedAgent] = 1;
@@ -1199,7 +1199,7 @@ namespace RealMovementOps {
         }
     }
 
-    __global__ void finalizeNoWorkTodayDriver(
+    static __global__ void finalizeNoWorkTodayDriver(
         unsigned numberOfLocations, unsigned numberOfAgents, const unsigned* noWorkLocPtr, uint8_t* noWorkAgentPtr) {
         unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
         if (i < numberOfLocations) { RealMovementOps::finalizeNoWorkToday(i, numberOfAgents, noWorkLocPtr, noWorkAgentPtr); }
@@ -1306,7 +1306,7 @@ namespace RealMovementOps {
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
     __device__
 #endif
-        void
+        inline void
         checkSchoolQuarantine(unsigned i,
             unsigned* schoolsPtr,
             unsigned* classroomsPtr,
@@ -1335,7 +1335,7 @@ namespace RealMovementOps {
     }
 
 #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
-    __global__ void checkSchoolQuarantineDriver(unsigned numSchools,
+    static __global__ void checkSchoolQuarantineDriver(unsigned numSchools,
         unsigned* schoolsPtr,
         unsigned* classroomsPtr,
         unsigned* classroomOffsetsPtr,
