@@ -20,7 +20,7 @@ compare_text_file() {
     local actual="$2"
     local label="$3"
 
-    if ! diff -u <(printf '%s\n' "$(cat "${expected}")") <(printf '%s\n' "$(cat "${actual}")") >&2; then
+    if ! diff -u <(sed -e '$a\' "${expected}") <(sed -e '$a\' "${actual}") >&2; then
         echo "${label} mismatch against deterministic reference" >&2
         exit 1
     fi
