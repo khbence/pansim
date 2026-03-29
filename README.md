@@ -78,6 +78,11 @@ Use the [Makefile](Makefile) to build it for GPU or CPU, run the buildCPU or bui
 For deterministic CPU runs, use a fixed seed and a single thread. Example:
 > ./build_cpu/panSim --seed 1234 --threads 1 -n 1000 -N 100 -w 1 --outAgentStat stats.json
 
+For deterministic GPU runs, use a fixed seed and build with the deterministic reduction path:
+> cmake .. -DUSE_GPU=ON -DGPU_ATOMICS=OFF
+
+The default GPU build keeps `-DGPU_ATOMICS=ON` for throughput. Determinism checks should explicitly configure `-DGPU_ATOMICS=OFF`.
+
 For a reference-based determinism regression test, configure with testing enabled and run:
 > cmake .. -DUSE_GPU=OFF -DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS="-I/usr/local/cuda/targets/x86_64-linux/include/cccl/"
 > ctest --output-on-failure -R deterministic_cpu_reference

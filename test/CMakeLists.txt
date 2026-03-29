@@ -8,6 +8,15 @@ add_test(
         ${CMAKE_CURRENT_SOURCE_DIR}/reference
 )
 
+if(CUDAToolkit_FOUND AND USE_GPU AND NOT GPU_ATOMICS)
+    add_test(
+        NAME deterministic_gpu_smoke
+        COMMAND
+            ${CMAKE_CURRENT_SOURCE_DIR}/run_determinism_smoke.sh
+            $<TARGET_FILE:${MAIN_BINARY}>
+    )
+endif()
+
 if(NOT ENABLE_GTEST_TESTING)
     return()
 endif()

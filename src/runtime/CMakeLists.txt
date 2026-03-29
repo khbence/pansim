@@ -20,6 +20,12 @@ target_include_directories(
         cxxopts/include)
 target_link_libraries(panSimRuntime PUBLIC OpenMP::OpenMP_CXX)
 
+if(CUDAToolkit_FOUND AND USE_GPU)
+    get_target_property(runtimeSources panSimRuntime SOURCES)
+    set_source_files_properties(${runtimeSources} PROPERTIES LANGUAGE CUDA)
+    set_target_properties(panSimRuntime PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
 target_sources(${MAIN_BINARY} PRIVATE $<TARGET_OBJECTS:panSimRuntime>)
 
 if (Matlab_FOUND)
