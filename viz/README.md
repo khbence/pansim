@@ -23,7 +23,9 @@ mkdir -p viz/runs/baseline
 
 Repeat with the GPU free between runs. `--seed` fixes a run; omitting it keeps the stochastic spread the bands are for. The default length is 12 weeks (`-w`). Day 0 is 2020-09-23 (`--startDate 267`, the 23 September used in the seasonality code and in `matlab/Study1/simout2table.m`).
 
-`viz/runs/baseline/` already contains six stdout captures from that command (84 days each).
+`viz/runs/baseline/` already contains six stdout captures from that command (84 days each, the default 12 weeks).
+
+An 8-week ensemble is `viz/run_ensemble.sh` (defaults: `-w 8 -n 6 -o viz/runs/weeks8`). The captures from that script are in `viz/runs/weeks8/`. Compare both with `--group baseline=viz/runs/baseline --group weeks8=viz/runs/weeks8`.
 
 ## View
 
