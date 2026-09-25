@@ -1,0 +1,20 @@
+{
+  "columns": 2,
+  "smoothing": 7,
+  "scale": "simulation",
+  "show_std": true,
+  "show_runs": false,
+  "show_ground_truth": true,
+  "panels": [
+    {"metric": "NI", "title": "New infections"},
+    {"metric": "I_all", "title": "All infected"},
+    {"metric": "H_covid", "title": "COVID hospital occupancy"},
+    {"metric": "D_new", "title": "New COVID deaths"},
+    {"metric": "D1", "title": "Cumulative COVID deaths"},
+    {"metric": "beta", "title": "Transmission rate"},
+    {"metric": "Q", "title": "Quarantine"},
+    {"metric": "VAC", "title": "Vaccinations per day"},
+    {"metric": "MUT_WT", "title": "Wild-type share of active infections"},
+    {"metric": "INF", "title": "Ever infected"}
+  ]
+}
