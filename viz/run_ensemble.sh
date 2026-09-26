@@ -33,7 +33,7 @@ for n in $(seq 1 "$COUNT"); do
   i="$(printf '%02d' "$n")"
   dest="$OUT/run_${i}.stdout"
   echo "Run ${i}/${COUNT} -> ${dest} (-w ${WEEKS})"
-  ./build_gpu/panSim -r --quarantinePolicy 0 -k 0.00041 \
+  ./build_gpu/panSim -r --quarantinePolicy 3 -k 0.00041 \
     --progression inputConfigFiles/progressions_Jun17_tune/transition_config.json \
     -A inputConfigFiles/agentTypes_3.json \
     -a inputRealExample/agents1.json \

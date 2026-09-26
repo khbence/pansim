@@ -10,7 +10,7 @@ The table is tab-separated. `MUT`, `IMM` and `INFV` are comma-separated per-vari
 
 ```bash
 mkdir -p viz/runs/baseline
-./build_gpu/panSim -r --quarantinePolicy 0 -k 0.00041 \
+./build_gpu/panSim -r --quarantinePolicy 3 -k 0.00041 \
   --progression inputConfigFiles/progressions_Jun17_tune/transition_config.json \
   -A inputConfigFiles/agentTypes_3.json \
   -a inputRealExample/agents1.json \
@@ -23,7 +23,7 @@ mkdir -p viz/runs/baseline
 
 Repeat with the GPU free between runs. `--seed` fixes a run; omitting it keeps the stochastic spread the bands are for. The default length is 12 weeks (`-w`). Day 0 is 2020-09-23 (`--startDate 267`, the 23 September used in the seasonality code and in `matlab/Study1/simout2table.m`).
 
-`viz/runs/baseline/` already contains six stdout captures from that command (84 days each, the default 12 weeks).
+`viz/runs/baseline/` holds six stdout captures of the same command run earlier with `--quarantinePolicy 0` (84 days each, the default 12 weeks). The example and `viz/run_ensemble.sh` now pass `--quarantinePolicy 3`.
 
 An 8-week ensemble is `viz/run_ensemble.sh` (defaults: `-w 8 -n 6 -o viz/runs/weeks8`). The captures from that script are in `viz/runs/weeks8/`. Compare both with `--group baseline=viz/runs/baseline --group weeks8=viz/runs/weeks8`.
 
@@ -46,7 +46,18 @@ A later pass scores hospital occupancy as `I5_h+I6_h+R_h`, scaled by the reconst
 --diseaseProgressionScaling 0.90,1.03,0.813,0.72,0.57,0.463,0.45
 ```
 
-That higher `-k` matches 4–18 November and then overshoots December (hospital RMSE 1273, mean squared error 1,619,389). The minimum mean squared error against hospital counts is the eight-run ensemble in `viz/runs/hosp_k41/`, same multipliers at `-k 0.00041`. Hospital mean squared error is 304,931 (RMSE 552, correlation 0.978): peak 8420 on 3 Dec versus 8045 on 8 Dec, and 3973 versus 3562 on 31 Jan. Against the reconstruction `Infected` column the same mean has mean squared error 482,888,634 (RMSE 21,975, correlation 0.890). The infected peak is 164,903 on 21 Nov versus 166,157 on 10 Nov, and 31 Jan is 92,614 versus 64,535. Nearby infectiousness values 0.80–0.812 and progression values 0.89–0.91 had higher hospital mean squared error once repeated.
+That higher `-k` matches 4–18 November and then overshoots December (hospital RMSE 1273, mean squared error 1,619,389). The minimum mean squared error against hospital counts is the eight-run ensemble in `viz/runs/hosp_k41/`, same multipliers at `-k 0.00041`. Hospital mean squared error is 304,931 (RMSE 552, correlation 0.978): peak 8420 on 3 Dec versus 8045 on 8 Dec, and 3973 versus 3562 on 31 Jan. Against the reconstruction `Infected` column the same mean has mean squared error 482,888,634 (RMSE 21,975, correlation 0.890). The infected peak is 164,903 on 21 Nov versus 166,157 on 10 Nov, and 31 Jan is 92,614 versus 64,535. Nearby infectiousness values 0.80–0.812 and progression values 0.89–0.91 had higher hospital mean squared error once repeated. Those runs all used `--quarantinePolicy 0`.
+
+With `--quarantinePolicy 3` the hospital mean squared error is lowest back at the original multipliers. Eight runs are in `viz/runs/hosp_q3/`:
+
+```bash
+--quarantinePolicy 3
+-k 0.00041
+--infectiousnessMultiplier 0.98,1.81,2.11,2.58,4.32,6.8,6.8
+--diseaseProgressionScaling 0.94,1.03,0.813,0.72,0.57,0.463,0.45
+```
+
+Hospital mean squared error is 285,121 (RMSE 534, correlation 0.977). The mean peaks at 8741 on 30 Nov versus 8045 on 8 Dec, and is 3227 versus 3562 on 31 Jan. Against reconstruction `Infected` the mean squared error is 243,168,234 (RMSE 15,594, correlation 0.956): peak 155,256 on 18 Nov versus 166,157 on 10 Nov, and 72,972 versus 64,535 on 31 Jan. Progression 0.92 instead of 0.94 raises the hospital mean squared error to 332,893 and lowers the infected RMSE to 12,650.
 
 ## View
 
