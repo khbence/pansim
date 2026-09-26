@@ -36,7 +36,17 @@ An 8-week ensemble is `viz/run_ensemble.sh` (defaults: `-w 8 -n 6 -o viz/runs/we
 --diseaseProgressionScaling 0.88,1.03,0.813,0.72,0.57,0.463,0.45
 ```
 
-The scored series is national-scale `I5_h+I6_h` (`H_covid`): simulated occupancy times `9_600_000 / N_sim`, compared with `Kórházi ápoltak száma` on every day from 2020-09-23 through 2021-01-31. The ensemble mean has RMSE 643 and MAE 487 (correlation 0.97). It peaks at 7714 on 2020-12-03; the official peak is 8045 on 2020-12-08. On 2021-01-31 the mean is 4021 and the official count is 3562. The largest gap is 4–18 November, where the mean is about 1100–1500 below the official counts.
+That pass scored national-scale `I5_h+I6_h` only (`9_600_000 / N_sim` against `Kórházi ápoltak száma`). RMSE was 643. The mean was about 1100–1500 low from 4–18 November.
+
+A later pass scores hospital occupancy as `I5_h+I6_h+R_h`, scaled by the reconstruction population `9_967_304 / N_sim`, and uses the `Infected` column of `Full_reconstruction_2026-09-26.xlsx` as a secondary check against `E+I1+I2+I3+I4+I5_h+I6_h` on the same scale. Raising `-k` from 0.00041 to 0.000418 closes most of the early–mid November hospital gap. Eight runs of that setting are in `viz/runs/hosp_k418/`:
+
+```bash
+-k 0.000418
+--infectiousnessMultiplier 0.81,1.81,2.11,2.58,4.32,6.8,6.8
+--diseaseProgressionScaling 0.90,1.03,0.813,0.72,0.57,0.463,0.45
+```
+
+Ensemble mean versus official hospital counts: 4 Nov 4440 vs 4871, 11 Nov 6169 vs 6352, 18 Nov 7291 vs 7499, peak 9598 on 8 Dec vs 8045, 31 Jan 4775 vs 3562. RMSE is 1273. The same runs versus ODE `Infected`: 21 Oct 81079 vs 83888, 4 Nov 138855 vs 150607, then a peak of 199072 on 21 Nov versus 166157 on 10 Nov (RMSE 35447). `viz/runs/hosp_k41/` is eight runs at `-k 0.00041` with the same multipliers. That ensemble has the smaller hospital RMSE (552) and an infected peak of 164903, and it is still about 1200 low on 11 November.
 
 ## View
 
