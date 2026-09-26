@@ -29,6 +29,15 @@ An 8-week ensemble is `viz/run_ensemble.sh` (defaults: `-w 8 -n 6 -o viz/runs/we
 
 `viz/runs/cmp_head/` and `viz/runs/cmp_main/` are twenty 8-week runs each of this branch and git `main`, same command, used to compare `I5_h+I6_h+R_h`.
 
+`viz/runs/hosp_jan2021/` is eight 19-week runs (`-w 19`) that fit official hospital occupancy through 2021-01-31. The same command is used, with only the first multiplier changed:
+
+```bash
+--infectiousnessMultiplier 0.82,1.81,2.11,2.58,4.32,6.8,6.8
+--diseaseProgressionScaling 0.88,1.03,0.813,0.72,0.57,0.463,0.45
+```
+
+The scored series is national-scale `I5_h+I6_h` (`H_covid`): simulated occupancy times `9_600_000 / N_sim`, compared with `Kórházi ápoltak száma` on every day from 2020-09-23 through 2021-01-31. The ensemble mean has RMSE 643 and MAE 487 (correlation 0.97). It peaks at 7714 on 2020-12-03; the official peak is 8045 on 2020-12-08. On 2021-01-31 the mean is 4021 and the official count is 3562. The largest gap is 4–18 November, where the mean is about 1100–1500 below the official counts.
+
 ## View
 
 ```bash
