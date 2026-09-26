@@ -15,7 +15,7 @@ mkdir -p viz/runs/baseline
   -A inputConfigFiles/agentTypes_3.json \
   -a inputRealExample/agents1.json \
   -l inputRealExample/locations0.json \
-  --infectiousnessMultiplier 0.98,1.81,2.11,2.58,4.32,6.8,6.8 \
+  --infectiousnessMultiplier 0.98,1.72,2.11,2.58,4.32,6.8,6.8 \
   --diseaseProgressionScaling 0.94,1.03,0.813,0.72,0.57,0.463,0.45 \
   --closures inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8.json \
   > viz/runs/baseline/run_01.stdout
@@ -58,6 +58,8 @@ With `--quarantinePolicy 3` the hospital mean squared error is lowest back at th
 ```
 
 Hospital mean squared error is 285,121 (RMSE 534, correlation 0.977). The mean peaks at 8741 on 30 Nov versus 8045 on 8 Dec, and is 3227 versus 3562 on 31 Jan. Against reconstruction `Infected` the mean squared error is 243,168,234 (RMSE 15,594, correlation 0.956): peak 155,256 on 18 Nov versus 166,157 on 10 Nov, and 72,972 versus 64,535 on 31 Jan. Progression 0.92 instead of 0.94 raises the hospital mean squared error to 332,893 and lowers the infected RMSE to 12,650.
+
+The next hospital wave, 26 Jan through 2 Jun 2021, is the second strain. It is seeded by the first `ExposeToMutation` in the closure file: variant 1, starting day 125 (26 Jan), daily fraction `0.00024`, for 6 days. Eight runs in `viz/runs/wave2/` keep that seeding and the second progression value `1.03`, and set the second infectiousness to `1.72` (the original list used `1.81`). On that window the hospital mean squared error is 999,962 (RMSE 1,000, correlation 0.963): peak 12,895 on 23 Mar versus 12,553 on 30 Mar. Reconstruction `Infected` has mean squared error 528,994,481 (RMSE 23,000, correlation 0.981): peak 243,605 on 13 Mar versus 220,698 on 19 Mar. Seeding on day 115 or 135, or at half or 1.5 times the fraction, raised the hospital mean squared error. By the hospital peak about 95% of infections are variant 1 (`MUT1`).
 
 ## View
 
