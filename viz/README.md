@@ -46,7 +46,7 @@ A later pass scores hospital occupancy as `I5_h+I6_h+R_h`, scaled by the reconst
 --diseaseProgressionScaling 0.90,1.03,0.813,0.72,0.57,0.463,0.45
 ```
 
-Ensemble mean versus official hospital counts: 4 Nov 4440 vs 4871, 11 Nov 6169 vs 6352, 18 Nov 7291 vs 7499, peak 9598 on 8 Dec vs 8045, 31 Jan 4775 vs 3562. RMSE is 1273. The same runs versus ODE `Infected`: 21 Oct 81079 vs 83888, 4 Nov 138855 vs 150607, then a peak of 199072 on 21 Nov versus 166157 on 10 Nov (RMSE 35447). `viz/runs/hosp_k41/` is eight runs at `-k 0.00041` with the same multipliers. That ensemble has the smaller hospital RMSE (552) and an infected peak of 164903, and it is still about 1200 low on 11 November.
+That higher `-k` matches 4–18 November and then overshoots December (hospital RMSE 1273, mean squared error 1,619,389). The minimum mean squared error against hospital counts is the eight-run ensemble in `viz/runs/hosp_k41/`, same multipliers at `-k 0.00041`. Hospital mean squared error is 304,931 (RMSE 552, correlation 0.978): peak 8420 on 3 Dec versus 8045 on 8 Dec, and 3973 versus 3562 on 31 Jan. Against the reconstruction `Infected` column the same mean has mean squared error 482,888,634 (RMSE 21,975, correlation 0.890). The infected peak is 164,903 on 21 Nov versus 166,157 on 10 Nov, and 31 Jan is 92,614 versus 64,535. Nearby infectiousness values 0.80–0.812 and progression values 0.89–0.91 had higher hospital mean squared error once repeated.
 
 ## View
 
