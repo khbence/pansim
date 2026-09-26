@@ -27,7 +27,7 @@ Repeat with the GPU free between runs. `--seed` fixes a run; omitting it keeps t
 
 An 8-week ensemble is `viz/run_ensemble.sh` (defaults: `-w 8 -n 6 -o viz/runs/weeks8`). The captures from that script are in `viz/runs/weeks8/`. Compare both with `--group baseline=viz/runs/baseline --group weeks8=viz/runs/weeks8`.
 
-`viz/runs/cmp_head/` and `viz/runs/cmp_main/` are six 8-week runs each of this branch and git `main`, same command, used to compare `I5_h+I6_h+R_h`.
+`viz/runs/cmp_head/` and `viz/runs/cmp_main/` are twenty 8-week runs each of this branch and git `main`, same command, used to compare `I5_h+I6_h+R_h`.
 
 ## View
 
