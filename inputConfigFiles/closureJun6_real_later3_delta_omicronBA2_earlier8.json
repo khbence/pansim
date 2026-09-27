@@ -92,7 +92,7 @@
       "threshold": 316,
       "threshold2": 2,
       "openAfter": 6,
-      "parameter": 10e-5,
+      "parameter": 30e-5,
       "closeAfter": -1,
       "locationTypesToClose": [
       ]

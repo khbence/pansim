@@ -15,7 +15,7 @@ mkdir -p viz/runs/baseline
   -A inputConfigFiles/agentTypes_3.json \
   -a inputRealExample/agents1.json \
   -l inputRealExample/locations0.json \
-  --infectiousnessMultiplier 0.98,1.85,2.11,2.58,4.32,6.8,6.8 \
+  --infectiousnessMultiplier 0.98,1.85,2.18,2.58,4.32,6.8,6.8 \
   --diseaseProgressionScaling 0.94,1.03,0.813,0.72,0.57,0.463,0.45 \
   --closures inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8.json \
   > viz/runs/baseline/run_01.stdout
@@ -60,6 +60,8 @@ With `--quarantinePolicy 3` the hospital mean squared error is lowest back at th
 Hospital mean squared error is 285,121 (RMSE 534, correlation 0.977). The mean peaks at 8741 on 30 Nov versus 8045 on 8 Dec, and is 3227 versus 3562 on 31 Jan. Against reconstruction `Infected` the mean squared error is 243,168,234 (RMSE 15,594, correlation 0.956): peak 155,256 on 18 Nov versus 166,157 on 10 Nov, and 72,972 versus 64,535 on 31 Jan. Progression 0.92 instead of 0.94 raises the hospital mean squared error to 332,893 and lowers the infected RMSE to 12,650.
 
 The next hospital wave, 26 Jan through 2 Jun 2021, is the second strain. It is seeded by the first `ExposeToMutation` in the closure file: variant 1, daily fraction `0.00024`, for 6 days. The second progression value stays `1.03`. Seeding that variant on day 125 (26 Jan) at infectiousness `1.72` put the hospital peak on 23 Mar, a week before the official 30 Mar peak (hospital mean squared error 999,962). The closure file now starts the same seeding on day 132 (2 Feb), and the second infectiousness is `1.85`. Eight runs of that setting are in `viz/runs/wave2/`. Hospital mean squared error on the window is 246,795 (RMSE 497, correlation 0.992). The ensemble mean is highest at 12,839 on 30 Mar versus 12,553 that day, and stays within 2% of that height from 26 Mar through 1 Apr. Separate runs peak on day 186±4. On 2 Jun the mean is 1,039 versus 837. Reconstruction `Infected` has mean squared error 1,559,048,162 (RMSE 39,485, correlation 0.926): peak 236,593 on 20 Mar versus 220,698 on 19 Mar, with a slow decline (19,830 versus 4,337 on 2 Jun). Starting the seeding on day 134 or later, or raising the daily fraction, either missed the hospital peak or placed it after the 8 March closures ended. By the hospital peak about 96% of infections are variant 1 (`MUT1`).
+
+The delta wave, 5 Aug 2021 through 31 Jan 2022, is variant 2. It is seeded by the second `ExposeToMutation`: day 316 (5 Aug), six days. The original daily fraction `0.00010` at infectiousness `2.11` left the hospital crest about four weeks late. The fraction is now `0.00030` and the third infectiousness is `2.18` (progression stays `0.813`). Eight runs are in `viz/runs/wave3/`. On days with an official hospital count, the mean squared error is 798,321 (RMSE 893, correlation 0.965). The ensemble mean is highest at 8,566 on 10 Dec versus 7,596 on 30 Nov, and is 7,876 versus 7,596 on 30 Nov itself. Separate runs peak on day 442±7. On 31 Jan the mean is 3,109 versus 3,903. Reconstruction `Infected` through the autumn crest peaks at 669,888 on 27 Nov versus 261,654 on 25 Nov (mean squared error 37,314,495,747, RMSE 193,170, correlation 0.844); the January infected count stays high (803,146 versus 508,521 on 31 Jan). Seeding ten days earlier, or moving the third progression to 0.70 or 1.00, raised the hospital error. By the hospital peak about 97% of infections are variant 2 (`MUT2`).
 
 ## View
 
