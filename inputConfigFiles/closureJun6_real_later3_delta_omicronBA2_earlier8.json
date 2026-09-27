@@ -89,10 +89,10 @@
     {
       "name": "ExposeToMutation",
       "conditionType": "afterDays",
-      "threshold": 330,
+      "threshold": 316,
       "threshold2": 2,
       "openAfter": 6,
-      "parameter": 5e-5,
+      "parameter": 35e-5,
       "closeAfter": -1,
       "locationTypesToClose": [
       ]
