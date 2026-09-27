@@ -62,12 +62,14 @@ PROPOSE_HI = np.array([385.0, -3.45, 2.55, 1.65])
 # seed and raise progression instead of walking the fraction to its ceiling.
 TRUST_LO = np.array([328.0, math.log10(6e-5), 1.82, 1.05])
 TRUST_HI = np.array([362.0, math.log10(2.5e-4), 2.25, 1.65])
-# Steps off the height-matched, low-severity run: smaller seed, higher progression.
+# The on-time wave at progression 1.18 had the right hospital/infected ratio and
+# twice the amplitude. Cutting the seed at the same time as raising progression
+# stalled the crest. These steps keep that severity and only shrink transmission.
 TRUST_DESIGN = (
-    (335, 1.2e-4, 2.00, 1.25),
-    (340, 1.4e-4, 1.95, 1.40),
-    (348, 9.0e-5, 2.08, 1.22),
-    (330, 1.0e-4, 2.05, 1.35),
+    (342, 2.2e-4, 2.10, 1.18),
+    (338, 2.5e-4, 2.05, 1.15),
+    (348, 1.8e-4, 2.15, 1.20),
+    (345, 2.0e-4, 2.00, 1.18),
 )
 # Normalization box also covers the earlier runs used as training data.
 NORM_LO = np.array([290.0, -5.4, 1.30, 0.50])
