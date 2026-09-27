@@ -58,18 +58,16 @@ DEFAULT_PROG = 0.813
 # Wide first box. Day starts at 330 so the search moves the seed later than 5 Aug.
 PROPOSE_LO = np.array([330.0, -5.15, 1.75, 0.55])  # day, log10(frac), inf, prog
 PROPOSE_HI = np.array([385.0, -3.45, 2.55, 1.65])
-# After a run matches the hospital shape but infections stay high, stay near that
-# seed and raise progression instead of walking the fraction to its ceiling.
-TRUST_LO = np.array([328.0, math.log10(6e-5), 1.82, 1.05])
-TRUST_HI = np.array([362.0, math.log10(2.5e-4), 2.25, 1.65])
-# The on-time wave at progression 1.18 had the right hospital/infected ratio and
-# twice the amplitude. Cutting the seed at the same time as raising progression
-# stalled the crest. These steps keep that severity and only shrink transmission.
+# Cresting runs sit near infectiousness 2.0 and progression 0.8–0.9, with the
+# hospital crest about ten days late. Higher progression keeps the wave from
+# turning. This box moves that crest earlier without leaving the cresting regime.
+TRUST_LO = np.array([318.0, math.log10(1.5e-4), 1.90, 0.75])
+TRUST_HI = np.array([350.0, math.log10(3.5e-4), 2.15, 1.10])
 TRUST_DESIGN = (
-    (342, 2.2e-4, 2.10, 1.18),
-    (338, 2.5e-4, 2.05, 1.15),
-    (348, 1.8e-4, 2.15, 1.20),
-    (345, 2.0e-4, 2.00, 1.18),
+    (330, 2.3e-4, 2.03, 0.83),
+    (326, 2.1e-4, 2.06, 0.88),
+    (332, 2.2e-4, 2.00, 1.00),
+    (322, 2.5e-4, 1.98, 0.90),
 )
 # Normalization box also covers the earlier runs used as training data.
 NORM_LO = np.array([290.0, -5.4, 1.30, 0.50])
