@@ -55,9 +55,20 @@ KNOWN_INF = {"d330_p066": 2.35, "d330_p068": 2.35}
 # Tags that set infectiousness and leave progression unnamed used the config default.
 DEFAULT_PROG = 0.813
 
-# Proposal box. Day starts at 330 so the search moves the seed later than 5 Aug.
+# Wide first box. Day starts at 330 so the search moves the seed later than 5 Aug.
 PROPOSE_LO = np.array([330.0, -5.15, 1.75, 0.55])  # day, log10(frac), inf, prog
 PROPOSE_HI = np.array([385.0, -3.45, 2.55, 1.65])
+# After a run matches the hospital shape but infections stay high, stay near that
+# seed and raise progression instead of walking the fraction to its ceiling.
+TRUST_LO = np.array([328.0, math.log10(6e-5), 1.82, 1.05])
+TRUST_HI = np.array([362.0, math.log10(2.5e-4), 2.25, 1.65])
+# Steps off the height-matched, low-severity run: smaller seed, higher progression.
+TRUST_DESIGN = (
+    (335, 1.2e-4, 2.00, 1.25),
+    (340, 1.4e-4, 1.95, 1.40),
+    (348, 9.0e-5, 2.08, 1.22),
+    (330, 1.0e-4, 2.05, 1.35),
+)
 # Normalization box also covers the earlier runs used as training data.
 NORM_LO = np.array([290.0, -5.4, 1.30, 0.50])
 NORM_HI = np.array([400.0, -3.30, 2.70, 2.10])
@@ -240,8 +251,24 @@ def objective(s: dict) -> dict:
     t_term = day_err / 15.0 + (max(0, day_err - 14) / 10.0) ** 2
     h_ratio = s["h_peak"] / H_PEAK
     i_ratio = s["i_peak"] / I_PEAK
-    h_ex = max(0.0, h_ratio - 1.35) ** 2 + max(0.0, 0.70 - h_ratio) ** 2
-    i_ex = max(0.0, i_ratio - 1.50) ** 2 + max(0.0, 0.60 - i_ratio) ** 2
+
+    def outside(ratio: float, lo: float, hi: float) -> float:
+        if ratio > hi:
+            gap = ratio - hi
+        elif ratio < lo:
+            gap = lo - ratio
+        else:
+            gap = 0.0
+        return gap + gap * gap
+
+    # Hospital height is the primary miss. Infected height is the next one.
+    # A peak that sits on the last day of the window never crested.
+    h_ex = 3.0 * outside(h_ratio, 0.80, 1.25)
+    i_ex = 1.6 * outside(i_ratio, 0.70, 1.45)
+    if s["i_peak_day"] >= W0 + JAN - 1:
+        i_ex += 1.5
+    if s["h_peak_day"] >= W1 - 1:
+        h_ex += 1.5
     mut_pen = 0.0 if s["mut2_at_hpeak"] >= 50 else 1.5
     total = h_term + i_term + 0.8 * t_term + h_ex + i_ex + mut_pen
     return {
@@ -270,9 +297,9 @@ def tier(s: dict) -> str:
     )
     closer = (
         day_err <= 18
-        and 0.55 <= h_ratio <= 1.60
-        and 0.50 <= i_ratio <= 1.80
-        and s["h_corr"] >= 0.75
+        and 0.65 <= h_ratio <= 1.45
+        and 0.60 <= i_ratio <= 1.55
+        and s["h_corr"] >= 0.80
         and s["mut2_at_hpeak"] >= 40
     )
     if close:
@@ -441,21 +468,50 @@ def too_close(candidate: np.ndarray, rows: list[dict]) -> bool:
     return False
 
 
+def trust_region(rows: list[dict]) -> bool:
+    """Hospital shape is already usable and prevalence is still the dominant error."""
+    for row in rows:
+        h_ratio = row["h_peak"] / H_PEAK
+        i_ratio = row["i_peak"] / I_PEAK
+        if row["h_corr"] >= 0.94 and 0.70 <= h_ratio <= 1.35 and i_ratio > 1.45:
+            return True
+    return False
+
+
+def proposal_box(rows: list[dict]) -> tuple[np.ndarray, np.ndarray]:
+    if trust_region(rows):
+        return TRUST_LO, TRUST_HI
+    return PROPOSE_LO, PROPOSE_HI
+
+
+def pending_design(rows: list[dict]) -> np.ndarray | None:
+    if not trust_region(rows):
+        return None
+    for day, frac, inf, prog in TRUST_DESIGN:
+        cand = np.array([day, math.log10(frac), inf, prog], dtype=float)
+        if not too_close(cand, rows):
+            return cand
+    return None
+
+
 def propose(rows: list[dict], rng: np.random.Generator) -> tuple[np.ndarray, float, float]:
     model = fit_gp(rows)
     # Reference for improvement is the best noise-free prediction at the data, not one lucky run.
     train = np.vstack([x_of(r) for r in rows])
     mu_t, _std_t = predict(model, train)
     y_best = float(np.min(mu_t))
-    span = PROPOSE_HI - PROPOSE_LO
-    draw = PROPOSE_LO + rng.random((6000, 4)) * span
+    lo, hi = proposal_box(rows)
+    span = hi - lo
+    draw = lo + rng.random((6000, 4)) * span
     best_rows = sorted(rows, key=lambda r: r["loss"])[:4]
     local = []
     for row in best_rows:
-        center = np.clip(x_of(row), PROPOSE_LO, PROPOSE_HI)
-        local.append(center + rng.normal(0, [6, 0.12, 0.08, 0.08], size=(400, 4)))
-    cand = np.vstack([draw, *local])
-    cand = np.clip(cand, PROPOSE_LO, PROPOSE_HI)
+        center = np.clip(x_of(row), lo, hi)
+        local.append(center + rng.normal(0, [4, 0.08, 0.06, 0.08], size=(400, 4)))
+    designed = pending_design(rows)
+    extra = [] if designed is None else [designed.reshape(1, 4)]
+    cand = np.vstack([draw, *local, *extra])
+    cand = np.clip(cand, lo, hi)
     cand[:, 0] = np.rint(cand[:, 0])
     mu, std = predict(model, cand)
     z = (y_best - mu) / np.maximum(std, 1e-9)
@@ -528,14 +584,22 @@ def main() -> None:
     rows = load_history()
     print(f"loaded {len(rows)} scored settings", flush=True)
     rows.sort(key=lambda r: r["loss"])
+    print(f"proposal box: {'trust' if trust_region(rows) else 'wide'}", flush=True)
     for row in rows[:8]:
         print(" ", fmt(row), flush=True)
     if dry:
         if len(rows) >= 4:
+            designed = pending_design(rows)
+            if designed is not None:
+                print(
+                    f"next design day {int(designed[0])} frac {10 ** designed[1]:.3g} "
+                    f"inf {designed[2]:.2f} prog {designed[3]:.2f}",
+                    flush=True,
+                )
             rng = np.random.default_rng(0)
             picked, mu, std = propose(rows, rng)
             print(
-                f"next day {int(picked[0])} frac {10 ** picked[1]:.3g} "
+                f"next ei day {int(picked[0])} frac {10 ** picked[1]:.3g} "
                 f"inf {picked[2]:.2f} prog {picked[3]:.2f}  pred {mu:.2f}±{std:.2f}",
                 flush=True,
             )
@@ -561,7 +625,16 @@ def main() -> None:
             rows = [updated if r["tag"] == updated["tag"] else r for r in rows]
             print(" ", fmt(updated), flush=True)
             continue
-        picked, mu, std = propose(rows, rng)
+        designed = pending_design(rows)
+        if designed is not None:
+            picked = designed
+            model = fit_gp(rows)
+            mu_a, std_a = predict(model, designed.reshape(1, 4))
+            mu, std = float(mu_a[0]), float(std_a[0])
+            origin = "design"
+        else:
+            picked, mu, std = propose(rows, rng)
+            origin = "ei"
         day = int(picked[0])
         frac = float(10 ** picked[1])
         inf = float(picked[2])
@@ -569,7 +642,7 @@ def main() -> None:
         n_target = runs_needed(incumbent)
         tag = tag_for(day, frac, inf, prog)
         print(
-            f"propose {tag} n={n_target} pred {mu:.2f}±{std:.2f} "
+            f"propose {origin} {tag} n={n_target} pred {mu:.2f}±{std:.2f} "
             f"(gpu {gpu['n']}/{MAX_GPU}, new {new_points}/{MAX_NEW})",
             flush=True,
         )
