@@ -13,7 +13,7 @@ thrust::pair<unsigned, bool> HD MultiBadMatrix::NextStates::selectNext(float sca
     double badSum = 0.0;
     for (unsigned i = 0; i < badCount; ++i) {
         preSum += bad[i].second * scalingSypmtons;
-        if (random < preSum) { return thrust::make_pair<unsigned, bool>(bad[i].first, true); }
+        if (random < preSum) { return thrust::make_pair(bad[i].first, true); }
         badSum += bad[i].second;
     }
 
@@ -27,7 +27,7 @@ thrust::pair<unsigned, bool> HD MultiBadMatrix::NextStates::selectNext(float sca
     } while (preSum < random);
     idx--;
     assert(neutral[idx].first < 15);
-    return thrust::make_pair<unsigned, bool>(neutral[idx].first, false);
+    return thrust::make_pair(neutral[idx].first, false);
 }
 
 void MultiBadMatrix::NextStatesInit::addBad(std::pair<unsigned, float> bad_p) { bad.push_back(bad_p); }
@@ -121,5 +121,5 @@ thrust::tuple<unsigned, int, bool> HD MultiBadMatrix::calculateNextState(unsigne
     thrust::pair<unsigned, bool> ret = transitions[currentState].selectNext(scalingSymptons);
     unsigned nextState = ret.first;
     int days = lengths[nextState].calculateDays(variant);
-    return thrust::make_tuple<unsigned, int, bool>(nextState, days, ret.second);
+    return thrust::make_tuple(nextState, days, ret.second);
 }

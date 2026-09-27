@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include <cstdint>
 #include <vector>
 #include <omp.h>
 #include "datatypes.h"
@@ -13,9 +14,12 @@ extern __device__ curandState* dstates;
 #endif
 class RandomGenerator {
     static std::vector<std::mt19937_64> generators;
+    static std::uint64_t baseSeed;
+
+    [[nodiscard]] static std::uint64_t deriveSeed(unsigned streamIdx);
 
 public:
-    static void init(unsigned agents);
+    static void init(unsigned agents, std::uint64_t seed);
     static void resize(unsigned agents);
 
     [[nodiscard]] static __host__ thrust::host_vector<float> fillUnitf(unsigned size) {
