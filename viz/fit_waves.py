@@ -504,8 +504,8 @@ def wave_record(wave: tuple, window: dict, winner: dict, args) -> dict:
     params = winner["params"]
     tuned = {
         "index": index,
-        "infectiousness": params["inf"][index],
-        "progression": params["prog"][index],
+        "infectiousness": round(float(params["inf"][index]), 5),
+        "progression": round(float(params["prog"][index]), 5),
     }
     if variant is not None:
         tuned["seed"] = params["seeds"][variant]
@@ -538,8 +538,8 @@ def public_params(params: dict, args, waves: list[dict]) -> dict:
         "search_evals": args.search_evals,
         "k": params["k"],
         "quarantinePolicy": QUARANTINE,
-        "infectiousnessMultiplier": params["inf"],
-        "diseaseProgressionScaling": params["prog"],
+        "infectiousnessMultiplier": [round(float(x), 5) for x in params["inf"]],
+        "diseaseProgressionScaling": [round(float(x), 5) for x in params["prog"]],
         "seeds": seeds,
         "waves": waves,
     }

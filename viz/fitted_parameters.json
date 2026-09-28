@@ -1,0 +1,271 @@
+{
+  "description": "Incremental wave-by-wave fit. viz/run_ensemble.sh is not updated.",
+  "hospital_weight": 0.75,
+  "finalize_runs": 3,
+  "search_evals": 4,
+  "k": 0.00041,
+  "quarantinePolicy": 3,
+  "infectiousnessMultiplier": [
+    0.98,
+    1.85,
+    1.98,
+    2.42,
+    3.41667,
+    4.55,
+    6.8
+  ],
+  "diseaseProgressionScaling": [
+    0.94,
+    1.03,
+    0.84,
+    0.72,
+    0.57,
+    0.463,
+    0.45
+  ],
+  "seeds": [
+    {
+      "variant": 1,
+      "day": 132,
+      "fraction": 0.00024,
+      "openAfter": 6
+    },
+    {
+      "variant": 2,
+      "day": 339,
+      "fraction": 0.00035,
+      "openAfter": 6
+    },
+    {
+      "variant": 3,
+      "day": 431,
+      "fraction": 0.00025,
+      "openAfter": 6
+    },
+    {
+      "variant": 4,
+      "day": 474,
+      "fraction": 0.0002,
+      "openAfter": 6
+    },
+    {
+      "variant": 5,
+      "day": 576,
+      "fraction": 0.0001,
+      "openAfter": 150
+    }
+  ],
+  "waves": [
+    {
+      "name": "wildtype",
+      "start": "2020-09-23",
+      "end": "2021-01-31",
+      "hospital_weight": 0.75,
+      "h_scale": 2474.2345451132333,
+      "i_scale": 45180.09239844701,
+      "gt_h_peak": 8045.0,
+      "gt_h_peak_day": 76,
+      "gt_i_peak": 166157.337319058,
+      "gt_i_peak_day": 48,
+      "tuned": {
+        "index": 0,
+        "infectiousness": 0.98,
+        "progression": 0.94
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 546.1526460421642,
+        "i_rmse": 19817.281732311785,
+        "h_peak": 8048.371491762987,
+        "h_peak_day": 73,
+        "i_peak": 140186.6461683059,
+        "i_peak_day": 59,
+        "h_norm": 0.22073600383635802,
+        "i_norm": 0.43862862336671476,
+        "loss": 0.2752091587189472,
+        "h_corr": 0.9790800763070252,
+        "i_corr": 0.9475244676269775
+      }
+    },
+    {
+      "name": "alpha",
+      "start": "2021-01-26",
+      "end": "2021-06-02",
+      "hospital_weight": 0.75,
+      "h_scale": 3529.8155005893273,
+      "i_scale": 68918.49672752553,
+      "gt_h_peak": 12553.0,
+      "gt_h_peak_day": 188,
+      "gt_i_peak": 220698.261202655,
+      "gt_i_peak_day": 177,
+      "tuned": {
+        "index": 1,
+        "infectiousness": 1.85,
+        "progression": 1.03,
+        "seed": {
+          "day": 132,
+          "fraction": 0.00024,
+          "openAfter": 6
+        }
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 920.9202725377601,
+        "i_rmse": 45729.16644916902,
+        "h_peak": 14107.88443937207,
+        "h_peak_day": 189,
+        "i_peak": 252027.41121666125,
+        "i_peak_day": 178,
+        "h_norm": 0.2608975660013975,
+        "i_norm": 0.663525303373385,
+        "loss": 0.3615545003443944,
+        "h_corr": 0.987597211871228,
+        "i_corr": 0.9312913770885404
+      }
+    },
+    {
+      "name": "delta",
+      "start": "2021-08-05",
+      "end": "2022-01-11",
+      "hospital_weight": 0.75,
+      "h_scale": 2643.6855960065536,
+      "i_scale": 94109.11129416116,
+      "gt_h_peak": 7596.0,
+      "gt_h_peak_day": 433,
+      "gt_i_peak": 261653.543002908,
+      "gt_i_peak_day": 428,
+      "tuned": {
+        "index": 2,
+        "infectiousness": 1.98,
+        "progression": 0.84,
+        "seed": {
+          "day": 339,
+          "fraction": 0.00035,
+          "openAfter": 6
+        }
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 596.3217362223099,
+        "i_rmse": 132384.7837753558,
+        "h_peak": 6598.54937546388,
+        "h_peak_day": 446,
+        "i_peak": 464965.38768233516,
+        "i_peak_day": 430,
+        "h_norm": 0.22556454410580815,
+        "i_norm": 1.4067159061948276,
+        "loss": 0.520852384628063,
+        "h_corr": 0.9809018798441193,
+        "i_corr": 0.933467678101403
+      }
+    },
+    {
+      "name": "ba1",
+      "start": "2022-01-12",
+      "end": "2022-03-15",
+      "hospital_weight": 0.75,
+      "h_scale": 995.1478464750702,
+      "i_scale": 89478.3977454398,
+      "gt_h_peak": 5291.0,
+      "gt_h_peak_day": 510,
+      "gt_i_peak": 522751.814367024,
+      "gt_i_peak_day": 499,
+      "tuned": {
+        "index": 3,
+        "infectiousness": 2.42,
+        "progression": 0.72,
+        "seed": {
+          "day": 431,
+          "fraction": 0.00025,
+          "openAfter": 6
+        }
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 467.5543759376629,
+        "i_rmse": 489126.1466668974,
+        "h_peak": 5390.364278547958,
+        "h_peak_day": 505,
+        "i_peak": 1190192.432703389,
+        "i_peak_day": 500,
+        "h_norm": 0.4698340830398167,
+        "i_norm": 5.466416017622817,
+        "loss": 1.7189795666855667,
+        "h_corr": 0.9033555344834828,
+        "i_corr": 0.916155817957907
+      }
+    },
+    {
+      "name": "ba2",
+      "start": "2022-02-15",
+      "end": "2022-06-15",
+      "hospital_weight": 0.75,
+      "h_scale": 1275.2475948820884,
+      "i_scale": 108156.8656015408,
+      "gt_h_peak": 5291.0,
+      "gt_h_peak_day": 510,
+      "gt_i_peak": 413784.792444368,
+      "gt_i_peak_day": 510,
+      "tuned": {
+        "index": 4,
+        "infectiousness": 3.41667,
+        "progression": 0.57,
+        "seed": {
+          "day": 474,
+          "fraction": 0.0002,
+          "openAfter": 6
+        }
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 622.1427829892518,
+        "i_rmse": 114237.29219020998,
+        "h_peak": 4572.515905251027,
+        "h_peak_day": 513,
+        "i_peak": 851342.9816760469,
+        "i_peak_day": 510,
+        "h_norm": 0.487860385297787,
+        "i_norm": 1.0562185909775712,
+        "loss": 0.629949936717733,
+        "h_corr": 0.9840831427822568,
+        "i_corr": 0.8857713622944483
+      }
+    },
+    {
+      "name": "summer",
+      "start": "2022-06-01",
+      "end": "2022-08-31",
+      "hospital_weight": 0.75,
+      "h_scale": 455.77149775217987,
+      "i_scale": 121168.94566654215,
+      "gt_h_peak": 1593.0,
+      "gt_h_peak_day": 679,
+      "gt_i_peak": 389757.311092794,
+      "gt_i_peak_day": 684,
+      "tuned": {
+        "index": 5,
+        "infectiousness": 4.55,
+        "progression": 0.463,
+        "seed": {
+          "day": 576,
+          "fraction": 0.0001,
+          "openAfter": 150
+        }
+      },
+      "score": {
+        "n": 3,
+        "h_rmse": 323.2792199423093,
+        "i_rmse": 119542.30896352818,
+        "h_peak": 1784.3964508296688,
+        "h_peak_day": 678,
+        "i_peak": 511136.64584755275,
+        "i_peak_day": 672,
+        "h_norm": 0.709301089551871,
+        "i_norm": 0.986575465404391,
+        "loss": 0.778619683515001,
+        "h_corr": 0.8504554288020224,
+        "i_corr": 0.7997433508411206
+      }
+    }
+  ]
+}
