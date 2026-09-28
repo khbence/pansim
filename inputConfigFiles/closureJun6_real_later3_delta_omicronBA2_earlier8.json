@@ -100,7 +100,7 @@
     {
       "name": "ExposeToMutation",
       "conditionType": "afterDays",
-      "threshold": 437,
+      "threshold": 431,
       "threshold2": 3,
       "openAfter": 6,
       "parameter": 25e-5,
@@ -111,7 +111,7 @@
     {
       "name": "ExposeToMutation",
       "conditionType": "afterDays",
-      "threshold": 480,
+      "threshold": 474,
       "threshold2": 4,
       "openAfter": 6,
       "parameter": 20e-5,
@@ -133,7 +133,7 @@
     {
       "name": "ExposeToMutation",
       "conditionType": "afterDays",
-      "threshold": 604,
+      "threshold": 576,
       "threshold2": 5,
       "openAfter": 150,
       "parameter": 10e-5,

@@ -15,8 +15,8 @@ mkdir -p viz/runs/baseline
   -A inputConfigFiles/agentTypes_3.json \
   -a inputRealExample/agents1.json \
   -l inputRealExample/locations0.json \
-  --infectiousnessMultiplier 0.98,1.85,2.05,2.58,4.32,6.8,6.8 \
-  --diseaseProgressionScaling 0.94,1.03,1.40,0.72,0.57,0.463,0.45 \
+  --infectiousnessMultiplier 0.98,1.85,1.98,2.42,4.10,4.55,6.8 \
+  --diseaseProgressionScaling 0.94,1.03,0.84,0.72,0.57,0.463,0.45 \
   --closures inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8.json \
   > viz/runs/baseline/run_01.stdout
 ```
@@ -64,6 +64,10 @@ The next hospital wave, 26 Jan through 2 Jun 2021, is the second strain. It is s
 The delta wave is variant 2, scored from 5 Aug 2021 through 11 Jan 2022. By 11 Jan variant 3 (BA.1) is about 73% of infections. The second `ExposeToMutation` starts on day 339 (28 Aug), daily fraction `0.00035`, for 6 days. Infectiousness is `1.98` and progression is `0.84`. Five runs of that setting are in `viz/runs/wave3/`. The search (`viz/optimize_delta.py`) varied the seed day, the daily fraction, and those two multipliers. Progression near 1.2 or higher, which would have been needed to cut prevalence down to the reconstruction, kept the hospital wave from turning inside the window. Settings that do turn down still peak near 450,000–520,000 infected.
 
 The five-run mean peaks at 7,361 hospital on 1 Dec versus 7,596 on 30 Nov (hospital mean squared error 85,483, RMSE 292, correlation 0.995). On 25 Nov it is 6,691 versus 6,858, on 30 Nov 7,349 versus 7,596, and on 11 Jan 3,056 versus 2,932. Reconstruction `Infected` has mean squared error 19,498,458,129 (RMSE 139,637, correlation 0.952): the crest is 516,605 on 26 Nov versus 261,654 on 25 Nov, and 11 Jan is 340,597 versus 256,529. At the hospital peak every infection is variant 2.
+
+BA.1 and BA.2 are variants 3 and 4, scored from 12 Jan through 31 Aug 2022. BA.1 is seeded on day 431 (28 Nov 2021), daily fraction `0.00025`, for 6 days, with infectiousness `2.42` and progression `0.72`. BA.2 is seeded on day 474 (10 Jan 2022), daily fraction `0.00020`, for 6 days, with infectiousness `4.10` and progression `0.57`. The summer rise is variant 5, seeded from day 576 (22 Apr) at daily fraction `0.00010`, infectiousness `4.55` and progression `0.463`. Five runs are in `viz/runs/ba/`. `viz/run_ba.py` is the trial runner used for that search.
+
+Hospital mean squared error on the window is 287,837 (RMSE 537, correlation 0.956). The mean crests at 5,297 on 7 Feb, against 4,919 that day; the official crest is 5,291 on 15 Feb, when the mean is 4,907. On 16 Mar it is 1,941 versus 2,259, on 15 Jun 56 versus 232, on 10 Aug 625 versus 1,501, and on 31 Aug 1,204 versus 978. On 15 Feb about 65% of infections are BA.1 and 34% are BA.2; on 16 Mar about 90% are BA.2; from August they are variant 5. Reconstruction `Infected` has mean squared error 74,619,259,356 (RMSE 273,165, correlation 0.839): the crest is 1,190,505 on 5 Feb versus 522,752 on 4 Feb, and 31 Aug is 353,779 versus 302,324. The summer hospital wave is still rising at the end of August, later than the official early-August bump.
 
 ## View
 
