@@ -71,8 +71,9 @@ SingleBadTransitionMatrix::SingleBadTransitionMatrix(const parser::TransitionFor
         }
         initTransitions[i].cleanUp(i);
         if (sumChance != 1.0 && !s.progressions.empty()) { throw(IOProgression::BadChances(s.stateName, sumChance)); }
-        thrust::pair<unsigned, float> badVal =
-            initTransitions[i].bad ? initTransitions[i].bad.value() : thrust::pair<unsigned, float>(0, 0.0f);
+        thrust::pair<unsigned, float> badVal = initTransitions[i].bad
+            ? thrust::pair<unsigned, float>(initTransitions[i].bad.value())
+            : thrust::pair<unsigned, float>(0, 0.0f);
         thrust::pair<unsigned, float>* neutrals =
             (thrust::pair<unsigned, float>*)malloc(initTransitions[i].neutral.size() * sizeof(thrust::pair<unsigned, float>));
         for (int j = 0; j < initTransitions[i].neutral.size(); j++) neutrals[j] = initTransitions[i].neutral[j];

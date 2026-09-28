@@ -1,0 +1,5 @@
+# scenario name -> extra panSim flags (appended after the default run of run_20_sims.sh)
+# Fill in the interventions you want to compare; "baseline" must stay first.
+baseline: ""
+# quarantine3: "--quarantinePolicy 3"
+# closures:    "--closures inputConfigFiles/closureRules.json"

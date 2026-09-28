@@ -18,3 +18,12 @@ matlab/mexPanSim.mexa64
 thrust
 Fn_*_ode.m
 Fn_*_out.m
+cub
+libcudacxx
+
+# HCW experiment raw output
+experiments/*/results/
+results_*/
+
+experiments/validation_1yr/results/
+experiments/validation_1yr/outputs/

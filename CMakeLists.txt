@@ -221,7 +221,7 @@ else()
     target_link_libraries(${PY_LIB} PUBLIC project_options ${CMAKE_THREAD_LIBS_INIT} OpenMP::OpenMP_CXX)
   endif()
   #include_directories(/home/shared/software/cuda/11.6/include/)
-  include_directories(./thrust)
+  include_directories(./thrust ./libcudacxx/include)
 endif()
 # target_include_directories(${MAIN_BINARY} SYSTEM PRIVATE $<TARGET_PROPERTY:Thrust,INTERFACE_INCLUDE_DIRECTORIES>)
 
