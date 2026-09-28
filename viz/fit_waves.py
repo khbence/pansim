@@ -7,15 +7,16 @@ weighted sum of hospital RMSE and reconstruction-infected RMSE, each divided
 by the standard deviation of that target on the wave window so the two series
 share a scale. Hospital weight defaults to 0.75.
 
-Search evaluations use one stochastic run. The best candidate and the wave's
-starting parameters are then repeated --finalize-runs times, and the better
-mean is kept.
+Each search trial is averaged over --search-runs stochastic runs. The best
+candidate and the wave's starting parameters are then repeated --finalize-runs
+times, and the better mean is kept. A later trial continues from the best
+point found so far, so a wave can move more than one step.
 
 Results go to viz/fitted_parameters.json and viz/fitted_closure.json.
 viz/run_ensemble.sh is not modified.
 
     viz/.venv/bin/python viz/fit_waves.py --finalize-runs 3 --hospital-weight 0.75
-    viz/.venv/bin/python viz/fit_waves.py --from-wave delta --search-evals 8 --finalize-runs 5
+    viz/.venv/bin/python viz/fit_waves.py --from-wave delta --through-wave ba2 --search-runs 3 --search-evals 12 --finalize-runs 8
 """
 
 from __future__ import annotations
@@ -63,7 +64,7 @@ WAVES = (
     ("alpha", "2021-01-26", "2021-06-02", 1, 1),
     ("delta", "2021-08-05", "2022-01-11", 2, 2),
     ("ba1", "2022-01-12", "2022-03-15", 3, 3),
-    ("ba2", "2022-02-15", "2022-06-15", 4, 4),
+    ("ba2", "2022-02-15", "2022-05-31", 4, 4),
     ("summer", "2022-06-01", "2022-08-31", 5, 5),
 )
 
@@ -471,19 +472,30 @@ def fit_wave(params: dict, wave: tuple, window: dict, args, rng: np.random.Gener
         f"i {window['gt_i_peak']:.0f}@{window['gt_i_peak_day']}",
         flush=True,
     )
-    trials = [evaluate(params, wave, window, 1, args.hospital_weight)]
-    candidates = coordinate_candidates(params, wave)
+    trials = [evaluate(params, wave, window, args.search_runs, args.hospital_weight)]
+    tried = {cache_token(params)}
     n_search = 0
+    frontier = params
     while n_search < args.search_evals:
-        if n_search < len(candidates):
-            cand = candidates[n_search]
-        else:
+        pending = [cand for cand in coordinate_candidates(frontier, wave) if cache_token(cand) not in tried]
+        if not pending:
             try:
                 cand = propose_ei(trials, wave, rng)
             except np.linalg.LinAlgError:
                 break
-        trials.append(evaluate(cand, wave, window, 1, args.hospital_weight))
-        n_search += 1
+            if cache_token(cand) in tried:
+                break
+            pending = [cand]
+        for cand in pending:
+            if n_search >= args.search_evals:
+                break
+            tried.add(cache_token(cand))
+            trials.append(evaluate(cand, wave, window, args.search_runs, args.hospital_weight))
+            n_search += 1
+        best = min(trials, key=lambda t: t["scored"]["loss"])
+        if cache_token(best["params"]) != cache_token(frontier):
+            frontier = best["params"]
+            print(f"  search moves to {fmt_trial(wave[0], frontier, wave[3], best['scored'])}", flush=True)
     best = min(trials, key=lambda t: t["scored"]["loss"])
     finalists = [best]
     if cache_token(best["params"]) != cache_token(trials[0]["params"]):
@@ -535,6 +547,7 @@ def public_params(params: dict, args, waves: list[dict]) -> dict:
         "description": "Incremental wave-by-wave fit. viz/run_ensemble.sh is not updated.",
         "hospital_weight": args.hospital_weight,
         "finalize_runs": args.finalize_runs,
+        "search_runs": args.search_runs,
         "search_evals": args.search_evals,
         "k": params["k"],
         "quarantinePolicy": QUARANTINE,
@@ -571,7 +584,8 @@ def initial_params() -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fit panSim incrementally, one wave at a time.")
     parser.add_argument("--finalize-runs", type=int, default=3, help="Stochastic runs used to accept the wave's parameters.")
-    parser.add_argument("--search-evals", type=int, default=4, help="New one-run trials per wave before the finalize step. 4 covers both directions of infectiousness and progression; 8 also moves the seed.")
+    parser.add_argument("--search-runs", type=int, default=1, help="Stochastic runs averaged for each search trial.")
+    parser.add_argument("--search-evals", type=int, default=4, help="Search trials per wave before finalize. The first ones step infectiousness, progression, seed day, and seed fraction. Further trials continue from the best point.")
     parser.add_argument("--hospital-weight", type=float, default=0.75, help="Weight on normalized hospital RMSE. Infected gets the rest.")
     parser.add_argument("--from-wave", default=None)
     parser.add_argument("--through-wave", default=None)
@@ -580,8 +594,10 @@ def main() -> None:
     args = parser.parse_args()
     if not 0.0 < args.hospital_weight < 1.0:
         parser.error("--hospital-weight must be between 0 and 1")
-    if args.finalize_runs < 1 or args.search_evals < 0:
-        parser.error("run counts must be non-negative, and finalize-runs at least 1")
+    if args.finalize_runs < 1 or args.search_runs < 1 or args.search_evals < 0:
+        parser.error("run counts must be non-negative, and search-runs and finalize-runs at least 1")
+    if args.finalize_runs < args.search_runs:
+        parser.error("--finalize-runs must be at least --search-runs")
 
     gt = load_ground_truth(ROOT / "korona_hun.xlsx")
     mask = (gt["date"] >= START) & (gt["date"] <= LAST_DAY)
