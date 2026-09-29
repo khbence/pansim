@@ -14,6 +14,6 @@
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 
-N_RUNS=20 WEEKS="${WEEKS:-52}" OUT_DIR="$here/results/sim" "$here/../../scripts/run_20_sims.sh"
+N_RUNS=20 WEEKS="${WEEKS:-52}" OUT_DIR="$here/results/sim" bash "$here/../../scripts/run_20_sims.sh"
 
 echo "Done. Next: python aggregate_compartments.py && python plot_key_metrics.py   (in $here)"

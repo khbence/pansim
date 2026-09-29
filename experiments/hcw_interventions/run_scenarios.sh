@@ -41,6 +41,6 @@ PY
     fi
     echo "=== scenario: $name ($flags)"
     start=$(date +%s)
-    EXTRA_ARGS="$flags" OUT_DIR="$out_dir" "$root/scripts/run_20_sims.sh"
+    EXTRA_ARGS="$flags" OUT_DIR="$out_dir" bash "$root/scripts/run_20_sims.sh"
     echo "=== scenario: $name took $(( $(date +%s) - start ))s"
 done
