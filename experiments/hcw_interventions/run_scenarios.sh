@@ -20,9 +20,19 @@ results_root="${RESULTS_ROOT:-$here/results}"
 scenarios_file="${SCENARIOS_FILE:-$here/scenarios.yaml}"
 
 python3 - "$scenarios_file" <<'PY' | while IFS=$'\t' read -r name flags; do
-import sys, yaml
-for k, v in yaml.safe_load(open(sys.argv[1])).items():
-    print(f"{k}\t{v}")
+# Pure-stdlib parser for scenarios.yaml's flat `name: "flags"` mapping (no pyyaml dependency -
+# HPC nodes often have no pip/network access to install it). Every active line is
+# `name: "flags"` or `name: ""`; blank lines and lines starting with # are skipped.
+import sys
+for line in open(sys.argv[1]):
+    line = line.strip()
+    if not line or line.startswith("#") or ":" not in line:
+        continue
+    name, _, value = line.partition(":")
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        value = value[1:-1]
+    print(f"{name.strip()}\t{value}")
 PY
     out_dir="$results_root/$name"
     if [ -f "$out_dir/all_runs.tsv" ] && [ -z "${FORCE:-}" ]; then

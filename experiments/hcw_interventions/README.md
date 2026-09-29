@@ -41,7 +41,10 @@ doesn't matter" without checking which days it was actually active.
 
 ## Running
 
-Needs `pandas`, `matplotlib`, `pyyaml`, `scipy` (`pip install pandas matplotlib pyyaml scipy`).
+`run_scenarios.sh` itself only needs a plain `python3` (no packages - it parses `scenarios.yaml`
+with a small stdlib-only parser, not `pyyaml`, since HPC nodes often have no pip/network access).
+`analyze.py` needs `pandas`, `matplotlib`, `scipy` (`pip install pandas matplotlib scipy`) -
+commonly run on a different machine than the simulations, see below.
 
 1. Build `build/panSim` (see `../../SETUP_HPC.md`), then on the **same machine/build** as
    `baseline` (see caveat below) run `./run_scenarios.sh` - runs any scenario in `scenarios.yaml`
