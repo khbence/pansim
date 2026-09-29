@@ -14,6 +14,8 @@ article_*
 matlab/mexPanSim.mexa64
 matlab/mexPanSim.mexmaca64
 .DS_Store
+__pycache__/
+*.pyc
 
 
 # Polcz:

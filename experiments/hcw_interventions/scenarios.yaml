@@ -1,5 +1,39 @@
 # scenario name -> extra panSim flags (appended after the default run of run_20_sims.sh)
-# Fill in the interventions you want to compare; "baseline" must stay first.
+# "baseline" must stay first; it is reused as-is from experiments/validation_1yr/results/sim
+# (identical PARAM_SET=validated config, no overrides) rather than being re-run - see
+# README.md.
+#
+# Target design (see README.md): a 2-level factorial over 4 NPI/vaccination levers -
+#   Q (quarantine):   baseline --quarantinePolicy 3      vs  --quarantinePolicy 0
+#   C (closures):     baseline (validated closures file)  vs  --closures inputConfigFiles/noRules.json
+#   V (vaccination):  baseline (vaccPerWeek.txt)           vs  --immunizationsPerWeek 0
+#   T (testing):      baseline (hospital rate 0.005)       vs  --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05
+# NOTE: for any scenario that keeps the baseline closures file, the T lever only differs from
+# baseline for days 0-258: that file's own TestingProb rule force-sets hospital testing to 0.5
+# from day 259 onward regardless of --testingProbabilities (see README.md "Confounds"). Only
+# scenarios combined with closuresNone keep the T lever active for the full run.
+#
+# This round only runs the Q lever (baseline vs quarantine0) to validate the pipeline cheaply.
+# Uncomment further lines below in later rounds - no code changes are needed to scale up.
+
 baseline: ""
-# quarantine3: "--quarantinePolicy 3"
-# closures:    "--closures inputConfigFiles/closureRules.json"
+quarantine0: "--quarantinePolicy 0"
+
+# --- later rounds (commented out) ---
+# closuresNone: "--closures inputConfigFiles/noRules.json"
+# noVacc: "--immunizationsPerWeek 0"
+# hiTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+#
+# quarantine0_closuresNone: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json"
+# quarantine0_noVacc: "--quarantinePolicy 0 --immunizationsPerWeek 0"
+# quarantine0_hiTest: "--quarantinePolicy 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+# closuresNone_noVacc: "--closures inputConfigFiles/noRules.json --immunizationsPerWeek 0"
+# closuresNone_hiTest: "--closures inputConfigFiles/noRules.json --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+# noVacc_hiTest: "--immunizationsPerWeek 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+#
+# quarantine0_closuresNone_noVacc: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json --immunizationsPerWeek 0"
+# quarantine0_closuresNone_hiTest: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+# quarantine0_noVacc_hiTest: "--quarantinePolicy 0 --immunizationsPerWeek 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+# closuresNone_noVacc_hiTest: "--closures inputConfigFiles/noRules.json --immunizationsPerWeek 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+#
+# quarantine0_closuresNone_noVacc_hiTest: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json --immunizationsPerWeek 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
