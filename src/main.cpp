@@ -1,46 +1,25 @@
-#include "simulation.h"
-#include "configTypes.h"
-#include "movementPolicies.h"
-#include "infectionPolicies.h"
-#include <iostream>
-#include "agentMeta.h"
-// for testing
-#include <inputJSON.h>
-#include <random>
-#include "randomGenerator.h"
-#include <omp.h>
+#include "runtime/simulationRuntime.h"
 #include "timing.h"
-#include <cxxopts.hpp>
-#include "smallTools.h"
-#include "datatypes.h"
-#include "version.h"
+
+#include <iostream>
 
 int main(int argc, char** argv) {
     BEGIN_PROFILING("init");
-
-    auto options = defineProgramParameters();
-    config::Simulation_t::addProgramParameters(options);
-
-    cxxopts::ParseResult result = options.parse(argc, argv);
-    if (result.count("help") != 0) {
-        std::cout << options.help() << std::endl;
-        return EXIT_SUCCESS;
-    } else if (result.count("version") != 0) {
-        std::cout << config::GIT_VERSION << std::endl;
-        return EXIT_SUCCESS;
-    }
-
-    BEGIN_PROFILING("Device/RNG init");
-    RandomGenerator::init(omp_get_max_threads());
-    END_PROFILING("Device/RNG init");
     try {
-        config::Simulation_t s{ result };
+        BEGIN_PROFILING("bootstrap");
+        runtime::BootstrapResult bootstrap = runtime::bootstrapSimulation(argc, argv);
+        END_PROFILING("bootstrap");
+        if (bootstrap.shouldExit) {
+            std::cout << bootstrap.output << std::endl;
+            return bootstrap.exitCode;
+        }
+
         END_PROFILING("init");
         BEGIN_PROFILING("runSimulation");
-        s.runSimulation();
+        bootstrap.engine->runSimulation();
         END_PROFILING("runSimulation");
         Timing::report();
-    } catch (const init::ProgramInit& e) {
+    } catch (const std::exception& e) {
         std::cerr << e.what();
         return EXIT_FAILURE;
     }

@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/agentData/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/IO/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/runtime/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/tools/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/policies/CMakeLists.txt)
 

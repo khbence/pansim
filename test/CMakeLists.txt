@@ -1,3 +1,26 @@
+option(ENABLE_GTEST_TESTING "Enable GoogleTest/RapidCheck-based C++ tests" OFF)
+
+add_test(
+    NAME deterministic_cpu_reference
+    COMMAND
+        ${CMAKE_CURRENT_SOURCE_DIR}/run_determinism_reference.sh
+        $<TARGET_FILE:${MAIN_BINARY}>
+        ${CMAKE_CURRENT_SOURCE_DIR}/reference
+)
+
+if(CUDAToolkit_FOUND AND USE_GPU AND NOT GPU_ATOMICS)
+    add_test(
+        NAME deterministic_gpu_smoke
+        COMMAND
+            ${CMAKE_CURRENT_SOURCE_DIR}/run_determinism_smoke.sh
+            $<TARGET_FILE:${MAIN_BINARY}>
+    )
+endif()
+
+if(NOT ENABLE_GTEST_TESTING)
+    return()
+endif()
+
 include(FetchContent)
 
 find_package(GTest QUIET)
@@ -10,8 +33,6 @@ if(NOT GTEST_FOUND)
 
     FetchContent_MakeAvailable(googletest)
 endif()
-
-# setup rapidcheck
 
 find_package(rapidcheck QUIET)
 
@@ -33,15 +54,7 @@ function(target_link_libraries_system target)
     endforeach(lib)
 endfunction(target_link_libraries_system)
 
-# set(RC_ENABLE_TESTS ON CACHE INTERNAL "To load the GTEST variant of rapidcheck")
-
 target_link_libraries(${TEST_BINARY} gtest gtest_main)
-
 target_link_libraries_system(${TEST_BINARY} rapidcheck rapidcheck_gtest)
 
-enable_testing()
-
 add_test(NAME google_test COMMAND $<TARGET_FILE:${TEST_BINARY}>)
-
-# set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/subprojects) include(ExternalProject) set(STAGED_INSTALL_PREFIX
-# ${CMAKE_BINARY_DIR}/stage) message(STATUS "${PFOJECT_NAME} staged install: ${STAGED_INSTALL_PREFIX}")

@@ -7,118 +7,60 @@
 #include <pybind11/stl.h>
 #endif
 
-#include <cstdlib>
-#include <cstring>
-#include <random>
+#include <iostream>
+#include <memory>
 #include <vector>
 #include <sstream>
 
-#include "simulation.h"
-#include "configTypes.h"
-#include "movementPolicies.h"
-#include "infectionPolicies.h"
-#include <iostream>
-#include "agentMeta.h"
-#include <inputJSON.h>
+#include "runtime/simulationRuntime.h"
 #include "timing.h"
-#include <cxxopts.hpp>
-#include "smallTools.h"
-#include "datatypes.h"
-#include "version.h"
-
-
-cxxopts::ParseResult initialize(int argc, char** argv) {
-    BEGIN_PROFILING("init");
-
-    auto options = defineProgramParameters();
-    config::Simulation_t::addProgramParameters(options);
-
-    //print each arg
-    for (int i = 0; i < argc; i++) {
-        std::cout << argv[i] << std::endl;
-    }
-
-    cxxopts::ParseResult result = options.parse(argc, argv);
-    if (result.count("help") != 0) {
-        std::cout << options.help() << std::endl;
-        exit(EXIT_SUCCESS);
-    } else if (result.count("version") != 0) {
-        std::cout << config::GIT_VERSION << std::endl;
-        exit(EXIT_SUCCESS);
-    }
-
-    BEGIN_PROFILING("Device/RNG init");
-    RandomGenerator::init(omp_get_max_threads());
-    END_PROFILING("Device/RNG init");
-    END_PROFILING("init");
-    return result;
-}
 
 class SimulatorInterface {
 private:
-
-  std::vector<std::seed_seq::result_type> _stats;
-  cxxopts::ParseResult _initResult;
+  std::vector<unsigned> _stats;
   bool _isInitialized = false;
-  // need to delete this pointer at the very end
-  config::Simulation_t *s;
+  std::unique_ptr<runtime::SimulationEngine> engine;
 
 public:
   SimulatorInterface() {
   }
 
   ~SimulatorInterface() {
-    s->finalize();
-    delete s;
+    if (engine) {
+        engine->finalize();
+    }
   }
 
   void initSimulation(std::string *options, size_t n)
     {
         std::vector<std::string> optVec = std::vector<std::string>{ options, options + n };
-        std::vector<char*> csOpts;
-
-        // Boilerplate code for casting vector string to char**
-        for (size_t i = 0; i < optVec.size(); i++)
-        {
-            csOpts.push_back(const_cast<char*>(optVec[i].c_str()));
+        runtime::BootstrapResult bootstrap = runtime::bootstrapSimulation(optVec);
+        if (bootstrap.shouldExit) {
+            if (!bootstrap.output.empty()) {
+                std::cout << bootstrap.output << std::endl;
+            }
+            _isInitialized = false;
+            return;
         }
-        
-        if (!csOpts.empty())
-            _initResult = initialize(csOpts.size(), &csOpts[0]);
+        engine = std::move(bootstrap.engine);
         _isInitialized = true;
-        s = new config::Simulation_t(_initResult);
     }
 
-    std::vector<std::seed_seq::result_type> runForDay(std::string *options, size_t n)
+    std::vector<unsigned> runForDay(std::string *options, size_t n)
     {
         if (!_isInitialized) {
             printf("Cannot run uninitialized simulation... Initialize it first.");
             return std::vector<unsigned>();
         }
 
-        // Cast vector string to char **
         std::vector<std::string> optVec = std::vector<std::string>{ options, options + n };
-        std::vector<char*> csOpts;
-
-        for (size_t i = 0; i < optVec.size(); i++)
-        {
-            csOpts.push_back(const_cast<char*>(optVec[i].c_str()));
-        }
 
         try {
             BEGIN_PROFILING("runSimulation");
-            // while loop to be on matlab side
-            // give char ** and number of args to runForDay
-            // get back vector of unsigned
-            // convert std::string to char*
-
-            if (!csOpts.empty())
-                _stats = s->runForDay(csOpts.size(), &csOpts[0]);
+            _stats = engine->runForDay(optVec);
 
             END_PROFILING("runSimulation");
-            // s.finalize();
-            // Timing::report();
-        } catch (const init::ProgramInit& e) {
+        } catch (const std::exception& e) {
             std::cerr << e.what();
             return std::vector<unsigned>();
         }

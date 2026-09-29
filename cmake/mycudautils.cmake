@@ -11,6 +11,17 @@ function (select_cuda_architectures ARCHITECTURE cuda_architecture_list)
               ";"
               arch_list_tmp
               ${CUDA_ARCH_FLAGS})
+    if (DEFINED CUDAToolkit_VERSION AND CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0)
+      set(filtered_arch_list "")
+      foreach(arch IN LISTS arch_list_tmp)
+        if (arch MATCHES "^[0-9]+$" AND arch GREATER_EQUAL 60)
+          list(APPEND filtered_arch_list "${arch}")
+        endif ()
+      endforeach()
+      if (filtered_arch_list)
+        set(arch_list_tmp ${filtered_arch_list})
+      endif ()
+    endif ()
     set(${cuda_architecture_list}
         ${arch_list_tmp}
         PARENT_SCOPE)

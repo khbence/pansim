@@ -1,0 +1,3 @@
+numpy>=1.26
+plotly>=5.22
+dash>=2.17
