@@ -23,6 +23,13 @@ closuresNone: "--closures inputConfigFiles/noRules.json"
 noVacc: "--immunizationsPerWeek 0"
 hiTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 
+# Isolates the HCW *priority* effect specifically (as opposed to noVacc, which removes
+# vaccination for everyone): only the first immunizationOrder value changes, 1 (first priority)
+# -> 0 (skip entirely) for category 0 = healthcare workers; the other 9 categories' order and
+# vaccinationGroupLevel are untouched, so everyone else's rollout is unaffected (their doses
+# simply aren't reserved for HCWs first anymore) - see README.md "Isolating the HCW-priority effect".
+noVaccHCW: "--immunizationOrder 0,2,3,4,5,6,0,0,7,8"
+
 # --- later rounds (commented out) ---
 # quarantine0_closuresNone: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json"
 # quarantine0_noVacc: "--quarantinePolicy 0 --immunizationsPerWeek 0"

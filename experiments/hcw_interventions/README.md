@@ -8,20 +8,22 @@ absence?
 - HCW = agent with a work location of type hospital (12) or doctor (14)
   (`flagHealthcareWorkers`, `src/runtime/simulationOrchestration.cpp:355-389`).
 
-## This round: quarantine policy only
+## Scenarios so far: the 4 single levers, plus one HCW-priority isolation
 
 Target design is a 2-level factorial over 4 levers - quarantine (Q), closures (C), vaccination
-(V), testing (T) - 16 scenarios total (see the commented-out entries in `scenarios.yaml`). Given
-the ~1h/scenario compute cost, **this round only runs Q** (`baseline` vs `quarantine0`,
-`--quarantinePolicy 0`) to validate the pipeline cheaply; later rounds uncomment more lines in
+(V), testing (T) - 16 scenarios total (see the commented-out combination entries in
+`scenarios.yaml`). Given the ~1h/scenario compute cost, rounds so far have run all **4 single-lever**
+scenarios (`baseline` vs one lever flipped each) to see each lever's own main effect before mixing
+them, plus a 5th scenario (`noVaccHCW`) outside the Q/C/V/T grid, added specifically to isolate the
+HCW-vaccination-*priority* effect (see below) - later rounds uncomment more combination lines in
 `scenarios.yaml` - no code changes needed to scale up.
 
 | Lever | baseline (implicit) | deviation flag |
 |---|---|---|
-| Q (this round) | `--quarantinePolicy 3` | `--quarantinePolicy 0` |
-| C | default closures file | `--closures inputConfigFiles/noRules.json` |
-| V | default (vaccPerWeek.txt) | `--immunizationsPerWeek 0` |
-| T | default (hospital rate 0.005) | `--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05` |
+| Q | `--quarantinePolicy 3` | `--quarantinePolicy 0` (`quarantine0`) |
+| C | default closures file | `--closures inputConfigFiles/noRules.json` (`closuresNone`) |
+| V | default (vaccPerWeek.txt) | `--immunizationsPerWeek 0` (`noVacc`) |
+| T | default (hospital rate 0.005) | `--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05` (`hiTest`) |
 
 **Confound to keep in mind for later rounds**: the default closures file
 (`inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8.json`) contains a
@@ -50,8 +52,9 @@ commonly run on a different machine than the simulations, see below.
    `baseline` (see caveat below) run `./run_scenarios.sh` - runs any scenario in `scenarios.yaml`
    that doesn't already have `results/<name>/all_runs.tsv` (`FORCE=1` to re-run one anyway); with
    `baseline` already complete, this runs only `quarantine0` (~1h).
-2. `python analyze.py` -> `outputs/per_run.csv`, `outputs/summary.csv`,
-   `outputs/significance.csv`, `outputs/{hci,hce,vulnerability}.png`.
+2. `python analyze.py` -> `outputs/per_run.csv`, `outputs/summary.csv`, `outputs/significance.csv`,
+   `outputs/relative_risk_table.csv`, `outputs/priority_isolation_test.csv`,
+   `outputs/{hci,hce,vulnerability}.png`.
 
 **Run new scenarios on the same machine/build as `baseline`** (the HPC machine, per
 `SETUP_HPC.md`) - a different build/platform is a possible confound in itself, on top of whatever
@@ -167,6 +170,37 @@ This is exactly why `prevalence_RR` (which inherits HCI's infected-OR-quarantine
 both sides) swings so much with the quarantine policy, while `incidence_RR` (pure infection,
 unaffected by which quarantine channels exist) stays stable and is the metric to trust for the
 "is HCW a vulnerable group" question.
+
+### Isolating the HCW-priority effect (`noVaccHCW`)
+
+`noVacc` (`--immunizationsPerWeek 0`) removes vaccination for the *entire population*, so its
+`incidence_RR` increase (baseline 1.38 -> 1.78, the largest of the 4 single levers) conflates two
+things: "vaccination exists at all" and "HCWs specifically get it first". `noVaccHCW` isolates the
+second: `--immunizationOrder 0,2,3,4,5,6,0,0,7,8` changes only the first value of the 10-category
+order string (category 0 = healthcare workers, per the `--immunizationOrder` help text order:
+health workers, nursery home, 60+, 18-60+underlying, essential worker, 18+, 60+underlying, school
+teachers, 12-18, 5-12) from `1` (first priority) to `0` (skip entirely) - every other category's
+order and `vaccinationGroupLevel` is untouched, so the *rest of the population's* vaccination
+rollout is unaffected (confirmed safe by reading the scheduling code,
+`include/immunization.h:495-516`: categories are found by searching for `round == i+1` and the
+loop just moves on when a round is empty, so HCWs' unclaimed doses flow to the next eligible
+category the same day - no wasted supply, no timing shift for anyone else; `0` as a skip value is
+already used twice in the default order for other categories, so this isn't an edge case).
+
+Comparing `noVaccHCW` against both `baseline` and `noVacc` answers the actual question: is it
+population-level vaccination coverage (indirect/herd protection) or HCWs' own vaccination access
+specifically that matters for their elevated risk?
+
+**Result** (`outputs/priority_isolation_test.csv`, direct `noVaccHCW` vs `noVacc` test, not vs
+`baseline`): `incidence_RR` is 1.78 under `noVacc` (nobody vaccinated) vs **1.82 under `noVaccHCW`**
+(everyone *except* HCWs vaccinated) - i.e. excluding *only* HCWs from vaccination leaves them
+*slightly worse off* than removing vaccination from the entire population (median diff +0.046,
+Mann-Whitney p=0.0008, significant but a much smaller effect than any of the single-lever-vs-baseline
+comparisons - rank-biserial 0.62 vs 1.0 elsewhere). So it's **not** primarily herd protection from
+the rest of the population being vaccinated that shields HCWs - their own vaccination access is
+what matters, and losing it isn't meaningfully cushioned by everyone else around them being immune.
+This directly supports treating HCW vaccination priority as the standalone protective measure it's
+designed to be, not as something substitutable by population-level coverage.
 
 ## Extending to more levers
 

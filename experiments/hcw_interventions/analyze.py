@@ -1,4 +1,5 @@
-"""results/<scenario>/all_runs.tsv -> outputs/{per_run,summary,significance,relative_risk_table}.csv,
+"""results/<scenario>/all_runs.tsv ->
+outputs/{per_run,summary,significance,relative_risk_table,priority_isolation_test}.csv,
 hci.png, hce.png, vulnerability.png
 
 Usage: python analyze.py [results_dir] [out_dir]
@@ -35,6 +36,17 @@ rr_table.to_csv(out / "relative_risk_table.csv", index=False)
 print("\nrelative risk table (HCW vs rest of population):")
 print(rr_table.round(4).to_string(index=False))
 
+# Isolating the HCW-priority effect: does excluding ONLY HCWs from vaccination (noVaccHCW) hurt
+# them more than removing vaccination for everyone (noVacc)? Direct scenario-vs-scenario test
+# (not vs baseline) - see README.md "Isolating the HCW-priority effect".
+if {"noVacc", "noVaccHCW"}.issubset(set(runs["scenario"])):
+    priority_test = metrics.mann_whitney_vs_baseline(
+        runs[runs["scenario"].isin(["noVacc", "noVaccHCW"])], "incidence_RR", baseline_name="noVacc")
+    priority_test.to_csv(out / "priority_isolation_test.csv", index=False)
+    print("\nnoVaccHCW vs noVacc, incidence_RR (isolating HCW-specific vaccine access "
+          "from population-level herd protection):")
+    print(priority_test.round(4).to_string(index=False))
+
 for col, title in [("HCI", "HCWs infected or quarantined [%]"), ("HCE", "new HCW infections per day")]:
     plt.figure(figsize=(8, 4))
     plots.band(df, col)
@@ -43,8 +55,8 @@ for col, title in [("HCI", "HCWs infected or quarantined [%]"), ("HCE", "new HCW
     plt.savefig(out / f"{col.lower()}.png", dpi=150)
     plt.close()
 
-# Is the HCW group a vulnerable subgroup? HCI vs general-population infection prevalence,
-# per scenario - see hci_pi_infected_ratio in significance.csv for the statistical test.
+# Is the HCW group a vulnerable subgroup? HCI vs rest-of-population infection prevalence/incidence,
+# per scenario - see prevalence_RR/incidence_RR in significance.csv for the statistical test.
 df = metrics.add_population_columns(df)
 fig = plots.hcw_vs_population(df)
 fig.savefig(out / "vulnerability.png", dpi=150)
