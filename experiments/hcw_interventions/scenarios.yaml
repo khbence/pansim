@@ -13,17 +13,17 @@
 # from day 259 onward regardless of --testingProbabilities (see README.md "Confounds"). Only
 # scenarios combined with closuresNone keep the T lever active for the full run.
 #
-# This round only runs the Q lever (baseline vs quarantine0) to validate the pipeline cheaply.
-# Uncomment further lines below in later rounds - no code changes are needed to scale up.
+# This round runs all 4 single-lever scenarios (baseline vs one lever flipped each) to see each
+# lever's own main effect before mixing them. Uncomment further lines below in later rounds -
+# no code changes are needed to scale up.
 
 baseline: ""
 quarantine0: "--quarantinePolicy 0"
+closuresNone: "--closures inputConfigFiles/noRules.json"
+noVacc: "--immunizationsPerWeek 0"
+hiTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 
 # --- later rounds (commented out) ---
-# closuresNone: "--closures inputConfigFiles/noRules.json"
-# noVacc: "--immunizationsPerWeek 0"
-# hiTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
-#
 # quarantine0_closuresNone: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json"
 # quarantine0_noVacc: "--quarantinePolicy 0 --immunizationsPerWeek 0"
 # quarantine0_hiTest: "--quarantinePolicy 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
