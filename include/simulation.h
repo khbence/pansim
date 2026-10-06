@@ -87,6 +87,10 @@ public:
     std::vector<int> totalHospitalizations;
     unsigned dueWithCOVID;
     double currentMaskValue = 1.0;
+    double currentPPEValue = 1.0;// hospital/doctor-location-specific infectiousness scaling, see
+                                 // the "HospitalPPE" closure rule (closurePolicies.h) - analogous
+                                 // to currentMaskValue but targeted at hospitalType/doctorType
+                                 // locations only, not every non-home location.
     int diagnosticLevel;
     unsigned homeType;
 

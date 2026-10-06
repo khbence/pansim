@@ -30,12 +30,71 @@ hiTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 # simply aren't reserved for HCWs first anymore) - see README.md "Isolating the HCW-priority effect".
 noVaccHCW: "--immunizationOrder 0,2,3,4,5,6,0,0,7,8"
 
+# Interaction of the two dominant single levers found so far: does boosting hospital testing
+# compensate for HCWs losing vaccine priority? (noVaccHCW alone: incidence_RR 1.82; hiTest alone:
+# 1.09; baseline: 1.38 - see README.md "Isolating the HCW-priority effect" / relative_risk_table.csv)
+# Keeps the default closures file, so the T lever only differs from baseline for days 0-258 (see
+# the NOTE above) - interpret accordingly.
+noVaccHCW_hiTest: "--immunizationOrder 0,2,3,4,5,6,0,0,7,8 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+
+# Un-confounds the T lever: closuresNone removes the default closures file's own TestingProb rule
+# (which otherwise force-sets hospital testing to 0.5 from day 259 on regardless of this flag), so
+# this is the first scenario where testing's effect is measured for the FULL year, not just days
+# 0-258 - see README.md "Does the testing effect hold up uncounfounded?".
+closuresNone_hiTest: "--closures inputConfigFiles/noRules.json --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+
+# Worst-case stacking of the two harmful levers (quarantine0 + noVaccHCW) - does losing quarantine
+# protection compound with losing vaccine priority, or interact? See README.md "Worst case:
+# stacking the two harmful levers".
+quarantine0_noVaccHCW: "--quarantinePolicy 0 --immunizationOrder 0,2,3,4,5,6,0,0,7,8"
+
+# Does testing's compensatory power generalize beyond the vaccination channel? Tests the
+# protective lever against the OTHER harmful lever (quarantine0) - see README.md "Does testing
+# compensate for lost quarantine too?".
+quarantine0_hiTest: "--quarantinePolicy 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
+
+# New round, from professor feedback: more realistic HCW-specific policy ideas (see
+# README.md "New intervention ideas (professor feedback)" for the full brainstormed list,
+# including ones that need a code change and aren't here yet).
+#
+# "Test every HCW every morning": hiTest alone only raised the probability (0.5) but left
+# testingRepeatDelay at its default 5 days, so even a "daily-tested" agent could in practice only
+# be RE-tested every 5 days. True daily testing needs both the probability near 1.0 AND
+# testingRepeatDelay=1.
+hcwDailyTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.95,0.05 --testingRepeatDelay 1"
+
+# Does the ISOLATION DURATION matter, independent of whether quarantine triggers at all (that's
+# what quarantine0 tested)? Default --quarantineLength is 10 days; this extends it to 21.
+longQuarantine: "--quarantineLength 21"
+
+# Hospital-specific PPE (N95/gowns/eye protection): the "Masks" closure rule scales infectiousness
+# at every non-home location uniformly, with no way to target hospitals specifically - this was
+# the single biggest untestable real-world HCW lever. Needed a code change: a new "HospitalPPE"
+# closure rule (include/policies/closurePolicies.h, mirrors "Masks" but filtered to
+# hospitalType/doctorType only) and a dedicated closures file with that rule added (--closures
+# can't be given as a patch on top of the validated file, only a whole replacement file).
+# parameter=0.3 (70% infectiousness reduction at hospital/doctor locations), active from day 0 for
+# the whole run - a middle estimate from the general range reported for N95/eye-protection
+# effectiveness in healthcare settings (e.g. Chu et al. 2020, Lancet) - see README.md "Hospital
+# PPE" for the full justification and caveats. REQUIRES REBUILDING build/panSim before running.
+hcwPPE: "--closures inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8_hospitalPPE.json"
+
 # --- later rounds (commented out) ---
+# Daily screening with rapid antigen tests instead of PCR (faster/cheaper/more frequent in
+# reality, typically less sensitive - may give different results than hcwDailyTest's PCR default).
+# hcwDailyAntigenTest: "--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.95,0.05 --testingRepeatDelay 1 --testingMethod antigen"
+#
+# Near-universal HCW vaccination coverage (90% -> 99%, only the first vaccinationGroupLevel value
+# changed) - complements noVaccHCW (0%) by testing the other direction: is there a ceiling effect?
+# hcwFullVacc: "--vaccinationGroupLevel 0.99,0.85,0.9,0.82,0.8,0.75,0.8,0.67,0.4,0.2"
+#
+# Fast-tracked vaccine rollout (starts day 30 instead of day 96) - HCWs are already first-priority,
+# so starting the whole rollout earlier benefits them soonest and most.
+# earlyVacc: "--immunizationStart 30"
+#
 # quarantine0_closuresNone: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json"
 # quarantine0_noVacc: "--quarantinePolicy 0 --immunizationsPerWeek 0"
-# quarantine0_hiTest: "--quarantinePolicy 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 # closuresNone_noVacc: "--closures inputConfigFiles/noRules.json --immunizationsPerWeek 0"
-# closuresNone_hiTest: "--closures inputConfigFiles/noRules.json --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 # noVacc_hiTest: "--immunizationsPerWeek 0 --testingProbabilities 0.00005,0.01,0.0005,0.0005,0.5,0.05"
 #
 # quarantine0_closuresNone_noVacc: "--quarantinePolicy 0 --closures inputConfigFiles/noRules.json --immunizationsPerWeek 0"

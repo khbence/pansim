@@ -1,5 +1,7 @@
 # HCW interventions experiment
 
+*(A Hungarian-language summary of the results and their evaluation is in `README.hu.md`.)*
+
 Question: how do NPI/vaccination configurations change healthcare-worker (HCW) infection and
 absence?
 
@@ -8,14 +10,16 @@ absence?
 - HCW = agent with a work location of type hospital (12) or doctor (14)
   (`flagHealthcareWorkers`, `src/runtime/simulationOrchestration.cpp:355-389`).
 
-## Scenarios so far: the 4 single levers, plus one HCW-priority isolation
+## Scenarios so far: 4 single levers, 1 priority-isolation scenario, 4 two-way combinations
 
 Target design is a 2-level factorial over 4 levers - quarantine (Q), closures (C), vaccination
 (V), testing (T) - 16 scenarios total (see the commented-out combination entries in
-`scenarios.yaml`). Given the ~1h/scenario compute cost, rounds so far have run all **4 single-lever**
-scenarios (`baseline` vs one lever flipped each) to see each lever's own main effect before mixing
-them, plus a 5th scenario (`noVaccHCW`) outside the Q/C/V/T grid, added specifically to isolate the
-HCW-vaccination-*priority* effect (see below) - later rounds uncomment more combination lines in
+`scenarios.yaml`). 10 scenarios have been run so far: `baseline`; the 4 single levers
+(`quarantine0`, `closuresNone`, `noVacc`, `hiTest`); `noVaccHCW` (outside the Q/C/V/T grid, isolates
+the HCW-vaccination-*priority* effect specifically, see below); and 4 two-way combinations
+(`noVaccHCW_hiTest`, `closuresNone_hiTest`, `quarantine0_noVaccHCW`, `quarantine0_hiTest`) chosen
+to probe interactions between the levers found to matter most. See "Full results and interaction
+effects" below for the complete picture. Later rounds can uncomment more combination lines in
 `scenarios.yaml` - no code changes needed to scale up.
 
 | Lever | baseline (implicit) | deviation flag |
@@ -33,6 +37,9 @@ difference for days 0-258 in any scenario that keeps the default closures file; 
 `closuresNone` combinations keep it active for the full run. This is a real interaction, not a
 bug - just don't attribute a null T-lever result on a non-`closuresNone` scenario to "testing rate
 doesn't matter" without checking which days it was actually active.
+
+**Round 3** (from professor feedback - more realistic HCW-specific policies, see "New intervention
+ideas" below for the full brainstormed list): `hcwDailyTest`, `longQuarantine`, `hcwPPE`.
 
 ## `baseline`
 
@@ -202,8 +209,211 @@ what matters, and losing it isn't meaningfully cushioned by everyone else around
 This directly supports treating HCW vaccination priority as the standalone protective measure it's
 designed to be, not as something substitutable by population-level coverage.
 
+### Does more testing compensate for lost vaccine priority? (`noVaccHCW_hiTest`)
+
+The two dominant single levers combined: `noVaccHCW` (HCWs excluded from vaccination) +
+`hiTest` (hospital testing rate 0.005 -> 0.5). `incidence_RR`: 1.38 (baseline) -> 1.82
+(`noVaccHCW` alone, the worst single lever) -> 1.09 (`hiTest` alone, the only protective lever) ->
+**1.52 (`noVaccHCW_hiTest`, combined)**.
+
+Checking against a purely additive model (no interaction): baseline + `noVaccHCW`'s effect
+(+0.445) + `hiTest`'s effect (-0.285) predicts 1.538 - within 0.02 of the observed 1.520. **The two
+levers are close to additive, with no evidence of a strong interaction** (testing doesn't act
+*through* the vaccine-access channel, or vice versa - they look like two independent, stacking
+layers of protection, not substitutes that cancel each other's mechanism out).
+
+In absolute terms: losing HCW vaccine priority alone adds +0.445 to `incidence_RR` above baseline;
+with high testing added on top, that excess drops to +0.142 - **testing recovers about 68% of the
+excess risk caused by losing vaccine priority, but not all of it**. `noVaccHCW_hiTest`'s RR (1.52)
+is still significantly above baseline (1.38), so testing is a strong complement to vaccine
+priority, not a full substitute. (Caveat: the T lever here only differs from baseline for days
+0-258 - see the confound note at the top - so this 68% figure reflects testing's effect during
+that window of the first wave; its value during the untested second wave, where the closures file's
+own TestingProb rule already forces testing to 0.5 regardless, isn't isolated by this comparison.)
+
+## Full results and interaction effects
+
+Complete `outputs/relative_risk_table.csv` (`incidence_RR` is the trustworthy metric throughout -
+`prevalence_RR` carries the quarantine/HCI-definition caveat from above):
+
+| scenario | incidence_RR | vs baseline | significant? |
+|---|---|---|---|
+| baseline | 1.38 | - | - |
+| closuresNone | 1.38 | +0.00 | no |
+| hiTest | 1.09 | -0.29 | yes |
+| closuresNone_hiTest | 1.13 | -0.25 | yes |
+| quarantine0 | 1.47 | +0.09 | yes |
+| quarantine0_hiTest | 1.48 | +0.10 | yes |
+| noVacc | 1.78 | +0.40 | yes |
+| noVaccHCW | 1.82 | +0.44 | yes |
+| noVaccHCW_hiTest | 1.52 | +0.14 | yes |
+| quarantine0_noVaccHCW | 1.62 | +0.25 | yes |
+
+### Does the testing effect hold up unconfounded? (`closuresNone_hiTest`)
+
+This scenario removes the default closures file's day-259 `TestingProb` override (so testing's
+effect is measured for the full year, not just days 0-258) - but it turns out **this doesn't
+cleanly isolate testing's "true" effect**, because `closuresNone` doesn't *only* remove that one
+override: it replaces the closures file with `noRules.json` (`{"rules": []}`), which also removes
+every `ExposeToMutation` event (no new variants ever get seeded - the whole year runs on the
+initial variant only, no second wave) *and* every other closure rule (masks, curfew, school
+restriction). That's a much bigger change than "fix the testing confound" - it was flagged as a
+risk back when `closuresNone` was first proposed.
+
+Result: `closuresNone_hiTest`'s `incidence_RR` is 1.13 (-0.25 vs baseline), very close to confounded
+`hiTest`'s 1.09 (-0.29) - similar magnitude, if anything *slightly* smaller. This is reassuring
+(the day-259 cutoff wasn't masking a much larger effect), but it isn't a clean "unconfounded
+testing effect" measurement, because the variant-seeding and other-closures changes are entangled
+with it. A properly isolated test would need a custom closures file that keeps variant seeding but
+drops only the `TestingProb` override - not built here.
+
+### Worst case: stacking the two harmful levers (`quarantine0_noVaccHCW`)
+
+Naive additive prediction: baseline + `quarantine0`'s effect (+0.09) + `noVaccHCW`'s effect (+0.45)
+= 1.91. Observed: **1.62** - a large (-0.29) deviation from additive, in sharp contrast to
+`noVaccHCW_hiTest`'s near-perfect additivity (-0.02 deviation). The two harmful levers do **not**
+simply stack.
+
+Direct pairwise checks (`outputs/per_run.csv`, Mann-Whitney) pin down why:
+- Adding `noVaccHCW` on top of `quarantine0` (`quarantine0` -> `quarantine0_noVaccHCW`): RR rises
+  +0.155, significant (p<1e-7) - smaller than the +0.445 it adds on top of plain `baseline`, but
+  still clearly harmful and in the expected direction.
+- Adding `quarantine0` on top of `noVaccHCW` (`noVaccHCW` -> `quarantine0_noVaccHCW`): RR
+  **drops** -0.199, significant (p<1e-7) - the opposite sign from `quarantine0`'s own effect vs
+  baseline (+0.09)!
+
+This reversal traces back to the same mechanism as the prevalence/incidence disagreement: hospitals
+are structurally exempt from workplace quarantine (see above), so HCWs were never getting much
+protection from that specific channel to begin with - the **rest of the population** was. Removing
+quarantine (`quarantine0`) therefore raises the rest-of-population's infection rate proportionally
+*more* than HCWs': checking the underlying absolute rates (median `mean_hce` / `mean_ni_nonHCW`)
+going from `noVaccHCW` to `quarantine0_noVaccHCW`, HCW incidence rises **24%** (16.7 -> 20.8) while
+the rest-of-population's rises **39%** (152.3 -> 212.4) - the denominator catches up faster than
+the numerator, narrowing the ratio even though both groups get strictly more infections in absolute
+terms. Sub-additivity in a shared, finite susceptible population (diminishing marginal harm as
+infections saturate) likely compounds this further.
+
+### Does testing compensate for lost quarantine too? (`quarantine0_hiTest`) - the key mechanistic finding
+
+This is the most important result of the three new scenarios. `quarantine0_hiTest`'s `incidence_RR`
+(1.477) is statistically indistinguishable from `quarantine0` alone (1.469) - direct Mann-Whitney
+test, p=0.51, **not significant** (vs. `noVaccHCW_hiTest`'s rank-biserial effect of 1.0 when tested
+against `noVaccHCW`). **Adding high testing provides essentially zero benefit when quarantine is
+already disabled**, in stark contrast to the ~68% harm-recovery testing provided for lost vaccine
+priority.
+
+This makes complete mechanistic sense once traced through the code: testing's entire protective
+mechanism is *detect, then isolate* - a positive test result only changes anything if a positive
+agent is actually quarantined as a result. `quarantineAgent()` (`include/policies/movementPolicies.h:181`)
+returns **immediately** if `a.quarantinePolicy == 0`, before anything else happens - so under
+`quarantine0`, a positive test changes nothing about that agent's behavior at all. Testing is only
+protective *through* the quarantine pathway; it has no independent transmission-reducing mechanism
+of its own in this model. `noVaccHCW_hiTest` worked because that scenario keeps quarantine active
+(policy 3, baseline default) - testing could still trigger real isolation there.
+
+**This reframes the whole ranking**: testing isn't an independent "4th lever" on equal footing with
+quarantine, vaccination and closures - it's a *multiplier* on whatever quarantine policy is already
+in place. "Increase testing" is good policy advice only conditional on "and quarantine/isolation
+infrastructure exists to act on the result." Quarantine's own modest direct effect (+0.09 removing
+it) therefore understates its true importance - it's also a **prerequisite** for testing to have
+any teeth at all.
+
+### Updated ranking of what matters for HCW vulnerability
+
+1. **Vaccination (direct HCW access)** - the largest, most robust effect in every context tested
+   (+0.40 to +0.45 when removed), and the one lever shown to matter for HCWs *specifically*, not
+   just via population-level herd effects (see "Isolating the HCW-priority effect" above).
+2. **Testing, conditional on quarantine being active** - large and reliable when quarantine policy
+   is in place (-0.29, recovers ~68% of lost-vaccine-priority harm), but **worthless on its own**
+   if quarantine is disabled (p=0.51, no effect). Not a standalone lever - a quarantine-dependent one.
+3. **Quarantine policy** - a modest *direct* effect (+0.09 when removed) that undersells its real
+   importance, since it's also the prerequisite for testing's much larger effect to materialize.
+   Also the lever whose *removal* paradoxically narrows the HCW-vs-population gap when vaccine
+   priority is already lost (see "Worst case" above) - a reminder that these levers interact with
+   each other, not just with a fixed baseline.
+4. **Closures (masks/curfew/school-restriction/venue-closures bundle)** - no measurable effect on
+   the HCW-vs-population *ratio* in any test so far (closuresNone alone: not significant;
+   closuresNone_hiTest: similar magnitude to hiTest alone). Likely because closures act on
+   transmission broadly rather than differentially by occupation - they move both groups together.
+
 ## Extending to more levers
 
 Uncomment the relevant line(s) in `scenarios.yaml` (all 16 factorial combinations are already
 spelled out there, commented) and re-run `./run_scenarios.sh` - it skips scenarios that already
 have results, so only the newly-uncommented ones get simulated.
+
+## New intervention ideas (professor feedback)
+
+Feedback round asked for more realistic, real-world HCW-specific policies beyond the Q/C/V/T
+factorial. Brainstormed list below, split by whether panSim could already express them.
+
+### Ready to test with existing flags (no code change)
+
+- **`hcwDailyTest`** (implemented) - mandatory daily HCW testing. `hiTest` alone only raised the
+  probability (0.5); it left `--testingRepeatDelay` at its default 5 days, so even a "daily-tested"
+  agent could in practice only be *re*-tested every 5 days. True daily testing needs both:
+  `--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.95,0.05 --testingRepeatDelay 1`.
+- **`longQuarantine`** (implemented) - extends isolation duration from the default 10 days
+  (`--quarantineLength`, registered once by `RealMovement`, `include/policies/movementPolicies.h:1401`)
+  to 21, independent of whether quarantine triggers at all (that's what `quarantine0` tested).
+- **`hcwDailyAntigenTest`** (not yet run) - `hcwDailyTest`'s flags plus `--testingMethod antigen`
+  instead of the default PCR - models realistic rapid-antigen screening (faster/cheaper/more
+  frequent in reality, typically less sensitive).
+- **`hcwFullVacc`** (not yet run) - push HCW vaccination coverage (`--vaccinationGroupLevel`'s
+  first value, default 0.9) to 0.99. Complements `noVaccHCW` (0%) by testing the other direction -
+  is there a ceiling effect above today's 90%?
+- **`earlyVacc`** (not yet run) - `--immunizationStart 30` instead of the default 96. Since HCWs
+  are already first-priority, starting the whole rollout earlier benefits them soonest and most -
+  models fast-tracked vaccine procurement/approval.
+
+### Hospital-specific PPE (`hcwPPE`) - implemented via a C++ code change
+
+The single most realistic, most-studied real-world HCW protection (N95 masks, gowns, eye
+protection) had no equivalent lever: the existing `"Masks"` closure rule
+(`include/policies/closurePolicies.h:214-246`) scales infectiousness at **every non-home location
+type uniformly** (`if (type != homeType)`) - there was no way to target hospitals specifically.
+
+Added a new `"HospitalPPE"` closure rule (`closurePolicies.h`, right after the `Masks` block it
+mirrors) that scales infectiousness only where `type == hospitalType || type == doctorType`,
+using the exact same toggle mechanics as `Masks` (a `Rule` + `GlobalCondition`, state tracked via
+`previousOpenState`, multiply-on-activate/divide-on-revert). Also added a `currentPPEValue` field
+to `Simulation` (`include/simulation.h`) for symmetry with `currentMaskValue` - not wired into the
+older `processFlags()` string-flag interface, which this experiment doesn't use.
+
+`inputConfigFiles/closureJun6_real_later3_delta_omicronBA2_earlier8_hospitalPPE.json` is a copy of
+the validated closures file with one rule appended:
+```json
+{"name": "HospitalPPE", "parameter": 0.3, "conditionType": "afterDays",
+ "threshold": 0, "threshold2": 0, "openAfter": 10000, "closeAfter": -1, "locationTypesToClose": []}
+```
+`threshold: 0, openAfter: 10000` makes it active from day 0 for effectively the whole run (any
+run far shorter than 10000 days). `parameter: 0.3` means infectiousness at hospital/doctor
+locations is multiplied by 0.3 once PPE activates - i.e. a **70% reduction**, a middle estimate
+from the range reported for N95/eye-protection effectiveness in healthcare settings in the
+literature (e.g. Chu et al. 2020, *Lancet*, physical distancing/face protection meta-analysis) -
+real-world effectiveness varies substantially by compliance and PPE type, so treat this as an
+illustrative, documented modeling assumption, not a precisely validated epidemiological parameter.
+
+**Verified before trusting it**: rebuilt (`make buildCPU`), then a 1-week, 1-run smoke test with
+`--diags 1` confirmed the rule fires exactly once, on day 0, with the right coefficient -
+`HospitalPPE on with 0.3 multiplier` appears right after the day-0 data row (note: like all of
+this codebase's rule diagnostics, e.g. `Masks`, the `printf` goes to stdout, so it's interleaved
+with the `.tsv` data rows, not the `.log` file - this is pre-existing behavior, not specific to
+`HospitalPPE`). The filter logic itself (`type == hospitalType || type == doctorType`) is a direct,
+minimal change from `Masks`'s already-proven-correct pattern, so this smoke test plus a careful
+code read were judged sufficient without also dumping raw per-location infectiousness arrays.
+
+### Ideas that need more code work than this round covered
+
+- **COVID-ward cohorting** (separating infectious patients from the general hospital population to
+  reduce ambient HCW exposure) - panSim has only one "hospital" location type, no COVID-ward vs.
+  general-ward distinction. Would need new location-type granularity.
+- **HCW-specific quarantine policy independent of the population-wide policy** - given the
+  hospital-workplace-quarantine exemption finding above, a natural policy is "quarantine can't
+  close a hospital, but a diagnosed HCW should still be pulled from the roster faster/longer than
+  the general population." `--quarantinePolicy`/`--quarantineLength` are currently single global
+  values, not per-category.
+- **Reduced shift/contact-hour scheduling for HCWs during high-prevalence periods** - no existing
+  mechanism; would need new schedule-modification logic analogous to `ReduceMovement`'s
+  `stayHome` mechanic but targeted at the HCW category specifically (today `ReduceMovement`
+  applies to a population fraction, not a named category).

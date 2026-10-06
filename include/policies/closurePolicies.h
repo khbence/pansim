@@ -105,7 +105,8 @@ public:
                 && !(rule.name.compare("HolidayMode") == 0) && !(rule.name.compare("SchoolAgeRestriction") == 0)
                 && !(rule.name.compare("ExposeToMutation") == 0) && !(rule.name.compare("ReduceMovement") == 0)
                 && !(rule.name.compare("QuarantinePolicy")==0) && !(rule.name.compare("QuarantineImmune")==0)
-                && !(rule.name.compare("LockdownNonvacc")==0) && !(rule.name.compare("TestingProb")==0))
+                && !(rule.name.compare("LockdownNonvacc")==0) && !(rule.name.compare("TestingProb")==0)
+                && !(rule.name.compare("HospitalPPE")==0))
                 continue;
 
             // Create condition
@@ -242,6 +243,42 @@ public:
                         r->previousOpenState = shouldBeOpen;
                         if (diags > 0)
                             printf("Masks %s with %g multiplier\n", (int)shouldBeOpen ? "off" : "on", maskCoefficient2);
+                    }
+                });
+            } else if (rule.name.compare("HospitalPPE") == 0) {
+                // Hospital-specific PPE (N95 masks, gowns, eye protection): scales infectiousness
+                // only at hospital/doctor locations, unlike "Masks" which scales every non-home
+                // location uniformly and so can't target healthcare settings specifically.
+                thrust::device_vector<float>& locInfectiousness = realThis->locs->infectiousness;
+                thrust::device_vector<typename SimulationType::TypeOfLocation_t>& locTypes = realThis->locs->locType;
+                unsigned hospitalType = data.hospital;
+                unsigned doctorType = data.doctor;
+                double ppeCoefficient = std::stod(rule.parameter);
+                std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, hospitalType, doctorType, ppeCoefficient, diags, realThis](Rule* r) {
+                    bool close = true;
+                    for (GlobalCondition* c : r->conditions) { close = close && c->active; }
+                    bool shouldBeOpen = !close;
+                    if (r->previousOpenState != shouldBeOpen) {
+                        realThis->currentPPEValue = shouldBeOpen ? 1.0 : ppeCoefficient;
+                        thrust::for_each(
+                            thrust::make_zip_iterator(thrust::make_tuple(locTypes.begin(), locInfectiousness.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(locTypes.end(), locInfectiousness.end())),
+                            [ppeCoefficient, hospitalType, doctorType, shouldBeOpen] HD(
+                                thrust::tuple<typename SimulationType::TypeOfLocation_t&, float&> tup) {
+                                auto& type = thrust::get<0>(tup);
+                                auto& infectiousness = thrust::get<1>(tup);
+                                if (type == hospitalType || type == doctorType) {
+                                    if (shouldBeOpen)
+                                        infectiousness = infectiousness / ppeCoefficient;
+                                    else
+                                        infectiousness = infectiousness * ppeCoefficient;
+                                }
+                            });
+                        r->previousOpenState = shouldBeOpen;
+                        if (diags > 0)
+                            printf("HospitalPPE %s with %g multiplier\n", (int)shouldBeOpen ? "off" : "on", ppeCoefficient);
                     }
                 });
             } else if (rule.name.compare("Curfew") == 0) {
