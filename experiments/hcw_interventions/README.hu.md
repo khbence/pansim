@@ -77,24 +77,37 @@ a többszörös összehasonlításra).
 | `closuresNone_hiTest` | `closuresNone` + `hiTest` kombinációja |
 | `quarantine0_hiTest` | `quarantine0` + `hiTest` kombinációja |
 | `quarantine0_noVaccHCW` | `quarantine0` + `noVaccHCW` kombinációja (a két "káros" tényező együtt) |
+| `hcwDailyTest` | minden HCW napi tesztelése (95%-os valószínűség + újratesztelési várakozás 1 napra csökkentve) |
+| `longQuarantine` | karantén/elkülönítés hossza 10 napról 21 napra nőve (attól függetlenül, hogy a karantén egyáltalán aktiválódik-e) |
+| `hcwPPE` | kórházi védőfelszerelés (N95/köpeny/szemvédő): 70%-os fertőzőképesség-csökkentés kizárólag kórházi/rendelői helyszíneken, 0. naptól - új C++ kódváltoztatással megvalósítva |
 
-## Fő eredmény: a HCW csoport valóban sérülékeny - minden körülmény között
+## Fő eredmény: a HCW csoport sérülékeny - két fontos kivétellel
 
-Mind a 10 forgatókönyv mind a 200 futásában (10 szcenárió × 20 futás), **kivétel nélkül**,
-`incidence_RR > 1`. Minden egyes szcenárió statisztikailag szignifikánsan különbözik az RR=1
-nullhipotézistől (Wilcoxon előjeles rangteszt, p ≈ 1,9×10⁻⁶ minden esetben - ez a lehető
-legmagasabb szignifikancia 20 mintával). Tehát: **az egészségügyi dolgozók minden tesztelt
-beavatkozási környezetben magasabb napi fertőzési rátával rendelkeznek, mint a lakosság többi
-része, kivétel nélkül.**
+10 a 13 forgatókönyv mind a 20-20 futásában, **kivétel nélkül**, `incidence_RR > 1`, statisztikailag
+szignifikánsan különbözve az RR=1 nullhipotézistől (Wilcoxon előjeles rangteszt, p ≈ 1,9×10⁻⁶
+minden ilyen esetben - ez a lehető legmagasabb szignifikancia 20 mintával). Tehát: **az
+egészségügyi dolgozók a legtöbb tesztelt beavatkozási környezetben magasabb napi fertőzési rátával
+rendelkeznek, mint a lakosság többi része.**
+
+**A két kivétel a két legfontosabb eredmény**:
+- `hcwDailyTest` (minden HCW napi tesztelése): RR pontosan 1,00-ra csökken, statisztikailag **nem
+  különbözik** az RR=1-től (p=0,67) - a rés teljesen bezárul.
+- **`hcwPPE` (kórházi védőfelszerelés): RR **0,71-re csökken** - ez nem csak bezárás, hanem
+  **megfordítás**: mind a 20 futásban RR<1, p=1,9×10⁻⁶. A HCW-k itt ténylegesen *kevésbé*
+  veszélyeztetettek, mint a lakosság többi része.** Ez a teljes kísérletsorozat legerősebb
+  eredménye - lásd a 7. pontot lent.
 
 ## Teljes eredménytábla
 
 | forgatókönyv | `incidence_RR` | különbség a baseline-hoz képest | szignifikáns? |
 |---|---|---|---|
 | baseline | 1,38 | - | - |
+| **hcwPPE** | **0,71** | **-0,67** | igen (RR maga is <1, p=1,9×10⁻⁶) |
+| hcwDailyTest | 1,00 | -0,38 | igen (de maga az RR nem tér el szignifikánsan 1-től, p=0,67) |
 | closuresNone | 1,38 | +0,00 | nem |
 | hiTest | 1,09 | -0,29 | igen |
 | closuresNone_hiTest | 1,13 | -0,25 | igen |
+| longQuarantine | 1,35 | -0,03 | nem |
 | quarantine0 | 1,47 | +0,09 | igen |
 | quarantine0_hiTest | 1,48 | +0,10 | igen |
 | noVacc | 1,78 | +0,40 | igen |
@@ -220,31 +233,123 @@ míg a lakosság többi részének incidenciája **39%-kal** (152,3 → 212,4) -
 a számlálót, ami szűkíti az arányt annak ellenére, hogy mindkét csoportban abszolút értékben nő a
 fertőzöttek száma.
 
+### 7. A kórházi védőfelszerelés megfordítja a sérülékenységi rést (`hcwPPE`) - a sorozat legerősebb eredménye
+
+A professzori visszajelzés nyomán felmerült ötletek közül a legfontosabb hiányzó, valós
+beavatkozás a kórházi védőfelszerelés (N95 maszk, köpeny, szemvédő) volt - erre korábban nem volt
+megfelelő mérőszám: a meglévő `"Masks"` zárlati szabály **minden** nem-otthoni helyszínen
+egységesen csökkenti a fertőzőképességet, nem lehetett vele kizárólag kórházakat célozni.
+
+Ezért egy új `"HospitalPPE"` zárlati szabályt implementáltunk (`include/policies/closurePolicies.h`,
+a `"Masks"` szabály pontos mása, csak a helyszín-szűrés `type == hospitalType || type == doctorType`-ra
+cserélve). A paraméter 0,3 (70%-os fertőzőképesség-csökkentés kórházi/rendelői helyszíneken), a
+0. naptól aktív a teljes futás alatt - ez egy középértékű becslés az egészségügyi környezetben mért
+N95/szemvédő-hatékonyság szakirodalmi tartományából (pl. Chu és mtsai. 2020, *Lancet*
+metaanalízise) - a valós hatékonyság erősen függ a betartástól és a felszerelés típusától, ezért ezt
+illusztratív, dokumentált modellezési feltételezésnek kell tekinteni, nem pontosan validált
+epidemiológiai paraméternek.
+
+**Eredmény**: `incidence_RR` = **0,71** - nem csupán a rés bezárása, hanem **valódi megfordítás**.
+Mind a 20 futásban `incidence_RR < 1` (medián 0,713, tartomány 0,67-0,77); az RR=1 nullhipotézis
+elleni egymintás Wilcoxon-teszt p=1,9×10⁻⁶-ot ad (20 minta esetén a lehető legmagasabb
+szignifikancia) - **az egészségügyi dolgozók mérhetően kevésbé veszélyeztetettek, mint a lakosság
+többi része.** Ez közvetlenül látszik az `outputs/vulnerability.png` `hcwPPE` incidencia-panelén is:
+a kék (HCW) görbe mindkét csúcsnál egyértelműen a narancs (populáció) görbe *alatt* fut - ez az
+egyetlen forgatókönyv, ahol ez történik.
+
+Ez a teljes kísérletsorozat legerősebb eredménye: a legnagyobb mért hatás (-0,67 a baseline-hoz
+képest, majdnem kétszerese a `hcwDailyTest` már eddig is nagy -0,38-as hatásának), és az egyetlen
+beavatkozás, amely nem csak bezárja, hanem meg is fordítja a sérülékenységi rést. Ennek
+mechanisztikus magyarázata: a védőfelszerelés közvetlenül a fertőzés *helyén* hat, függetlenül az
+"észlelés, majd elkülönítés" útvonaltól, amitől a `hcwDailyTest`/`hiTest` függ (és amiről a
+`quarantine0_hiTest` megmutatta, hogy aktív karantén nélkül nullára csökken) - nem versenyez a
+többi tesztelt tényezővel, és nem is függ tőlük, mert egy strukturálisan eltérő, közvetlenebb
+védelmi mechanizmus.
+
+### 8. A napi tesztelés lezárja a rést (`hcwDailyTest`)
+
+A `hiTest` csak a tesztelési *valószínűséget* emelte (0,005→0,5), de az újratesztelési várakozási
+időt (`--testingRepeatDelay`) az alapértelmezett 5 napon hagyta - így egy "naponta tesztelt" ügynök
+a gyakorlatban csak 5 naponta kaphatott *új* tesztet. A `hcwDailyTest` mindkettőt javítja
+(valószínűség 0,95, `testingRepeatDelay=1`) - egy valódi "minden HCW-t minden reggel teszteljük"
+politika.
+
+**Eredmény**: `incidence_RR` = 1,00 (medián 0,9966) - paritás a lakosság többi részével. Az RR=1
+nullhipotézis elleni egymintás teszt p=0,67-et ad - **statisztikailag nem különbözik 1-től** (a 20
+futásból 11 van 1 alatt, 9 fölötte - fej-vagy-írás eloszlás, nem egyirányú trend).
+
+A `hcwPPE` előtt ez volt a sorozat legerősebb eredménye; még mindig a második legerősebb és a
+legjobb *teszteléssel elérhető* eredmény - nagy védőhatás (-0,38 a baseline-hoz képest, nagyobb,
+mint a `hiTest` már eddig is jelentős -0,29-es hatása), amely teljesen bezárja a rést, nem csak
+szűkíti. Összhangban van azzal a mechanisztikus felfedezéssel, hogy a tesztelés a
+karantén/elkülönítés csatornán keresztül hat (lásd az 5. pontot fent) - az újratesztelési
+késleltetés megszüntetésével a valóban napi szűrés szinte azonnal elkapja és elkülöníti a fertőzött
+HCW-ket, maximalizálva ennek a csatornának a hatását. A `hcwPPE`-vel ellentétben azonban ez a
+védelem feltételes - csak akkor működik, ha a karantén aktív (lásd `quarantine0_hiTest` fent); a
+`hcwPPE` hatásának nincs ilyen függősége.
+
+### 9. Számít-e a karantén *időtartama*, függetlenül attól, hogy egyáltalán aktiválódik-e? (`longQuarantine`)
+
+Az elkülönítés meghosszabbítása az alapértelmezett 10 napról 21-re (`--quarantineLength 21`, a
+`quarantine0` szintje változatlanul 3 marad) szignifikánsan csökkenti a HCW-k abszolút
+fertőzésszámát (`mean_hce`: -0,68, `hcw_infections`: -249, mindkettő p<0,0001) - a hosszabb
+elkülönítés valóban csökkenti a terjedést. De **az `incidence_RR` alig mozdul (1,38→1,35), és a
+változás nem szignifikáns** (p=0,118, ellentétben minden eddig tesztelt tényezővel). A hosszabb
+elkülönítés arányosan csökkenti a fertőzéseket a HCW-knél és a lakosság többi részénél is - mint a
+`closuresNone` esetében, ez egy olyan tényező, amely mindenkit együtt mozgat, nem változtatja meg a
+HCW-k *relatív* pozícióját. (A `prevalence_RR` kissé mozdul, -0,02, p=0,016 - összhangban a már
+ismert mechanizmussal: a hosszabb karantén-időtartam felfújja a lakosság többi részének
+"karanténban lévő" állományát, hiszen ők profitálnak a munkahelyi karanténból - a `quarantine0`-nál
+látott hatás kisebb változata.)
+
 ## Összegzés: rangsor a HCW-sérülékenység szempontjából
 
-1. **Oltás (közvetlen HCW-hozzáférés)** - a legnagyobb és legrobusztusabb hatás minden tesztelt
-   környezetben (+0,40-0,45, ha megszűnik), és az egyetlen tényező, amelyről bizonyítottan a HCW-k
-   *saját* hozzáférése számít, nem csak a populációs szintű nyájimmunitás.
+0. **Kórházi védőfelszerelés (`hcwPPE`)** - a messze leghatékonyabb beavatkozás: egy 70%-os
+   hatékonyságú feltételezés kórházi/rendelői helyszíneken nem csak bezárja, hanem **meg is
+   fordítja** a sérülékenységi rést (RR=0,71, mind a 20 futás 1 alatt, p=1,9×10⁻⁶).
+   Mechanisztikusan eltér minden más tesztelt tényezőtől - közvetlenül a fertőzés helyén hat,
+   függetlenül attól, hogy van-e karantén/tesztelés/oltási infrastruktúra. A kísérletsorozat
+   legegyértelműbb, önmagában megálló szakpolitikai javaslata.
+0b. **Tesztelési intenzitás/gyakoriság, helyesen megvalósítva (`hcwDailyTest`)** - a legjobb
+   *teszteléssel elérhető* eredmény: a `hiTest`-ben hagyott újratesztelési késleltetés
+   megszüntetése a tesztelést "jelentősen segít" (-0,29) szintről "teljesen lezárja a rést"
+   (RR=1,00, statisztikailag nem különbözik a paritástól) szintre emeli. Továbbra is függ az aktív
+   karanténtól (lásd 2. pont), ellentétben a PPE-vel - ez a tesztelés elérhető felső határa, ha ez
+   a feltétel teljesül.
+1. **Oltás (közvetlen HCW-hozzáférés)** - a legnagyobb és legrobusztusabb *káros hatás, ha
+   megszűnik* minden tesztelt környezetben (+0,40-0,45), és az egyetlen tényező, amelyről
+   bizonyítottan a HCW-k *saját* hozzáférése számít, nem csak a populációs szintű nyájimmunitás.
 2. **Tesztelés, de csak akkor, ha van aktív karantén** - nagy és megbízható hatás, ha a
-   karanténpolitika érvényben van (-0,29, az oltási prioritás elvesztésének kb. 68%-át pótolja),
-   de **önmagában hatástalan** (p=0,51), ha a karantén ki van kapcsolva. Nem önálló beavatkozás -
-   a karanténtól függ.
-3. **Karanténpolitika** - szerény *közvetlen* hatás (+0,09 kikapcsolva), ami alulbecsüli a valódi
-   fontosságát, mivel egyben előfeltétele is a tesztelés sokkal nagyobb hatásának. Emellett az a
-   tényező, amelynek eltávolítása paradox módon *szűkíti* a HCW-populáció rést, ha az oltási
-   prioritás már amúgy is elveszett - emlékeztető arra, hogy ezek a tényezők egymással is
-   kölcsönhatásban állnak, nem csak egy rögzített alaphelyzethez képest.
+   karanténpolitika érvényben van (-0,29-től -0,38-ig, az agresszivitástól függően; az oltási
+   prioritás elvesztésének kb. 68%-át pótolja `hiTest` szinten, a teljes rést lezárja
+   `hcwDailyTest` szinten), de **önmagában hatástalan** (p=0,51), ha a karantén ki van kapcsolva.
+   Nem önálló beavatkozás - a karanténtól függ.
+3. **Karanténpolitika** - szerény *közvetlen* hatás attól, hogy egyáltalán engedélyezve van-e
+   (+0,09, ha teljesen kikapcsolva), ami alulbecsüli a valódi fontosságát, mivel egyben
+   előfeltétele is a tesztelés sokkal nagyobb hatásának. Az *időtartam* önmagában (10→21 nap,
+   `longQuarantine`), függetlenül attól, hogy aktiválódik-e, **nem** változtatja meg szignifikánsan
+   az `incidence_RR`-t (p=0,12) - az számít, hogy létezik-e egyáltalán karantén, nem az, hogy
+   mennyi ideig tart, ha már aktiválódott. Emellett az a tényező, amelynek eltávolítása paradox
+   módon *szűkíti* a HCW-populáció rést, ha az oltási prioritás már amúgy is elveszett -
+   emlékeztető arra, hogy ezek a tényezők egymással is kölcsönhatásban állnak, nem csak egy
+   rögzített alaphelyzethez képest.
 4. **Zárlatok/korlátozások (maszk, kijárási tilalom, iskolai korlátozás, helyszín-bezárások)** -
    egyik tesztben sem volt mérhető hatása a HCW-vs-populáció *arányra*. Valószínűleg azért, mert a
    zárlatok általánosan csökkentik a terjedést, foglalkozástól függetlenül - mindkét csoportot
-   együtt mozgatják, nem differenciáltan.
+   együtt mozgatják, nem differenciáltan, ugyanaz a mintázat, mint a karantén *időtartamánál* fent.
 
 ## Végkövetkeztetés
 
-Az egészségügyi dolgozók **statisztikailag igazolhatóan, minden tesztelt körülmény között**
-sérülékenyebb csoportnak bizonyultak, mint a lakosság többi része. A legfontosabb, egyértelműen
-alátámasztott szakpolitikai üzenet: **az egészségügyi dolgozók oltási prioritása az egyetlen
-önmagában is robusztus védelmi intézkedés** - elvesztését sem a lakosság nyájimmunitása, sem
-(teljes mértékben) a fokozott tesztelés nem pótolja. A tesztelés ugyanakkor fontos *kiegészítő*
-intézkedés, feltéve, hogy létezik karanténpolitika, amely érvényt szerez a pozitív
-teszteredményeknek - önmagában, karantén nélkül, a modellben nincs hatása.
+Az egészségügyi dolgozók **statisztikailag igazolhatóan, szinte minden tesztelt körülmény között**
+sérülékenyebb csoportnak bizonyultak, mint a lakosság többi része - ez alól csak két, kifejezetten
+HCW-re célzott beavatkozás jelent kivételt. A legfontosabb, egyértelműen alátámasztott
+szakpolitikai üzenet: **a kórházi védőfelszerelés (PPE) az egyetlen tesztelt beavatkozás, amely nem
+csak kiegyenlíti, hanem meg is fordítja a HCW-k sérülékenységét** - ez a legerősebb, legtisztább és
+leginkább önmagában megálló eredmény. Emellett **az egészségügyi dolgozók oltási prioritása** a
+másik robusztus, önmagában is ható védelmi intézkedés - elvesztését sem a lakosság
+nyájimmunitása, sem (teljes mértékben) a fokozott tesztelés nem pótolja. A **helyesen (napi
+szinten, újratesztelési késleltetés nélkül) megvalósított tesztelés** szintén teljesen lezárja a
+rést, de ez a védelem *feltételes*: csak akkor működik, ha létezik karanténpolitika, amely érvényt
+szerez a pozitív teszteredményeknek - önmagában, karantén nélkül, a modellben nincs hatása. A
+karantén *időtartama* és az általános zárlatok/korlátozások ezzel szemben nem változtatják meg a
+HCW-k relatív helyzetét - mindkét csoportot együtt mozgatják, nem célzottan.

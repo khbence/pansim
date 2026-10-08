@@ -10,17 +10,21 @@ absence?
 - HCW = agent with a work location of type hospital (12) or doctor (14)
   (`flagHealthcareWorkers`, `src/runtime/simulationOrchestration.cpp:355-389`).
 
-## Scenarios so far: 4 single levers, 1 priority-isolation scenario, 4 two-way combinations
+## Scenarios so far: 4 single levers, 1 priority-isolation scenario, 4 two-way combinations, 3 round-3 policies
 
 Target design is a 2-level factorial over 4 levers - quarantine (Q), closures (C), vaccination
 (V), testing (T) - 16 scenarios total (see the commented-out combination entries in
-`scenarios.yaml`). 10 scenarios have been run so far: `baseline`; the 4 single levers
+`scenarios.yaml`). 13 scenarios have been run so far: `baseline`; the 4 single levers
 (`quarantine0`, `closuresNone`, `noVacc`, `hiTest`); `noVaccHCW` (outside the Q/C/V/T grid, isolates
-the HCW-vaccination-*priority* effect specifically, see below); and 4 two-way combinations
+the HCW-vaccination-*priority* effect specifically, see below); 4 two-way combinations
 (`noVaccHCW_hiTest`, `closuresNone_hiTest`, `quarantine0_noVaccHCW`, `quarantine0_hiTest`) chosen
-to probe interactions between the levers found to matter most. See "Full results and interaction
-effects" below for the complete picture. Later rounds can uncomment more combination lines in
-`scenarios.yaml` - no code changes needed to scale up.
+to probe interactions between the levers found to matter most; and 3 "round 3" policies from
+professor feedback (`hcwDailyTest`, `longQuarantine`, `hcwPPE` - see "New intervention ideas"
+below for the brainstormed list and implementation details; `hcwPPE` needed a C++ code change).
+See "Full results and interaction effects" below for the complete picture - **`hcwPPE` is now the
+strongest result in the entire series** (RR=0.71, a genuine reversal of the vulnerability gap, not
+just a reduction). Later rounds can uncomment more combination lines in `scenarios.yaml` - no code
+changes needed to scale those up.
 
 | Lever | baseline (implicit) | deviation flag |
 |---|---|---|
@@ -38,8 +42,6 @@ difference for days 0-258 in any scenario that keeps the default closures file; 
 bug - just don't attribute a null T-lever result on a non-`closuresNone` scenario to "testing rate
 doesn't matter" without checking which days it was actually active.
 
-**Round 3** (from professor feedback - more realistic HCW-specific policies, see "New intervention
-ideas" below for the full brainstormed list): `hcwDailyTest`, `longQuarantine`, `hcwPPE`.
 
 ## `baseline`
 
@@ -239,15 +241,77 @@ Complete `outputs/relative_risk_table.csv` (`incidence_RR` is the trustworthy me
 | scenario | incidence_RR | vs baseline | significant? |
 |---|---|---|---|
 | baseline | 1.38 | - | - |
+| **hcwPPE** | **0.71** | **-0.67** | **yes (RR itself != 1 too, p=1.9e-6 - see below)** |
+| hcwDailyTest | 1.00 | -0.38 | yes (but RR itself not != 1, see below) |
 | closuresNone | 1.38 | +0.00 | no |
 | hiTest | 1.09 | -0.29 | yes |
 | closuresNone_hiTest | 1.13 | -0.25 | yes |
+| longQuarantine | 1.35 | -0.03 | no |
 | quarantine0 | 1.47 | +0.09 | yes |
 | quarantine0_hiTest | 1.48 | +0.10 | yes |
 | noVacc | 1.78 | +0.40 | yes |
 | noVaccHCW | 1.82 | +0.44 | yes |
 | noVaccHCW_hiTest | 1.52 | +0.14 | yes |
 | quarantine0_noVaccHCW | 1.62 | +0.25 | yes |
+
+### Hospital-specific PPE reverses the gap entirely (`hcwPPE`) - the strongest result of the series
+
+`hcwPPE` applies a 70% infectiousness reduction (coefficient 0.3) at hospital/doctor locations
+only, active from day 0 - see "New intervention ideas" below for the full implementation (it
+needed a new C++ closure rule, `HospitalPPE`, mirroring `Masks` but targeted at
+`hospitalType`/`doctorType` instead of every non-home location).
+
+**Result: `incidence_RR` = 0.71 - not just parity, but a genuine reversal.** Every single one of
+the 20 runs has `incidence_RR < 1` (median 0.713, range 0.67-0.77); a one-sample Wilcoxon test
+against the null of RR=1 gives p=1.9x10^-6 (the maximum possible significance for n=20) -
+**healthcare workers become measurably *less* at risk than the rest of the population.** This is
+visible directly in `outputs/vulnerability.png`'s `hcwPPE` incidence panel - the blue (HCW) line
+sits clearly *below* the orange (population) line at both peaks, the only scenario where that
+happens.
+
+This is now the single strongest result in the whole experiment series: the largest effect size
+measured (-0.67 vs baseline, nearly double `hcwDailyTest`'s already-large -0.38) and the only
+intervention that doesn't just close the vulnerability gap but inverts it. Makes sense
+mechanistically - PPE acts directly on transmission *at the exposure site itself*, independent of
+the detect-then-isolate pathway that `hcwDailyTest`/`hiTest` depend on (and that `quarantine0_hiTest`
+showed goes to zero without active quarantine) - it doesn't compete with or depend on any of the
+other levers tested, it's a structurally different, more direct protective mechanism.
+
+### Mandatory daily testing closes the gap entirely (`hcwDailyTest`)
+
+`hiTest` raised the testing *probability* (0.005 -> 0.5) but left `--testingRepeatDelay` at its
+default 5 days, so even a "daily-tested" agent could in practice only be *re*-tested every 5 days.
+`hcwDailyTest` fixes both (probability 0.95, `testingRepeatDelay=1`) - a true "test every HCW every
+morning" policy.
+
+**Result: `incidence_RR` = 1.00 (median 0.9966) - parity with the rest of the population.** A
+one-sample test against the null of RR=1 (Wilcoxon signed-rank on the 20 per-run values) gives
+p=0.67 - **not significantly different from 1** (11 of 20 runs land below 1, 9 above - a coin-flip
+split, not a one-sided trend). This is visible directly in `outputs/vulnerability.png`'s
+`hcwDailyTest` incidence panel - the two lines track each other throughout, unlike most other
+scenarios.
+
+Before `hcwPPE` was run, this was the strongest result of the series; it's still the second
+strongest and the best *testing-based* result - a large protective effect (-0.38 vs baseline,
+larger than `hiTest`'s already-substantial -0.29) that fully closes the gap rather than narrowing
+it. Consistent with the mechanistic finding that testing works through the quarantine/isolation
+channel (see "the key mechanistic finding" below) - removing the retest-delay bottleneck lets
+genuinely daily screening catch and isolate infected HCWs almost immediately, maximizing that
+channel's effect. Unlike `hcwPPE`, though, this protection is conditional on quarantine being
+active at all (see `quarantine0_hiTest` below) - `hcwPPE`'s effect has no such dependency.
+
+### Does quarantine *duration* matter, independent of whether it triggers at all? (`longQuarantine`)
+
+Extending isolation from the default 10 days to 21 (`--quarantineLength 21`, `quarantine0` itself
+unchanged at policy level 3) reduces absolute HCW infections significantly (`mean_hce`: -0.68,
+`hcw_infections`: -249, both p<0.0001) - longer isolation does reduce transmission. But
+**`incidence_RR` barely moves (1.38 -> 1.35) and the change is not significant** (p=0.118, in
+contrast to every other lever tested so far). Longer isolation reduces infections for HCWs and the
+rest of the population roughly proportionally - like `closuresNone`, it's a lever that moves
+everyone together rather than changing HCWs' *relative* position. (`prevalence_RR` does move
+slightly, -0.02, p=0.016 - consistent with the established mechanism: longer quarantine duration
+inflates the general population's "quarantined" pool specifically, since they're the ones who
+benefit from workplace quarantine - a small version of the same effect seen with `quarantine0`.)
 
 ### Does the testing effect hold up unconfounded? (`closuresNone_hiTest`)
 
@@ -320,21 +384,39 @@ any teeth at all.
 
 ### Updated ranking of what matters for HCW vulnerability
 
-1. **Vaccination (direct HCW access)** - the largest, most robust effect in every context tested
-   (+0.40 to +0.45 when removed), and the one lever shown to matter for HCWs *specifically*, not
-   just via population-level herd effects (see "Isolating the HCW-priority effect" above).
+0. **Hospital-specific PPE (`hcwPPE`)** - the single most effective intervention found, by a wide
+   margin: a 70%-effectiveness assumption at hospital/doctor locations doesn't just close the
+   vulnerability gap, it **reverses** it (RR=0.71, every one of 20 runs below 1, p=1.9e-6).
+   Mechanistically distinct from every other lever tested - it protects at the exposure site
+   directly, with no dependency on quarantine/testing/vaccination infrastructure being in place.
+   The clearest single real-world policy recommendation this experiment series has produced.
+0b. **Testing intensity/frequency, done properly (`hcwDailyTest`)** - the best *testing-based*
+   result: fixing the retest-delay bottleneck that `hiTest` left in place turns testing from
+   "substantially helps" (-0.29) into "closes the gap entirely" (RR=1.00, not significantly
+   different from parity). Still conditional on quarantine being active (see #2), unlike PPE -
+   this is the ceiling of what testing can achieve when that condition holds.
+1. **Vaccination (direct HCW access)** - the largest, most robust *harmful-when-removed* effect in
+   every context tested (+0.40 to +0.45), and the one lever shown to matter for HCWs
+   *specifically*, not just via population-level herd effects (see "Isolating the HCW-priority
+   effect" above).
 2. **Testing, conditional on quarantine being active** - large and reliable when quarantine policy
-   is in place (-0.29, recovers ~68% of lost-vaccine-priority harm), but **worthless on its own**
-   if quarantine is disabled (p=0.51, no effect). Not a standalone lever - a quarantine-dependent one.
-3. **Quarantine policy** - a modest *direct* effect (+0.09 when removed) that undersells its real
-   importance, since it's also the prerequisite for testing's much larger effect to materialize.
-   Also the lever whose *removal* paradoxically narrows the HCW-vs-population gap when vaccine
-   priority is already lost (see "Worst case" above) - a reminder that these levers interact with
-   each other, not just with a fixed baseline.
+   is in place (-0.29 to -0.38 depending on how aggressively it's implemented, recovers ~68% of
+   lost-vaccine-priority harm at the `hiTest` level and the entire gap at the `hcwDailyTest` level),
+   but **worthless on its own** if quarantine is disabled (p=0.51, no effect). Not a standalone
+   lever - a quarantine-dependent one.
+3. **Quarantine policy** - a modest *direct* effect from whether it's enabled at all (+0.09 when
+   fully removed) that undersells its real importance, since it's also the prerequisite for
+   testing's much larger effect to materialize. *Duration* alone (10 -> 21 days, `longQuarantine`),
+   independent of whether it triggers, does **not** significantly change `incidence_RR` (p=0.12) -
+   it's whether quarantine exists at all that matters for the ratio, not how long it lasts once
+   triggered. Also the lever whose *removal* paradoxically narrows the HCW-vs-population gap when
+   vaccine priority is already lost (see "Worst case" above) - a reminder that these levers
+   interact with each other, not just with a fixed baseline.
 4. **Closures (masks/curfew/school-restriction/venue-closures bundle)** - no measurable effect on
    the HCW-vs-population *ratio* in any test so far (closuresNone alone: not significant;
    closuresNone_hiTest: similar magnitude to hiTest alone). Likely because closures act on
-   transmission broadly rather than differentially by occupation - they move both groups together.
+   transmission broadly rather than differentially by occupation - they move both groups together,
+   the same pattern seen with quarantine *duration* above.
 
 ## Extending to more levers
 
@@ -349,13 +431,17 @@ factorial. Brainstormed list below, split by whether panSim could already expres
 
 ### Ready to test with existing flags (no code change)
 
-- **`hcwDailyTest`** (implemented) - mandatory daily HCW testing. `hiTest` alone only raised the
-  probability (0.5); it left `--testingRepeatDelay` at its default 5 days, so even a "daily-tested"
-  agent could in practice only be *re*-tested every 5 days. True daily testing needs both:
-  `--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.95,0.05 --testingRepeatDelay 1`.
-- **`longQuarantine`** (implemented) - extends isolation duration from the default 10 days
-  (`--quarantineLength`, registered once by `RealMovement`, `include/policies/movementPolicies.h:1401`)
-  to 21, independent of whether quarantine triggers at all (that's what `quarantine0` tested).
+- **`hcwDailyTest`** (run - see "Mandatory daily testing closes the gap entirely" above) -
+  mandatory daily HCW testing. `hiTest` alone only raised the probability (0.5); it left
+  `--testingRepeatDelay` at its default 5 days, so even a "daily-tested" agent could in practice
+  only be *re*-tested every 5 days. True daily testing needs both:
+  `--testingProbabilities 0.00005,0.01,0.0005,0.0005,0.95,0.05 --testingRepeatDelay 1`. **Result:
+  the strongest finding of the whole series - RR reaches parity (1.00), not just reduced.**
+- **`longQuarantine`** (run - see "Does quarantine duration matter" above) - extends isolation
+  duration from the default 10 days (`--quarantineLength`, registered once by `RealMovement`,
+  `include/policies/movementPolicies.h:1401`) to 21, independent of whether quarantine triggers at
+  all (that's what `quarantine0` tested). **Result: no significant change to `incidence_RR`** -
+  duration alone doesn't move the ratio, only whether quarantine exists at all does.
 - **`hcwDailyAntigenTest`** (not yet run) - `hcwDailyTest`'s flags plus `--testingMethod antigen`
   instead of the default PCR - models realistic rapid-antigen screening (faster/cheaper/more
   frequent in reality, typically less sensitive).
@@ -366,7 +452,8 @@ factorial. Brainstormed list below, split by whether panSim could already expres
   are already first-priority, starting the whole rollout earlier benefits them soonest and most -
   models fast-tracked vaccine procurement/approval.
 
-### Hospital-specific PPE (`hcwPPE`) - implemented via a C++ code change
+### Hospital-specific PPE (`hcwPPE`) - implemented via a C++ code change, run - see "Hospital-specific
+PPE reverses the gap entirely" above for the result (RR=0.71, the strongest finding of the series)
 
 The single most realistic, most-studied real-world HCW protection (N95 masks, gowns, eye
 protection) had no equivalent lever: the existing `"Masks"` closure rule
