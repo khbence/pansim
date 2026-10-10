@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <cstdint>
+#include <cmath>
 #include <vector>
 #include <omp.h>
 #include "datatypes.h"
@@ -79,6 +80,44 @@ public:
         return dis(generators[omp_get_thread_num()]);
     }
 #endif
+
+    // Gamma(shape, scale=1/shape), so the mean is 1. shape <= 0 or very large returns 1.
+    // Marsaglia-Tsang for shape >= 1, with the Ahrens boost when shape < 1.
+    [[nodiscard]] static __host__ __device__ double gammaMeanOne(double shape) {
+        if (!(shape > 0.0) || shape >= 1.0e6) return 1.0;
+        double extra = 1.0;
+        double alpha = shape;
+        if (alpha < 1.0) {
+            double uBoost = randomUnit();
+            if (uBoost < 1e-12) uBoost = 1e-12;
+            extra = pow(uBoost, 1.0 / alpha);
+            alpha += 1.0;
+        }
+        const double d = alpha - 1.0 / 3.0;
+        const double c = 1.0 / sqrt(9.0 * d);
+        double g = 0.0;
+        while (true) {
+            double x;
+            double v;
+            do {
+                double u1 = randomUnit();
+                if (u1 < 1e-12) u1 = 1e-12;
+                double u2 = randomUnit();
+                x = sqrt(-2.0 * log(u1)) * cos(2.0 * 3.14159265358979323846 * u2);
+                v = 1.0 + c * x;
+            } while (v <= 0.0);
+            v = v * v * v;
+            double u = randomUnit();
+            double x2 = x * x;
+            if (u < 1.0 - 0.0331 * x2 * x2 || log(u) < 0.5 * x2 + d * (1.0 - v + log(v))) {
+                g = d * v * extra;
+                break;
+            }
+        }
+        const double cap = 1.0e4 * shape;
+        if (!(g > 0.0) || g > cap) g = cap;
+        return g / shape;
+    }
 
     [[nodiscard]] static __host__ __device__ int geometric(double p) {
 #ifdef __CUDA_ARCH__

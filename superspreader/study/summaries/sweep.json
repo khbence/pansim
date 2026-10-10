@@ -1,0 +1,342 @@
+{
+  "event_r0.05_f40": {
+    "replicates": 2,
+    "offspring": {
+      "n": 166382,
+      "mean": 1.263411907538075,
+      "variance": 2.195421630644898,
+      "k_mom": 1.7126534289664768,
+      "zero_fraction": 0.3721917034294575,
+      "top10": 0.35871917948327614,
+      "top20": 0.5626923680717761,
+      "p80": 0.3751307232753543
+    },
+    "mean_infections": 130276.0,
+    "mean_peak_prevalence": 42790.0,
+    "mean_peak_hospital": 2219.5,
+    "mean_quarantine_person_days": 0.0,
+    "mean_day14_prevalence": 3051.0,
+    "household_fraction": 0.3739944425680862,
+    "top10_venues_pooled": 0.6603288403082685,
+    "top20_venues_pooled": 0.749136448770303,
+    "mean_top10_venues": 0.6390139329822792,
+    "runs": [
+      {
+        "run": "rep01",
+        "infections": 130436,
+        "index_cases": 81316,
+        "offspring": {
+          "n": 81316,
+          "mean": 1.2804245167002803,
+          "variance": 2.228967346070018,
+          "k_mom": 1.7284269009302502,
+          "zero_fraction": 0.36859904569826357,
+          "top10": 0.3571874489766517,
+          "top20": 0.5616650179121966,
+          "p80": 0.3753258891239116
+        },
+        "household_fraction": 0.37228985862798614,
+        "top10_venues": 0.6410193504860622,
+        "generation1_r": 1.8591549295774648,
+        "peak_prevalence": 44058,
+        "peak_hospital": 2256,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 3069
+      },
+      {
+        "run": "rep02",
+        "infections": 130116,
+        "index_cases": 85066,
+        "offspring": {
+          "n": 85066,
+          "mean": 1.2471492723297204,
+          "variance": 2.162839401616881,
+          "k_mom": 1.698589138099995,
+          "zero_fraction": 0.37562598452965934,
+          "top10": 0.36022245263455555,
+          "top20": 0.5637194834574418,
+          "p80": 0.3749441610043966
+        },
+        "household_fraction": 0.37570321866642076,
+        "top10_venues": 0.6370085154784961,
+        "generation1_r": 1.681159420289855,
+        "peak_prevalence": 41522,
+        "peak_hospital": 2183,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 3033
+      }
+    ]
+  },
+  "event_r0.1_f30": {
+    "replicates": 2,
+    "offspring": {
+      "n": 247654,
+      "mean": 1.115027417283791,
+      "variance": 1.975652279454869,
+      "k_mom": 1.4446319133265022,
+      "zero_fraction": 0.42396650165149763,
+      "top10": 0.3810806797976396,
+      "top20": 0.5895756153559233,
+      "p80": 0.353028822470059
+    },
+    "mean_infections": 150150.5,
+    "mean_peak_prevalence": 52862.5,
+    "mean_peak_hospital": 2764.0,
+    "mean_quarantine_person_days": 0.0,
+    "mean_day14_prevalence": 4407.0,
+    "household_fraction": 0.34291261101361636,
+    "top10_venues_pooled": 0.6880429968598173,
+    "top20_venues_pooled": 0.7671769324777473,
+    "mean_top10_venues": 0.6717326163373605,
+    "runs": [
+      {
+        "run": "rep01",
+        "infections": 150676,
+        "index_cases": 124025,
+        "offspring": {
+          "n": 124025,
+          "mean": 1.1148881273936706,
+          "variance": 1.948283873063017,
+          "k_mom": 1.4914589414001183,
+          "zero_fraction": 0.4206893771417053,
+          "top10": 0.3783719282005294,
+          "top20": 0.5856270882450786,
+          "p80": 0.3563394476919976
+        },
+        "household_fraction": 0.344527330165388,
+        "top10_venues": 0.6708035785393826,
+        "generation1_r": 1.8333333333333333,
+        "peak_prevalence": 50150,
+        "peak_hospital": 2622,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 4652
+      },
+      {
+        "run": "rep02",
+        "infections": 149625,
+        "index_cases": 123629,
+        "offspring": {
+          "n": 123629,
+          "mean": 1.1151671533378091,
+          "variance": 2.003124292804027,
+          "k_mom": 1.4005155481165712,
+          "zero_fraction": 0.4272541232235155,
+          "top10": 0.3837974279559285,
+          "top20": 0.5935357989946832,
+          "p80": 0.3497156815957421
+        },
+        "household_fraction": 0.34128654970760236,
+        "top10_venues": 0.6726616541353383,
+        "generation1_r": 1.6923076923076923,
+        "peak_prevalence": 55575,
+        "peak_hospital": 2906,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 4162
+      }
+    ]
+  },
+  "venue_s2": {
+    "replicates": 2,
+    "offspring": {
+      "n": 322141,
+      "mean": 1.0128297857149509,
+      "variance": 1.7364995793618927,
+      "k_mom": 1.4175307354777669,
+      "zero_fraction": 0.46014633343784245,
+      "top10": 0.39466522002979093,
+      "top20": 0.6094417575412077,
+      "p80": 0.33729019280377226
+    },
+    "mean_infections": 165929.5,
+    "mean_peak_prevalence": 75146.5,
+    "mean_peak_hospital": 3719.5,
+    "mean_quarantine_person_days": 0.0,
+    "mean_day14_prevalence": 9657.0,
+    "household_fraction": 0.2844430917950093,
+    "top10_venues_pooled": 0.7412847022379987,
+    "top20_venues_pooled": 0.806375599275596,
+    "mean_top10_venues": 0.7259560253404085,
+    "runs": [
+      {
+        "run": "rep01",
+        "infections": 165794,
+        "index_cases": 161396,
+        "offspring": {
+          "n": 161396,
+          "mean": 1.0116297801680338,
+          "variance": 1.7390202354634567,
+          "k_mom": 1.406940116786633,
+          "zero_fraction": 0.4601786909217081,
+          "top10": 0.3954358650848579,
+          "top20": 0.6099048832323777,
+          "p80": 0.337499070608937
+        },
+        "household_fraction": 0.28422017684596546,
+        "top10_venues": 0.7261058904423562,
+        "generation1_r": 2.6294117647058823,
+        "peak_prevalence": 74963,
+        "peak_hospital": 3702,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 10928
+      },
+      {
+        "run": "rep02",
+        "infections": 166065,
+        "index_cases": 160745,
+        "offspring": {
+          "n": 160745,
+          "mean": 1.014034651155557,
+          "variance": 1.7339766201350786,
+          "k_mom": 1.428262718454493,
+          "zero_fraction": 0.46011384490963947,
+          "top10": 0.393893288998227,
+          "top20": 0.6089778590315397,
+          "p80": 0.3370804690659118
+        },
+        "household_fraction": 0.2846656429711258,
+        "top10_venues": 0.7258061602384609,
+        "generation1_r": 2.2907801418439715,
+        "peak_prevalence": 75330,
+        "peak_hospital": 3737,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 8386
+      }
+    ]
+  },
+  "venue_s4": {
+    "replicates": 2,
+    "offspring": {
+      "n": 348540,
+      "mean": 0.9983100935330235,
+      "variance": 2.1697428541571844,
+      "k_mom": 0.8507727258019445,
+      "zero_fraction": 0.5075457623228324,
+      "top10": 0.44296179634488764,
+      "top20": 0.6666542128058262,
+      "p80": 0.2927927927927928
+    },
+    "mean_infections": 174878.5,
+    "mean_peak_prevalence": 103970.5,
+    "mean_peak_hospital": 4685.0,
+    "mean_quarantine_person_days": 0.0,
+    "mean_day14_prevalence": 41703.0,
+    "household_fraction": 0.21438884711385334,
+    "top10_venues_pooled": 0.8044013415028148,
+    "top20_venues_pooled": 0.8518943151959789,
+    "mean_top10_venues": 0.7908975212374347,
+    "runs": [
+      {
+        "run": "rep01",
+        "infections": 174809,
+        "index_cases": 174232,
+        "offspring": {
+          "n": 174232,
+          "mean": 0.9984732999678589,
+          "variance": 2.1754773484499967,
+          "k_mom": 0.8470225162219022,
+          "zero_fraction": 0.5077942054272464,
+          "top10": 0.44331651012266765,
+          "top20": 0.6669694078153202,
+          "p80": 0.2925122824739428
+        },
+        "household_fraction": 0.21504613606850906,
+        "top10_venues": 0.790497056787694,
+        "generation1_r": 3.6823529411764704,
+        "peak_prevalence": 103934,
+        "peak_hospital": 4658,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 44420
+      },
+      {
+        "run": "rep02",
+        "infections": 174948,
+        "index_cases": 174308,
+        "offspring": {
+          "n": 174308,
+          "mean": 0.9981469582577965,
+          "variance": 2.1640232547603784,
+          "k_mom": 0.8545480796444729,
+          "zero_fraction": 0.507297427542052,
+          "top10": 0.44262436416932494,
+          "top20": 0.666350547460988,
+          "p80": 0.29307318080638867
+        },
+        "household_fraction": 0.21373208038960148,
+        "top10_venues": 0.7912979856871756,
+        "generation1_r": 3.1338028169014085,
+        "peak_prevalence": 104007,
+        "peak_hospital": 4712,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 38986
+      }
+    ]
+  },
+  "venue_s8": {
+    "replicates": 2,
+    "offspring": {
+      "n": 354602,
+      "mean": 0.9963818590983694,
+      "variance": 2.8389157332472927,
+      "k_mom": 0.5388106145939335,
+      "zero_fraction": 0.5568891320409924,
+      "top10": 0.501719409372267,
+      "top20": 0.730707943812815,
+      "p80": 0.24383675218977896
+    },
+    "mean_infections": 177803.5,
+    "mean_peak_prevalence": 129468.5,
+    "mean_peak_hospital": 5315.5,
+    "mean_quarantine_person_days": 0.0,
+    "mean_day14_prevalence": 126480.5,
+    "household_fraction": 0.1542461200145104,
+    "top10_venues_pooled": 0.8579696125216882,
+    "top20_venues_pooled": 0.8918075290981337,
+    "mean_top10_venues": 0.8443815748424167,
+    "runs": [
+      {
+        "run": "rep01",
+        "infections": 177793,
+        "index_cases": 177324,
+        "offspring": {
+          "n": 177324,
+          "mean": 0.9966445602400126,
+          "variance": 2.851976356780242,
+          "k_mom": 0.5353761420508648,
+          "zero_fraction": 0.5578771063138661,
+          "top10": 0.5027810942177006,
+          "top20": 0.7315437760639171,
+          "p80": 0.242798493153775
+        },
+        "household_fraction": 0.15424679261838206,
+        "top10_venues": 0.8443189551894619,
+        "generation1_r": 4.989304812834225,
+        "peak_prevalence": 129681,
+        "peak_hospital": 5362,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 127632
+      },
+      {
+        "run": "rep02",
+        "infections": 177814,
+        "index_cases": 177278,
+        "offspring": {
+          "n": 177278,
+          "mean": 0.9961190897911755,
+          "variance": 2.8258675966638442,
+          "k_mom": 0.5422894115335657,
+          "zero_fraction": 0.5559009014090863,
+          "top10": 0.5006568888385525,
+          "top20": 0.7298714536496971,
+          "p80": 0.2448752806326786
+        },
+        "household_fraction": 0.1542454474900739,
+        "top10_venues": 0.8444441944953716,
+        "generation1_r": 4.52542372881356,
+        "peak_prevalence": 129256,
+        "peak_hospital": 5269,
+        "quarantine_person_days": 0,
+        "day14_prevalence": 125329
+      }
+    ]
+  }
+}

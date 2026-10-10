@@ -85,6 +85,7 @@ public:
 
     unsigned disableTourists;
     unsigned diagnosticLevel;
+    unsigned shuffleSchedules = 0;
     unsigned quarantinePolicy = 0;
     unsigned quarantineLength = 0;
     unsigned timeStep;
@@ -96,7 +97,10 @@ public:
     static void addProgramParameters(cxxopts::Options& options) {
         options.add_options()("disableTourists",
             "enable or disable tourists",
-            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(1))));
+            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(1))))(
+            "shuffleSchedules",
+            "Randomly reassign venues within each location type, keeping occupancy counts",
+            cxxopts::value<unsigned>()->default_value(std::to_string(unsigned(0))));
     }
 
     void initializeArgs(const cxxopts::ParseResult& result);

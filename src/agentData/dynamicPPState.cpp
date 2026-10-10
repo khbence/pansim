@@ -45,19 +45,19 @@ HD ProgressionMatrix& DynamicPPState::getTransition(unsigned progressionID_p) {
 
 void HD DynamicPPState::reduceInfectiousness(float multiplier) {
 #ifdef __CUDA_ARCH__
-infectious = multiplier * detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
+infectious = multiplier * shedMultiplier * detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
 #else
-infectious = multiplier * detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
+    infectious = multiplier * shedMultiplier * detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
 #endif
 }
 
 void HD DynamicPPState::updateMeta() {
 #ifdef __CUDA_ARCH__
-    infectious = detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
+    infectious = shedMultiplier * detail::DynamicPPState::infectious[state] * detail::DynamicPPState::variantMultiplier[variant];
     for (int i = 0; i < MAX_STRAINS; i++)
         susceptible[i] = detail::DynamicPPState::susceptible[state];
 #else
-    infectious = detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
+    infectious = shedMultiplier * detail::DynamicPPState::h_infectious[state] * detail::DynamicPPState::h_variantMultiplier[variant];
     for (int i = 0; i < MAX_STRAINS; i++)
         susceptible[i] = detail::DynamicPPState::h_susceptible[state];
 #endif

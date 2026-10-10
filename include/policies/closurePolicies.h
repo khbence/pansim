@@ -359,6 +359,7 @@ public:
                     if (expose) {
                         thrust::device_vector<unsigned> exposed(realThis->agents->PPValues.size(), 0);
                         unsigned timestamp = realThis->getSimTime().getTimestamp();
+                        double sheddingShape = realThis->getSheddingShape();
                         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.begin(),
                                              realThis->agents->location.begin(),
                                              exposed.begin(),
@@ -367,7 +368,7 @@ public:
                                 realThis->agents->location.end(),
                                 exposed.end(),
                                 realThis->agents->agentStats.end())),
-                            [fraction, timestamp, variantIdx] HD(
+                            [fraction, timestamp, variantIdx, sheddingShape] HD(
                                 thrust::tuple<typename SimulationType::PPState_t&, unsigned&, unsigned&, AgentStats&> tup) {
                                 auto& state = thrust::get<0>(tup);
                                 auto& agentLocation = thrust::get<1>(tup);
@@ -376,6 +377,11 @@ public:
                                 if (state.getSusceptible(variantIdx) > 0.0f
                                     && RandomGenerator::randomUnit() < fraction * state.getSusceptible(variantIdx)) {
                                     state.gotInfected(variantIdx);
+                                    float shed = sheddingShape > 0.0
+                                        ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape))
+                                        : 1.0f;
+                                    state.setShedMultiplier(shed);
+                                    agentStat.shedMultiplier = shed;
                                     agentStat.infectedTimestamp = timestamp;
                                     agentStat.infectedLocation = agentLocation;
                                     agentStat.infectedCount++;

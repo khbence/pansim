@@ -2,6 +2,10 @@
 
 #include "simulation.h"
 #include "configTypes.h"
+#include "randomGenerator.h"
+
+#include <algorithm>
+#include <vector>
 
 template<typename PPState, typename AgentMeta, typename Location>
 std::map<unsigned, unsigned> AgentList<PPState, AgentMeta, Location>::initAgentTypes(const parser::AgentTypes& inputData) {
@@ -33,6 +37,11 @@ template<typename PPState, typename AgentMeta, typename Location>
 void AgentList<PPState, AgentMeta, Location>::initializeArgs(const cxxopts::ParseResult& result) {
     disableTourists = result["disableTourists"].as<unsigned>();
     diagnosticLevel = result["diags"].as<unsigned>();
+    try {
+        shuffleSchedules = result["shuffleSchedules"].as<unsigned>();
+    } catch (std::exception&) {
+        shuffleSchedules = 0;
+    }
     try {
         quarantinePolicy = result["quarantinePolicy"].as<unsigned>();
         quarantineLength = result["quarantineLength"].as<unsigned>();
@@ -168,6 +177,30 @@ void AgentList<PPState, AgentMeta, Location>::initAgents(
             location_h.push_back(0);
         } else {
             location_h.push_back(locs[std::distance(ts.begin(), itHome)]);
+        }
+    }
+
+    if (shuffleSchedules) {
+        std::map<unsigned, std::vector<unsigned>> positionsByType;
+        for (unsigned i = 0; i < possibleTypes_h.size(); ++i) {
+            positionsByType[possibleTypes_h[i]].push_back(i);
+        }
+        for (auto& entry : positionsByType) {
+            std::vector<unsigned>& positions = entry.second;
+            for (unsigned i = positions.size(); i > 1; --i) {
+                unsigned j = RandomGenerator::randomUnsigned(i);
+                std::swap(possibleLocations_h[positions[i - 1]], possibleLocations_h[positions[j]]);
+            }
+        }
+        for (unsigned agent = 0; agent < location_h.size(); ++agent) {
+            unsigned begin = static_cast<unsigned>(locationOffset_h[agent]);
+            unsigned end = static_cast<unsigned>(locationOffset_h[agent + 1]);
+            for (unsigned j = begin; j < end; ++j) {
+                if (possibleTypes_h[j] == homeType) {
+                    location_h[agent] = possibleLocations_h[j];
+                    break;
+                }
+            }
         }
     }
 

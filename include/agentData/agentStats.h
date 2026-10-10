@@ -7,6 +7,8 @@ class AgentStats {
 public:
     unsigned infectedTimestamp = std::numeric_limits<unsigned>::max();
     unsigned infectedLocation = 0;
+    unsigned infectorId = std::numeric_limits<unsigned>::max();
+    float shedMultiplier = 1.0f;
     unsigned worstStateTimestamp = 0;
     unsigned worstStateEndTimestamp = 0;
     unsigned diagnosedTimestamp = 0;

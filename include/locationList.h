@@ -47,6 +47,7 @@ public:
     thrust::device_vector<TypeOfLocation> locType;
     thrust::device_vector<PositionType> position;
     thrust::device_vector<float> infectiousness;
+    thrust::device_vector<float> eventBoost;
     thrust::device_vector<unsigned> areas;
     thrust::device_vector<unsigned> capacity;
     thrust::device_vector<bool> states;// Closed/open or ON/OFF
@@ -70,6 +71,12 @@ public:
     std::map<unsigned, std::string> generalLocationTypes;
 
     unsigned tracked;
+    unsigned venueProfile = 0;
+    double venueStrength = 1.0;
+    double communityScale = 1.0;
+    double eventRate = 0.0;
+    double eventFactor = 20.0;
+    int lastEventDay = -1;
 
     [[nodiscard]] static LocationsList* getInstance() {
         static LocationsList instance;
@@ -85,6 +92,8 @@ public:
         const parser::LocationTypes& locTypes);
 
     void initialize();
+    void applyVenueAmplification();
+    void updateDailyEvents(unsigned day);
 
     // TODO optimise randoms for performance
     static void infectAgents(thrust::device_vector<float>& infectionRatioAtLocations,
@@ -93,7 +102,8 @@ public:
         thrust::device_vector<unsigned>& newlyInfectedAgents,
         bool flagInfectionsAtLocation,
         Timehandler& simTime,
-        uint8_t variant) {
+        uint8_t variant,
+        double sheddingShape) {
         //        PROFILE_FUNCTION();
         auto& ppstates = SimulationType::AgentListType::getInstance()->PPValues;
         auto& agentStats = SimulationType::AgentListType::getInstance()->agentStats;
@@ -121,7 +131,7 @@ public:
                 thrust::make_counting_iterator<unsigned>(0) + ppstates.size(),
                 thrust::make_permutation_iterator(infectionAtLocation.begin(), agentLocations.end()),
                 newlyInfectedAgents.begin() + ppstates.size())),
-            [timestamp, tracked2, flagInfectionsAtLocation, variant] HD(thrust::tuple<typename SimulationType::PPState_t&,
+            [timestamp, tracked2, flagInfectionsAtLocation, variant, sheddingShape] HD(thrust::tuple<typename SimulationType::PPState_t&,
                 float&,
                 TypeOfLocation&,
                 AgentStats&,
@@ -140,6 +150,11 @@ public:
                 if (ppstate.getSusceptible(variant) > 0.0f
                     && RandomGenerator::randomUnit() < infectionRatio * ppstate.getSusceptible(variant)) {
                     ppstate.gotInfected(variant);
+                    float shed = sheddingShape > 0.0
+                        ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape))
+                        : 1.0f;
+                    ppstate.setShedMultiplier(shed);
+                    agentStat.shedMultiplier = shed;
                     agentStat.infectedTimestamp = timestamp;
                     agentStat.infectedCount++;
                     agentStat.infectedLocation = agentLocation;

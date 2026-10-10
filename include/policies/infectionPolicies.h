@@ -2,7 +2,10 @@
 #include "locationList.h"
 #include "util.h"
 #include "timeHandler.h"
+#include "randomGenerator.h"
+#include <fstream>
 #include <iostream>
+#include <limits>
 #include <string>
 
 template<class SimulationType>
@@ -15,6 +18,9 @@ private:
     int d_peak_offset;
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
+    double sheddingShape = 0.0;
+    std::string infectionTracePath = "";
+    bool initialSheddingDone = false;
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
     thrust::device_vector<bool> infectionFlagAtLocations;
     thrust::device_vector<unsigned> newlyInfectedAgents;
@@ -105,10 +111,34 @@ public:
             cxxopts::value<double>()->default_value("0.5"))
             ("c0",
             "seasonality c0 value ",
-            cxxopts::value<double>()->default_value("3.08"));
+            cxxopts::value<double>()->default_value("3.08"))
+            ("sheddingShape",
+            "Gamma shape of a per-infection shedding multiplier with mean 1. <=0 disables it",
+            cxxopts::value<double>()->default_value("0"))
+            ("infectionTrace",
+            "Write one row per infection (agent, infector, place, time) to this TSV path",
+            cxxopts::value<std::string>()->default_value(""))
+            ("venueProfile",
+            "Location-type transmission profile: off, covid, or caregiving",
+            cxxopts::value<std::string>()->default_value("off"))
+            ("venueStrength",
+            "Scale of the venue profile, 0 = flat, 1 = full profile",
+            cxxopts::value<double>()->default_value("1"))
+            ("communityScale",
+            "Multiplier on non-home, non-hospital, non-nursing location infectiousness",
+            cxxopts::value<double>()->default_value("1"))
+            ("eventRate",
+            "Daily probability that a social venue draws an amplification event",
+            cxxopts::value<double>()->default_value("0"))
+            ("eventFactor",
+            "Infectiousness multiplier while a social-venue event is active",
+            cxxopts::value<double>()->default_value("20"));
     }
 
+    [[nodiscard]] double getSheddingShape() const { return sheddingShape; }
+
     void finalize() {
+        writeInfectionTrace();
         if (flagInfectionAtLocations)
             dumpstore->write(dumpDirectory);
         delete dumpstore;
@@ -124,8 +154,10 @@ protected:
         c0_offset = result["c0"].as<double>();
         trunc = result["trunc"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
+        sheddingShape = result["sheddingShape"].as<double>();
+        infectionTracePath = result["infectionTrace"].as<std::string>();
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
-        if (dumpToFile || flagInfectionAtLocations) Util::needAgentsSortedByLocation = 1;
+        if (dumpToFile || flagInfectionAtLocations || !infectionTracePath.empty()) Util::needAgentsSortedByLocation = 1;
     }
 
 public:
@@ -478,9 +510,106 @@ public:
     }
 
 
+    void ensureInitialShedding() {
+        if (initialSheddingDone) return;
+        initialSheddingDone = true;
+        auto realThis = static_cast<SimulationType*>(this);
+        double shape = sheddingShape;
+        const unsigned unknownTime = 0xffffffffu;
+        thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.begin(),
+                             realThis->agents->agentStats.begin(),
+                             realThis->agents->location.begin())),
+            thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.end(),
+                realThis->agents->agentStats.end(),
+                realThis->agents->location.end())),
+            [shape, unknownTime] HD(thrust::tuple<typename SimulationType::PPState_t&, AgentStats&, unsigned&> tup) {
+                auto& state = thrust::get<0>(tup);
+                auto& stat = thrust::get<1>(tup);
+                unsigned place = thrust::get<2>(tup);
+                if (!state.isInfected()) return;
+                if (stat.infectedTimestamp == unknownTime) {
+                    stat.infectedTimestamp = 0;
+                    stat.infectedLocation = place;
+                }
+                if (!(shape > 0.0)) return;
+                float multiplier = static_cast<float>(RandomGenerator::gammaMeanOne(shape));
+                state.setShedMultiplier(multiplier);
+                stat.shedMultiplier = multiplier;
+            });
+    }
+
+    void attributeInfectors(uint8_t variant) {
+        auto realThis = static_cast<SimulationType*>(this);
+        unsigned* offsets = thrust::raw_pointer_cast(realThis->locs->locationListOffsets.data());
+        unsigned* people = thrust::raw_pointer_cast(realThis->locs->locationAgentList.data());
+        typename SimulationType::PPState_t* states = thrust::raw_pointer_cast(realThis->agents->PPValues.data());
+        AgentStats* stats = thrust::raw_pointer_cast(realThis->agents->agentStats.data());
+        unsigned* places = thrust::raw_pointer_cast(realThis->agents->location.data());
+        unsigned* newly = thrust::raw_pointer_cast(newlyInfectedAgents.data());
+        unsigned nAgents = static_cast<unsigned>(realThis->agents->PPValues.size());
+        const unsigned unknown = 0xffffffffu;
+        thrust::for_each(thrust::make_counting_iterator<unsigned>(0),
+            thrust::make_counting_iterator<unsigned>(nAgents),
+            [=] HD(unsigned agent) {
+                if (newly[agent] == 0u) return;
+                unsigned place = places[agent];
+                float total = 0.0f;
+                for (unsigned j = offsets[place]; j < offsets[place + 1]; ++j) {
+                    unsigned other = people[j];
+                    if (other == agent) continue;
+                    total += states[other].isInfectious(variant);
+                }
+                unsigned infector = unknown;
+                if (total > 0.0f) {
+                    float draw = static_cast<float>(RandomGenerator::randomUnit()) * total;
+                    float cumulative = 0.0f;
+                    for (unsigned j = offsets[place]; j < offsets[place + 1]; ++j) {
+                        unsigned other = people[j];
+                        if (other == agent) continue;
+                        cumulative += states[other].isInfectious(variant);
+                        if (cumulative >= draw) {
+                            infector = other;
+                            break;
+                        }
+                    }
+                }
+                stats[agent].infectorId = infector;
+                stats[agent].shedMultiplier = states[agent].getShedMultiplier();
+            });
+    }
+
+    void writeInfectionTrace() {
+        if (infectionTracePath.empty()) return;
+        auto realThis = static_cast<SimulationType*>(this);
+        thrust::host_vector<AgentStats> stats = realThis->agents->agentStats;
+        thrust::host_vector<typename SimulationType::TypeOfLocation_t> types = realThis->locs->locType;
+        std::ofstream out(infectionTracePath.c_str());
+        if (!out) {
+            std::cerr << "Could not write infection trace " << infectionTracePath << "\n";
+            return;
+        }
+        out << "agent\tinfector\tlocation\tlocType\ttimestamp\tvariant\tshed\tdiagnosed\t"
+               "hospitalized\tinfectedCount\tworstState\n";
+        const unsigned unknownTime = std::numeric_limits<unsigned>::max();
+        for (unsigned agent = 0; agent < stats.size(); ++agent) {
+            const AgentStats& stat = stats[agent];
+            if (stat.infectedCount == 0 && stat.infectedTimestamp == unknownTime) continue;
+            unsigned place = stat.infectedLocation;
+            unsigned locType = place < types.size() ? types[place] : 0u;
+            out << agent << '\t' << stat.infectorId << '\t' << place << '\t' << locType << '\t'
+                << stat.infectedTimestamp << '\t' << stat.variant << '\t' << stat.shedMultiplier << '\t'
+                << stat.diagnosedTimestamp << '\t' << stat.hospitalizedTimestamp << '\t'
+                << static_cast<unsigned>(stat.infectedCount) << '\t' << static_cast<int>(stat.worstState) << '\n';
+        }
+    }
+
     void infectionsAtLocations(Timehandler& simTime, unsigned timeStep, uint8_t variant) {
         PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
+        ensureInitialShedding();
+        if (realThis->locs->eventRate > 0.0) {
+            realThis->locs->updateDailyEvents(simTime.getTimestamp() / simTime.getStepsPerDay());
+        }
         thrust::device_vector<unsigned>& locationListOffsets =
             realThis->locs->locationListOffsets;// offsets into locationAgentList and locationIdsOfAgents
         thrust::device_vector<unsigned>& locationAgentList = realThis->locs->locationAgentList;
@@ -494,7 +623,8 @@ public:
         thrust::fill(infectionRatios.begin(), infectionRatios.end(), 0.0);
         thrust::fill(fullInfectedCounts.begin(), fullInfectedCounts.end(), 0.0f);
 
-        if (flagInfectionAtLocations) {
+        bool recordNewInfections = flagInfectionAtLocations || !infectionTracePath.empty();
+        if (recordNewInfections) {
             if (infectionFlagAtLocations.size() == 0) infectionFlagAtLocations.resize(infectiousness.size());
             thrust::fill(infectionFlagAtLocations.begin(), infectionFlagAtLocations.end(), false);
             if (newlyInfectedAgents.size() == 0) newlyInfectedAgents.resize(ppstates.size());
@@ -520,20 +650,25 @@ public:
         float tmpK = this->k;
         float seasonality = seasonalityMultiplier(simTime);
         //if (simTime.getStepsUntilMidnight()==1) printf("%g\n", seasonality);
+        float* eventBoostPtr = thrust::raw_pointer_cast(realThis->locs->eventBoost.data());
+        bool hasEventBoost = realThis->locs->eventBoost.size() == infectiousness.size();
         thrust::transform(thrust::make_zip_iterator(thrust::make_tuple(fullInfectedCounts.begin(),
                               locationListOffsets.begin(),
                               locationListOffsets.begin() + 1,
-                              infectiousness.begin())),
+                              infectiousness.begin(),
+                              thrust::make_counting_iterator<unsigned>(0))),
             thrust::make_zip_iterator(thrust::make_tuple(
-                fullInfectedCounts.end(), locationListOffsets.end() - 1, locationListOffsets.end(), infectiousness.end())),
+                fullInfectedCounts.end(), locationListOffsets.end() - 1, locationListOffsets.end(), infectiousness.end(),
+                thrust::make_counting_iterator<unsigned>(0) + fullInfectedCounts.size())),
             infectionRatios.begin(),
-            [=] HD(thrust::tuple<float&, unsigned&, unsigned&, float&> tuple) {
+            [=] HD(thrust::tuple<float&, unsigned&, unsigned&, float&, unsigned> tuple) {
                 float numInfectedAgentsPresent = thrust::get<0>(tuple);
                 unsigned offset0 = thrust::get<1>(tuple);
                 unsigned offset1 = thrust::get<2>(tuple);
                 unsigned num_agents = offset1 - offset0;
-                if (numInfectedAgentsPresent == 0.0f) { return 0.0f; }
+                if (numInfectedAgentsPresent == 0.0f || num_agents == 0) { return 0.0f; }
                 float densityOfInfected = numInfectedAgentsPresent / num_agents;
+                float boost = hasEventBoost ? eventBoostPtr[thrust::get<4>(tuple)] : 1.0f;
                 /*float y =
                     1.0
                     / (1.0
@@ -542,7 +677,7 @@ public:
                 y = parTMP.a * y + parTMP.b;
                 y *= thrust::get<3>(tuple);// Weighted by infectiousness
                 return y / (60.0 * 24.0 / static_cast<float>(timeStep));*/
-                return 1.0f - expf(-tmpK * densityOfInfected * thrust::get<3>(tuple) * seasonality * static_cast<float>(timeStep));
+                return 1.0f - expf(-tmpK * densityOfInfected * thrust::get<3>(tuple) * boost * seasonality * static_cast<float>(timeStep));
             });
 
         //
@@ -553,9 +688,11 @@ public:
             agentLocations,
             infectionFlagAtLocations,
             newlyInfectedAgents,
-            flagInfectionAtLocations,
+            recordNewInfections,
             simTime,
-            variant);
+            variant,
+            sheddingShape);
+        if (!infectionTracePath.empty()) attributeInfectors(variant);
         if (flagInfectionAtLocations) {
             thrust::device_vector<unsigned> fullInfectedCounts2(fullInfectedCounts.size(), 0);
             Util::reduce_by_location(locationListOffsets,

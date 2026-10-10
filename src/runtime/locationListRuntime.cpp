@@ -19,6 +19,58 @@ void LocationsList<SimulationType>::initializeArgs(const cxxopts::ParseResult& r
     } catch (std::exception&) {
         tracked = std::numeric_limits<unsigned>::max();
     }
+    try {
+        std::string profile = result["venueProfile"].as<std::string>();
+        if (profile == "covid") venueProfile = 1;
+        else if (profile == "caregiving") venueProfile = 2;
+        else venueProfile = 0;
+        venueStrength = result["venueStrength"].as<double>();
+        communityScale = result["communityScale"].as<double>();
+        eventRate = result["eventRate"].as<double>();
+        eventFactor = result["eventFactor"].as<double>();
+    } catch (std::exception&) {
+        venueProfile = 0;
+        venueStrength = 1.0;
+        communityScale = 1.0;
+        eventRate = 0.0;
+        eventFactor = 20.0;
+    }
+}
+
+namespace {
+float covidVenueFactor(unsigned type) {
+    switch (type) {
+        case 2: return 1.0f;
+        case 3: return 1.4f;
+        case 33: return 1.6f;
+        case 4:
+        case 13: return 1.1f;
+        case 5: return 4.0f;
+        case 6: return 3.0f;
+        case 7: return 0.8f;
+        case 8: return 2.5f;
+        case 9: return 3.0f;
+        case 10: return 0.3f;
+        case 11: return 2.0f;
+        case 12: return 1.8f;
+        case 14: return 1.3f;
+        case 22: return 2.2f;
+        case 44: return 1.5f;
+        default: return 1.0f;
+    }
+}
+
+float caregivingVenueFactor(unsigned type) {
+    switch (type) {
+        case 2: return 2.5f;
+        case 9: return 3.0f;
+        case 11: return 2.0f;
+        case 12: return 4.0f;
+        case 14: return 2.0f;
+        case 22: return 3.0f;
+        default: return 0.35f;
+    }
+}
 }
 
 template<typename SimulationType>
@@ -144,6 +196,49 @@ std::pair<unsigned, std::map<std::string, unsigned>> LocationsList<SimulationTyp
     thrust::fill(closedUntil.begin(), closedUntil.end(), 0);
 
     return std::make_pair(locType.size() - 1, IDMapping);
+}
+
+template<typename SimulationType>
+void LocationsList<SimulationType>::applyVenueAmplification() {
+    if (venueProfile != 0 || communityScale != 1.0) {
+        thrust::host_vector<float> infectiousnessHost = infectiousness;
+        thrust::host_vector<TypeOfLocation> typesHost = locType;
+        for (unsigned i = 0; i < infectiousnessHost.size(); ++i) {
+            if (!(infectiousnessHost[i] > 0.0f)) continue;
+            unsigned type = typesHost[i];
+            float base = 1.0f;
+            if (venueProfile == 1) base = covidVenueFactor(type);
+            else if (venueProfile == 2) base = caregivingVenueFactor(type);
+            float factor = 1.0f + static_cast<float>(venueStrength) * (base - 1.0f);
+            bool community = !(type == 1 || type == 2 || type == 12 || type == 22);
+            if (community) factor *= static_cast<float>(communityScale);
+            if (factor < 0.0f) factor = 0.0f;
+            infectiousnessHost[i] *= factor;
+        }
+        infectiousness = infectiousnessHost;
+    }
+    eventBoost.resize(infectiousness.size());
+    thrust::fill(eventBoost.begin(), eventBoost.end(), 1.0f);
+    lastEventDay = -1;
+}
+
+template<typename SimulationType>
+void LocationsList<SimulationType>::updateDailyEvents(unsigned day) {
+    if (!(eventRate > 0.0) || lastEventDay == static_cast<int>(day)) return;
+    lastEventDay = static_cast<int>(day);
+    TypeOfLocation* types = thrust::raw_pointer_cast(locType.data());
+    float* boost = thrust::raw_pointer_cast(eventBoost.data());
+    double rate = eventRate;
+    double factor = eventFactor;
+    unsigned n = static_cast<unsigned>(locType.size());
+    thrust::for_each(thrust::make_counting_iterator<unsigned>(0),
+        thrust::make_counting_iterator<unsigned>(n),
+        [types, boost, rate, factor] HD(unsigned i) {
+            unsigned type = types[i];
+            bool social = type == 5 || type == 6 || type == 8 || type == 9;
+            if (social && RandomGenerator::randomUnit() < rate) boost[i] = static_cast<float>(factor);
+            else boost[i] = 1.0f;
+        });
 }
 
 template<typename SimulationType>

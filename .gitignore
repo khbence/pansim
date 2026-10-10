@@ -13,6 +13,13 @@ articleTest/*
 article_*
 matlab/mexPanSim.mexa64
 
+# ACT-049 raw simulator output. Tables are in superspreader/study/summaries.
+superspreader/study/results/**/trace.tsv
+superspreader/study/results/**/stdout.txt
+superspreader/study/results/**/stdout.partial
+superspreader/study/results/**/stdout.failed
+superspreader/study/results/**/command.json
+
 
 # Polcz:
 thrust

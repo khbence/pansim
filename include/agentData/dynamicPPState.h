@@ -13,6 +13,7 @@ using ProgressionMatrix = MultiBadMatrix;
 
 class DynamicPPState {
     float infectious = 0.0;
+    float shedMultiplier = 1.0f;
     unsigned progressionID = 0;
 
     char state = 0;// a number
@@ -39,6 +40,11 @@ public:
     [[nodiscard]] char HD getStateIdx() const { return state; }
     [[nodiscard]] states::WBStates HD getWBState() const;
     void HD setInfectious(float inf)  { infectious = inf; }
+    void HD setShedMultiplier(float multiplier) {
+        shedMultiplier = multiplier;
+        updateMeta();
+    }
+    [[nodiscard]] float HD getShedMultiplier() const { return shedMultiplier; }
     void HD reduceInfectiousness(float multiplier);
     [[nodiscard]] float HD isInfectious() const { return infectious; }
     [[nodiscard]] float HD isInfectious(uint8_t variant) const { return (variant == this->variant) ? infectious : 0.0f; }

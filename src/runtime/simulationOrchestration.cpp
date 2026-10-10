@@ -476,6 +476,7 @@ Simulation<PositionType,
         auto cemeteryID = tmp.first;
         auto locationMapping = tmp.second;
         locs->initializeArgs(result);
+        locs->applyVenueAmplification();
         MovementPolicy<Simulation>::init(data.acquireLocationTypes(), cemeteryID);
         this->hospitalType = data.acquireLocationTypes().hospital;
         TestingPolicy<Simulation>::init(data.acquireLocationTypes());

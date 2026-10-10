@@ -159,6 +159,7 @@ public:
     void toggleQuarantineImmune(bool enable) { MovementPolicy<Simulation>::quarantineImmuneActive = enable; }
     void toggleLockdownNonvacc(bool enable) { MovementPolicy<Simulation>::lockdownNonvaccActive = enable; }
     void quarantinePolicy(unsigned newQP) { MovementPolicy<Simulation>::quarantinePolicy = newQP; }
+    double getSheddingShape() const { return InfectionPolicy<Simulation>::getSheddingShape(); }
     void updateTestingProbs(const std::string &probs) {TestingPolicy<Simulation>::updateTestingProbs(probs);};
     Timehandler& getSimTime() { return simTime; }
 };
