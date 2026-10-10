@@ -19,6 +19,7 @@ private:
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
     double sheddingShape = 0.0;
+    double densityExponent = 1.0;
     std::string infectionTracePath = "";
     bool initialSheddingDone = false;
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
@@ -115,6 +116,9 @@ public:
             ("sheddingShape",
             "Gamma shape of a per-infection shedding multiplier with mean 1. <=0 disables it",
             cxxopts::value<double>()->default_value("0"))
+            ("densityExponent",
+            "Infection density is the summed infectiousness divided by occupancy to this power. 1 is the original kernel",
+            cxxopts::value<double>()->default_value("1"))
             ("infectionTrace",
             "Write one row per infection (agent, infector, place, time) to this TSV path",
             cxxopts::value<std::string>()->default_value(""))
@@ -155,6 +159,7 @@ protected:
         trunc = result["trunc"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
         sheddingShape = result["sheddingShape"].as<double>();
+        densityExponent = result["densityExponent"].as<double>();
         infectionTracePath = result["infectionTrace"].as<std::string>();
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
         if (dumpToFile || flagInfectionAtLocations || !infectionTracePath.empty()) Util::needAgentsSortedByLocation = 1;
@@ -575,6 +580,8 @@ public:
                 }
                 stats[agent].infectorId = infector;
                 stats[agent].shedMultiplier = states[agent].getShedMultiplier();
+                stats[agent].infectedOccupancy = offsets[place + 1] - offsets[place];
+                stats[agent].infectiousPresent = total;
             });
     }
 
@@ -589,7 +596,7 @@ public:
             return;
         }
         out << "agent\tinfector\tlocation\tlocType\ttimestamp\tvariant\tshed\tdiagnosed\t"
-               "hospitalized\tinfectedCount\tworstState\n";
+               "hospitalized\tinfectedCount\tworstState\toccupancy\tinfectiousPresent\n";
         const unsigned unknownTime = std::numeric_limits<unsigned>::max();
         for (unsigned agent = 0; agent < stats.size(); ++agent) {
             const AgentStats& stat = stats[agent];
@@ -599,7 +606,8 @@ public:
             out << agent << '\t' << stat.infectorId << '\t' << place << '\t' << locType << '\t'
                 << stat.infectedTimestamp << '\t' << stat.variant << '\t' << stat.shedMultiplier << '\t'
                 << stat.diagnosedTimestamp << '\t' << stat.hospitalizedTimestamp << '\t'
-                << static_cast<unsigned>(stat.infectedCount) << '\t' << static_cast<int>(stat.worstState) << '\n';
+                << static_cast<unsigned>(stat.infectedCount) << '\t' << static_cast<int>(stat.worstState) << '\t'
+                << stat.infectedOccupancy << '\t' << stat.infectiousPresent << '\n';
         }
     }
 
@@ -648,6 +656,7 @@ public:
         // Step 2 - calculate infection ratios, based on density of infected people
         //
         float tmpK = this->k;
+        float densityPower = static_cast<float>(densityExponent);
         float seasonality = seasonalityMultiplier(simTime);
         //if (simTime.getStepsUntilMidnight()==1) printf("%g\n", seasonality);
         float* eventBoostPtr = thrust::raw_pointer_cast(realThis->locs->eventBoost.data());
@@ -667,7 +676,9 @@ public:
                 unsigned offset1 = thrust::get<2>(tuple);
                 unsigned num_agents = offset1 - offset0;
                 if (numInfectedAgentsPresent == 0.0f || num_agents == 0) { return 0.0f; }
-                float densityOfInfected = numInfectedAgentsPresent / num_agents;
+                float densityOfInfected = densityPower == 1.0f
+                    ? numInfectedAgentsPresent / num_agents
+                    : numInfectedAgentsPresent / powf(static_cast<float>(num_agents), densityPower);
                 float boost = hasEventBoost ? eventBoostPtr[thrust::get<4>(tuple)] : 1.0f;
                 /*float y =
                     1.0

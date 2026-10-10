@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "name": "ExposeToMutation",
+      "conditionType": "afterDays",
+      "threshold": 0,
+      "threshold2": 0,
+      "openAfter": 1,
+      "closeAfter": -1,
+      "parameter": "0.0054",
+      "locationTypesToClose": []
+    }
+  ]
+}

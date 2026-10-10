@@ -1,0 +1,252 @@
+{
+  "3": [
+    {
+      "size_range": [
+        16,
+        249
+      ],
+      "venues": 36,
+      "mean_size": 146.77777777777777,
+      "infections_per_assigned_agent": 0.00553557910673732,
+      "infections_per_venue": 0.8125
+    },
+    {
+      "size_range": [
+        250,
+        410
+      ],
+      "venues": 36,
+      "mean_size": 332.94444444444446,
+      "infections_per_assigned_agent": 0.006236442516268981,
+      "infections_per_venue": 2.076388888888889
+    },
+    {
+      "size_range": [
+        411,
+        685
+      ],
+      "venues": 36,
+      "mean_size": 525.0833333333334,
+      "infections_per_assigned_agent": 0.005395968893826377,
+      "infections_per_venue": 2.8333333333333335
+    },
+    {
+      "size_range": [
+        686,
+        1184
+      ],
+      "venues": 36,
+      "mean_size": 935.3888888888889,
+      "infections_per_assigned_agent": 0.003682366217259607,
+      "infections_per_venue": 3.4444444444444446
+    },
+    {
+      "size_range": [
+        1185,
+        29138
+      ],
+      "venues": 37,
+      "mean_size": 2311.4864864864867,
+      "infections_per_assigned_agent": 0.002110494007600117,
+      "infections_per_venue": 4.878378378378378
+    }
+  ],
+  "4": [
+    {
+      "size_range": [
+        3,
+        9
+      ],
+      "venues": 16,
+      "mean_size": 3.0,
+      "infections_per_assigned_agent": 0.0,
+      "infections_per_venue": 0.0
+    },
+    {
+      "size_range": [
+        10,
+        19
+      ],
+      "venues": 54,
+      "mean_size": 10.0,
+      "infections_per_assigned_agent": 0.008333333333333333,
+      "infections_per_venue": 0.08333333333333333
+    },
+    {
+      "size_range": [
+        20,
+        99
+      ],
+      "venues": 19,
+      "mean_size": 43.68421052631579,
+      "infections_per_assigned_agent": 0.015963855421686747,
+      "infections_per_venue": 0.6973684210526315
+    },
+    {
+      "size_range": [
+        100,
+        196
+      ],
+      "venues": 30,
+      "mean_size": 138.56666666666666,
+      "infections_per_assigned_agent": 0.011306230454654799,
+      "infections_per_venue": 1.5666666666666667
+    }
+  ],
+  "7": [
+    {
+      "size_range": [
+        1,
+        9
+      ],
+      "venues": 163,
+      "mean_size": 4.54601226993865,
+      "infections_per_assigned_agent": 0.009109311740890687,
+      "infections_per_venue": 0.04141104294478527
+    },
+    {
+      "size_range": [
+        10,
+        92
+      ],
+      "venues": 266,
+      "mean_size": 24.834586466165412,
+      "infections_per_assigned_agent": 0.004768392370572207,
+      "infections_per_venue": 0.11842105263157894
+    },
+    {
+      "size_range": [
+        93,
+        295
+      ],
+      "venues": 214,
+      "mean_size": 181.01869158878506,
+      "infections_per_assigned_agent": 0.0023491145645103,
+      "infections_per_venue": 0.4252336448598131
+    },
+    {
+      "size_range": [
+        296,
+        657
+      ],
+      "venues": 216,
+      "mean_size": 456.2083333333333,
+      "infections_per_assigned_agent": 0.001268507524786637,
+      "infections_per_venue": 0.5787037037037037
+    },
+    {
+      "size_range": [
+        658,
+        27102
+      ],
+      "venues": 215,
+      "mean_size": 1371.8558139534885,
+      "infections_per_assigned_agent": 0.0008247188496994396,
+      "infections_per_venue": 1.1313953488372093
+    }
+  ],
+  "8": [
+    {
+      "size_range": [
+        2,
+        19
+      ],
+      "venues": 202,
+      "mean_size": 8.900990099009901,
+      "infections_per_assigned_agent": 0.009454949944382647,
+      "infections_per_venue": 0.08415841584158416
+    },
+    {
+      "size_range": [
+        20,
+        70
+      ],
+      "venues": 310,
+      "mean_size": 30.519354838709678,
+      "infections_per_assigned_agent": 0.007081703836803721,
+      "infections_per_venue": 0.2161290322580645
+    },
+    {
+      "size_range": [
+        71,
+        206
+      ],
+      "venues": 256,
+      "mean_size": 134.46484375,
+      "infections_per_assigned_agent": 0.0017793335851029836,
+      "infections_per_venue": 0.2392578125
+    },
+    {
+      "size_range": [
+        207,
+        468
+      ],
+      "venues": 255,
+      "mean_size": 313.29411764705884,
+      "infections_per_assigned_agent": 0.0014895481286769307,
+      "infections_per_venue": 0.4666666666666667
+    },
+    {
+      "size_range": [
+        469,
+        29365
+      ],
+      "venues": 257,
+      "mean_size": 957.6653696498055,
+      "infections_per_assigned_agent": 0.0011498456037705184,
+      "infections_per_venue": 1.1011673151750974
+    }
+  ],
+  "33": [
+    {
+      "size_range": [
+        1,
+        24
+      ],
+      "venues": 133,
+      "mean_size": 10.902255639097744,
+      "infections_per_assigned_agent": 0.01396551724137931,
+      "infections_per_venue": 0.15225563909774437
+    },
+    {
+      "size_range": [
+        25,
+        26
+      ],
+      "venues": 155,
+      "mean_size": 25.574193548387097,
+      "infections_per_assigned_agent": 0.01160443995963673,
+      "infections_per_venue": 0.2967741935483871
+    },
+    {
+      "size_range": [
+        27,
+        28
+      ],
+      "venues": 150,
+      "mean_size": 27.453333333333333,
+      "infections_per_assigned_agent": 0.012020398251578437,
+      "infections_per_venue": 0.33
+    },
+    {
+      "size_range": [
+        29,
+        33
+      ],
+      "venues": 161,
+      "mean_size": 30.795031055900623,
+      "infections_per_assigned_agent": 0.01381605486083098,
+      "infections_per_venue": 0.4254658385093168
+    },
+    {
+      "size_range": [
+        34,
+        49
+      ],
+      "venues": 173,
+      "mean_size": 39.65895953757225,
+      "infections_per_assigned_agent": 0.014975951027547004,
+      "infections_per_venue": 0.5939306358381503
+    }
+  ]
+}

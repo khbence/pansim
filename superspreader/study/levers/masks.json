@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "name": "Masks",
+      "conditionType": "afterDays",
+      "threshold": 21,
+      "threshold2": 21,
+      "openAfter": 400,
+      "closeAfter": -1,
+      "parameter": "0.6",
+      "locationTypesToClose": []
+    }
+  ]
+}

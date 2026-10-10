@@ -1,5 +1,7 @@
 # ACT-049 results: where PanSim overdispersion comes from
 
+> **Corrections (10 October 2026).** Four conclusions below are superseded by `09_phase2_results.md`: (1) the occupancy attribution of the baseline tail in Experiment 1; (2) the sub-1 k at venue strength 4 and 8, which was depletion (early-window k is 3.1 and 1.1); (3) Experiment 2, which was not matched on early growth and should read "not tested"; (4) Experiment 4, where heterogeneity does raise the zero share once mean offspring is matched. See section 8 of 09.
+
 The question is the one in `04_pansim_experiments.md`: how much of the simulated offspring distribution is biological shedding, how much is who meets whom, and how much is the place, and does that split change what an intervention does? The window is the first two Hungarian waves in `viz/fitted_parameters2.json`, from 23 September 2020 (day 0) through the alpha wave, which ends on 2 June 2021 (day 252). A 37-week job finishes a few days after that. Later variants are seeded on or after day 339, so they are outside this study.
 
 ## Answer

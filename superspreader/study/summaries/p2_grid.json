@@ -1,0 +1,234 @@
+{
+  "grid_shed0.1_venuecovid": {
+    "n": 3905,
+    "mean": 1.344686299615877,
+    "cv2": 9.174496625934676,
+    "k_mom": 0.11861230126712566,
+    "zero": 0.7485275288092189,
+    "top20": 0.9617215768425061,
+    "p80": 0.10089628681177977,
+    "k_ci": {
+      "low": 0.10568673690764256,
+      "high": 0.13777887044851084,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 37216.25,
+    "mean_peak_prevalence": 13640.75,
+    "top10_venues_early": 0.48577238107158066,
+    "occupancy": {
+      "median_occupancy": 69.5,
+      "p90_occupancy": 2141.75,
+      "share_above_50": 0.5310906298326304,
+      "share_above_200": 0.38326850756364933
+    },
+    "calibrated": {
+      "k": 0.00034820785359168877,
+      "measured": 1.3783835843049277,
+      "target": 1.39
+    }
+  },
+  "grid_shed0.1_venueoff": {
+    "n": 4041,
+    "mean": 1.3499133877753031,
+    "cv2": 8.634557014921038,
+    "k_mom": 0.126682201115278,
+    "zero": 0.7302647859440733,
+    "top20": 0.9484876260311641,
+    "p80": 0.10987379361544172,
+    "k_ci": {
+      "low": 0.1076048656873185,
+      "high": 0.14780826027247998,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 32457.5,
+    "mean_peak_prevalence": 11227.0,
+    "top10_venues_early": 0.41208375447563494,
+    "occupancy": {
+      "median_occupancy": 39.0,
+      "p90_occupancy": 1039.0,
+      "share_above_50": 0.4534367596804587,
+      "share_above_200": 0.27626560807130857
+    },
+    "calibrated": {
+      "k": 0.0005762877720582903,
+      "measured": 1.4002674493939922,
+      "target": 1.39
+    }
+  },
+  "grid_shed0.3_venuecovid": {
+    "n": 4598,
+    "mean": 1.5184862983906047,
+    "cv2": 3.9951759806294866,
+    "k_mom": 0.29970400434865774,
+    "zero": 0.5765550239234449,
+    "top20": 0.8009166427957606,
+    "p80": 0.1994345367551109,
+    "k_ci": {
+      "low": 0.26926674450516663,
+      "high": 0.33157807228029074,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 54278.0,
+    "mean_peak_prevalence": 19673.0,
+    "top10_venues_early": 0.47852610117698113,
+    "occupancy": {
+      "median_occupancy": 46.0,
+      "p90_occupancy": 1910.5,
+      "share_above_50": 0.4878190928513309,
+      "share_above_200": 0.3349576257901449
+    },
+    "calibrated": {
+      "k": 0.00032489097423438196,
+      "measured": 1.423826321903341,
+      "target": 1.39
+    }
+  },
+  "grid_shed0.3_venueoff": {
+    "n": 3950,
+    "mean": 1.3359493670886076,
+    "cv2": 3.7564017985548044,
+    "k_mom": 0.3324611286505867,
+    "zero": 0.5924050632911393,
+    "top20": 0.7909797233276483,
+    "p80": 0.20607594936708862,
+    "k_ci": {
+      "low": 0.2928288773245098,
+      "high": 0.37014022595138346,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 30685.25,
+    "mean_peak_prevalence": 10862.25,
+    "top10_venues_early": 0.3648948959870584,
+    "occupancy": {
+      "median_occupancy": 27.75,
+      "p90_occupancy": 939.0,
+      "share_above_50": 0.4063442212332421,
+      "share_above_200": 0.2386043379010778
+    },
+    "calibrated": {
+      "k": 0.0004836606939759114,
+      "measured": 1.32335940408108,
+      "target": 1.39
+    }
+  },
+  "grid_shed1_venuecovid": {
+    "n": 3527,
+    "mean": 1.4510915792458179,
+    "cv2": 2.132283723629053,
+    "k_mom": 0.6929299391250783,
+    "zero": 0.43067762971363766,
+    "top20": 0.6512309495896834,
+    "p80": 0.307626878366884,
+    "k_ci": {
+      "low": 0.5998267191735251,
+      "high": 0.8205740219808756,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 34239.0,
+    "mean_peak_prevalence": 12346.5,
+    "top10_venues_early": 0.42904715332973253,
+    "occupancy": {
+      "median_occupancy": 36.75,
+      "p90_occupancy": 1660.25,
+      "share_above_50": 0.4563211125495562,
+      "share_above_200": 0.3109319519675711
+    },
+    "calibrated": {
+      "k": 0.0002725413889551255,
+      "measured": 1.3761713046193842,
+      "target": 1.39
+    }
+  },
+  "grid_shed1_venueoff": {
+    "n": 3701,
+    "mean": 1.3658470683599027,
+    "cv2": 1.8634783208430101,
+    "k_mom": 0.8839138828171371,
+    "zero": 0.43501756282085924,
+    "top20": 0.6356083086053412,
+    "p80": 0.3126182112942448,
+    "k_ci": {
+      "low": 0.7734104179927228,
+      "high": 0.985063799594241,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 30373.75,
+    "mean_peak_prevalence": 10910.75,
+    "top10_venues_early": 0.318824233324654,
+    "occupancy": {
+      "median_occupancy": 17.0,
+      "p90_occupancy": 921.25,
+      "share_above_50": 0.3594955045612207,
+      "share_above_200": 0.21841539887011518
+    },
+    "calibrated": {
+      "k": 0.0004345092324596298,
+      "measured": 1.3549460003660991,
+      "target": 1.39
+    }
+  },
+  "grid_shedoff_venuecovid": {
+    "n": 3681,
+    "mean": 1.4830209182287422,
+    "cv2": 0.9594219440459446,
+    "k_mom": 3.507262922866617,
+    "zero": 0.2936701983156751,
+    "top20": 0.5130976369298407,
+    "p80": 0.4132029339853301,
+    "k_ci": {
+      "low": 3.0306322552222094,
+      "high": 4.236669744592291,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 40557.5,
+    "mean_peak_prevalence": 14958.0,
+    "top10_venues_early": 0.4094452862037852,
+    "occupancy": {
+      "median_occupancy": 33.0,
+      "p90_occupancy": 1358.5,
+      "share_above_50": 0.4422727874556339,
+      "share_above_200": 0.28621015291244717
+    },
+    "calibrated": {
+      "k": 0.0002661834656778199,
+      "measured": 1.4234200079396586,
+      "target": 1.39
+    }
+  },
+  "grid_shedoff_venueoff": {
+    "n": 3860,
+    "mean": 1.4108808290155441,
+    "cv2": 0.8993286920262064,
+    "k_mom": 5.24792212920594,
+    "zero": 0.2823834196891192,
+    "top20": 0.4966948218876239,
+    "p80": 0.4354922279792746,
+    "k_ci": {
+      "low": 4.352044789895476,
+      "high": 6.987082463503202,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 36595.5,
+    "mean_peak_prevalence": 13208.75,
+    "top10_venues_early": 0.30232693892389184,
+    "occupancy": {
+      "median_occupancy": 11.5,
+      "p90_occupancy": 788.25,
+      "share_above_50": 0.3339030441397177,
+      "share_above_200": 0.19204736115618898
+    },
+    "calibrated": {
+      "k": 0.00041,
+      "measured": 1.378201555718927,
+      "target": 1.39
+    }
+  }
+}

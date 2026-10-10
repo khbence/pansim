@@ -1,0 +1,89 @@
+{
+  "kernel_alpha0": {
+    "n": 3180,
+    "mean": 1.3959119496855346,
+    "cv2": 1.275089357086377,
+    "k_mom": 1.7898315548636587,
+    "zero": 0.3663522012578616,
+    "top20": 0.5708492903807164,
+    "p80": 0.360062893081761,
+    "k_ci": {
+      "low": 1.580723789452178,
+      "high": 2.0393669410364823,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 33116.5,
+    "mean_peak_prevalence": 13102.0,
+    "top10_venues_early": 0.5759516077240169,
+    "occupancy": {
+      "median_occupancy": 1235.25,
+      "p90_occupancy": 3552.75,
+      "share_above_50": 0.9778371361720516,
+      "share_above_200": 0.9274049140987966
+    },
+    "calibrated": {
+      "k": 1.5129804435781924e-06,
+      "measured": 1.4594878417119457,
+      "target": 1.39
+    }
+  },
+  "kernel_alpha0.5": {
+    "n": 2995,
+    "mean": 1.3859766277128547,
+    "cv2": 1.0971164903189163,
+    "k_mom": 2.6623812845576693,
+    "zero": 0.332220367278798,
+    "top20": 0.5338472657191038,
+    "p80": 0.39065108514190316,
+    "k_ci": {
+      "low": 2.27155676263524,
+      "high": 3.1943191249696294,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 27765.75,
+    "mean_peak_prevalence": 10453.5,
+    "top10_venues_early": 0.5109075735727141,
+    "occupancy": {
+      "median_occupancy": 649.0,
+      "p90_occupancy": 2640.25,
+      "share_above_50": 0.7965163117234922,
+      "share_above_200": 0.6595922878931392
+    },
+    "calibrated": {
+      "k": 3.8338127706505647e-05,
+      "measured": 1.4068283227269403,
+      "target": 1.39
+    }
+  },
+  "kernel_alpha1": {
+    "n": 3860,
+    "mean": 1.4108808290155441,
+    "cv2": 0.8993286920262064,
+    "k_mom": 5.24792212920594,
+    "zero": 0.2823834196891192,
+    "top20": 0.4966948218876239,
+    "p80": 0.4354922279792746,
+    "k_ci": {
+      "low": 4.352044789895476,
+      "high": 6.987082463503202,
+      "finite_fraction": 1.0
+    },
+    "replicates": 4,
+    "mean_infections": 36595.5,
+    "mean_peak_prevalence": 13208.75,
+    "top10_venues_early": 0.30232693892389184,
+    "occupancy": {
+      "median_occupancy": 11.5,
+      "p90_occupancy": 788.25,
+      "share_above_50": 0.3339030441397177,
+      "share_above_200": 0.19204736115618898
+    },
+    "calibrated": {
+      "k": 0.00041,
+      "measured": 1.378201555718927,
+      "target": 1.39
+    }
+  }
+}

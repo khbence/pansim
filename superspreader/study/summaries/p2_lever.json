@@ -1,0 +1,232 @@
+{
+  "lever_II_set_household": {
+    "replicates": 4,
+    "infections": 13757.25,
+    "infections_per_rep": [
+      14760,
+      13757,
+      13184,
+      13328
+    ],
+    "peak_hospital_per_rep": [
+      165,
+      133,
+      130,
+      140
+    ],
+    "peak_prevalence": 2189.25,
+    "peak_hospital": 142.0,
+    "quarantine_person_days": 165324.0,
+    "early_R_days1_10": 1.1704139893005492,
+    "R_days24_33": 1.0836900039487098,
+    "prevalence_day21": 841.25,
+    "prevalence_day35": 1243.75
+  },
+  "lever_II_set_isolate": {
+    "replicates": 4,
+    "infections": 16022.75,
+    "infections_per_rep": [
+      17032,
+      15751,
+      15221,
+      16087
+    ],
+    "peak_hospital_per_rep": [
+      190,
+      153,
+      159,
+      189
+    ],
+    "peak_prevalence": 2769.0,
+    "peak_hospital": 172.75,
+    "quarantine_person_days": 48527.25,
+    "early_R_days1_10": 1.166464299823576,
+    "R_days24_33": 1.117271631480537,
+    "prevalence_day21": 841.25,
+    "prevalence_day35": 1311.25
+  },
+  "lever_II_set_masks": {
+    "replicates": 4,
+    "infections": 4418.75,
+    "infections_per_rep": [
+      4583,
+      4282,
+      4435,
+      4375
+    ],
+    "peak_hospital_per_rep": [
+      82,
+      54,
+      55,
+      48
+    ],
+    "peak_prevalence": 847.5,
+    "peak_hospital": 59.75,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.1783589341795448,
+    "R_days24_33": 0.7981716266118781,
+    "prevalence_day21": 841.25,
+    "prevalence_day35": 624.25
+  },
+  "lever_II_set_none": {
+    "replicates": 4,
+    "infections": 20928.0,
+    "infections_per_rep": [
+      22634,
+      19889,
+      19858,
+      21331
+    ],
+    "peak_hospital_per_rep": [
+      253,
+      199,
+      214,
+      256
+    ],
+    "peak_prevalence": 4030.75,
+    "peak_hospital": 230.5,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.1661623319627292,
+    "R_days24_33": 1.1738712530791926,
+    "prevalence_day21": 841.25,
+    "prevalence_day35": 1487.75
+  },
+  "lever_II_set_venue_close": {
+    "replicates": 4,
+    "infections": 5153.75,
+    "infections_per_rep": [
+      5034,
+      5233,
+      5369,
+      4979
+    ],
+    "peak_hospital_per_rep": [
+      63,
+      74,
+      59,
+      44
+    ],
+    "peak_prevalence": 849.0,
+    "peak_hospital": 60.0,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.1691651740604152,
+    "R_days24_33": 0.8817125398170409,
+    "prevalence_day21": 841.25,
+    "prevalence_day35": 655.0
+  },
+  "lever_I_bio_household": {
+    "replicates": 4,
+    "infections": 25606.5,
+    "infections_per_rep": [
+      27120,
+      27877,
+      22487,
+      24942
+    ],
+    "peak_hospital_per_rep": [
+      201,
+      236,
+      187,
+      183
+    ],
+    "peak_prevalence": 3830.0,
+    "peak_hospital": 201.75,
+    "quarantine_person_days": 269334.75,
+    "early_R_days1_10": 1.305285236428932,
+    "R_days24_33": 1.0745903803002548,
+    "prevalence_day21": 1609.0,
+    "prevalence_day35": 2595.5
+  },
+  "lever_I_bio_isolate": {
+    "replicates": 4,
+    "infections": 45594.0,
+    "infections_per_rep": [
+      47801,
+      48532,
+      40828,
+      45215
+    ],
+    "peak_hospital_per_rep": [
+      430,
+      465,
+      383,
+      413
+    ],
+    "peak_prevalence": 8963.75,
+    "peak_hospital": 422.75,
+    "quarantine_person_days": 119348.0,
+    "early_R_days1_10": 1.2996693106086703,
+    "R_days24_33": 1.1897353897471465,
+    "prevalence_day21": 1609.0,
+    "prevalence_day35": 3144.25
+  },
+  "lever_I_bio_masks": {
+    "replicates": 4,
+    "infections": 14526.75,
+    "infections_per_rep": [
+      15848,
+      15654,
+      11774,
+      14831
+    ],
+    "peak_hospital_per_rep": [
+      110,
+      122,
+      92,
+      100
+    ],
+    "peak_prevalence": 1900.5,
+    "peak_hospital": 106.0,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.3152958623540743,
+    "R_days24_33": 0.974419818779092,
+    "prevalence_day21": 1609.0,
+    "prevalence_day35": 1839.25
+  },
+  "lever_I_bio_none": {
+    "replicates": 4,
+    "infections": 54783.5,
+    "infections_per_rep": [
+      56674,
+      57207,
+      51658,
+      53595
+    ],
+    "peak_hospital_per_rep": [
+      580,
+      585,
+      499,
+      523
+    ],
+    "peak_prevalence": 10919.0,
+    "peak_hospital": 546.75,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.3004218243532604,
+    "R_days24_33": 1.2422630305482336,
+    "prevalence_day21": 1609.0,
+    "prevalence_day35": 3521.5
+  },
+  "lever_I_bio_venue_close": {
+    "replicates": 4,
+    "infections": 34429.75,
+    "infections_per_rep": [
+      38114,
+      34208,
+      32682,
+      32715
+    ],
+    "peak_hospital_per_rep": [
+      308,
+      284,
+      240,
+      261
+    ],
+    "peak_prevalence": 6178.5,
+    "peak_hospital": 273.25,
+    "quarantine_person_days": 0.0,
+    "early_R_days1_10": 1.302102819808847,
+    "R_days24_33": 1.1085542164216906,
+    "prevalence_day21": 1609.0,
+    "prevalence_day35": 2698.0
+  }
+}
