@@ -1,0 +1,1 @@
+{"attempt": 0, "shape": 0.2703885132970594, "coefficient": 0.0004747323905540065, "early_R": 1.2949304362235576, "early_k": 0.29122808843817943, "infectors": 2326, "reached": true, "target_k": 0.30116577590967497, "window": [1, 19], "flags": ["--sheddingShape", "0.270389", "--sheddingMode", "peak", "--sheddingPeakWindow", "1,19"]}

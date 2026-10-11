@@ -1,0 +1,61 @@
+{
+ "C": {
+  "k": 0.00048,
+  "early_R": 1.3264742296404988,
+  "flags": [
+   "--sheddingShape",
+   "0.3",
+   "--sheddingMode",
+   "constant"
+  ]
+ },
+ "A0": {
+  "k": 0.00038,
+  "early_R": 1.3503023792472348,
+  "flags": []
+ },
+ "Pk50": {
+  "attempt": 0,
+  "shape": 0.2703885132970594,
+  "coefficient": 0.0004747323905540065,
+  "early_R": 1.2949304362235576,
+  "early_k": 0.29122808843817943,
+  "infectors": 2326,
+  "reached": true,
+  "target_k": 0.30116577590967497,
+  "window": [
+   1,
+   19
+  ],
+  "flags": [
+   "--sheddingShape",
+   "0.270389",
+   "--sheddingMode",
+   "peak",
+   "--sheddingPeakWindow",
+   "1,19"
+  ]
+ },
+ "Pk75": {
+  "attempt": 0,
+  "shape": 0.17709487244491526,
+  "coefficient": 0.00044545885957390124,
+  "early_R": 1.3570262664165105,
+  "early_k": 0.25679698643598586,
+  "infectors": 2284,
+  "reached": true,
+  "target_k": 0.30116577590967497,
+  "window": [
+   3,
+   16
+  ],
+  "flags": [
+   "--sheddingShape",
+   "0.177095",
+   "--sheddingMode",
+   "peak",
+   "--sheddingPeakWindow",
+   "3,16"
+  ]
+ }
+}

@@ -1,6 +1,8 @@
 # ACT-049 phase 3: response to 10, 11 and 12, and the runs they asked for
 
-11 October 2026. This note answers `10_reading_of_09_phase2.md`, `11_volume_model_proposal.md` and `12_capacity_work_package (1).md`. Code is in `superspreader/study/` (`run_phase3.py`, `run_phase3b.py`, `chain_structure.py`, `capacity_audit.py`, `capacity_recalc.py`, `analyze_phase3.py`) and in the PanSim sources (`--volumeModel`, `--volumeTypeFactors`, `--volumeHomeType`, `--occupancyStats`, and a `Ventilation` closure rule). Summaries are in `study/summaries/p3_*.json` and `p2_*.json`.
+11 October 2026. This note answers `10_reading_of_09_phase2.md`, `11_volume_model_proposal.md` and `12_capacity_work_package (1).md`.
+
+**Correction, 11 October 2026.** Section 5.1 below originally read the residence-capacity total as a 1-in-50 sample of Hungary. That reading is withdrawn. The model is a single city (Szeged). The 9.2 million is what the capacity field contains, not a sampling fraction. The correction is also in `17_ps1_ps2_results.md`. Code is in `superspreader/study/` (`run_phase3.py`, `run_phase3b.py`, `chain_structure.py`, `capacity_audit.py`, `capacity_recalc.py`, `analyze_phase3.py`) and in the PanSim sources (`--volumeModel`, `--volumeTypeFactors`, `--volumeHomeType`, `--occupancyStats`, and a `Ventilation` closure rule). Summaries are in `study/summaries/p3_*.json` and `p2_*.json`.
 
 ## 1. What I accepted from 10, what I changed, and what I did not do
 
@@ -90,7 +92,7 @@ Audit of the 80,877 locations, 184,745 agents, with an uncontrolled 3-week refer
 
 - **Capacity and area are inert.** `capacity` and `area` are read into the location list and never used in a transmission or movement computation (the only reference is a pointer that is set and not dereferenced). The regression run (E0) with all new flags off reproduces the daily table and the infection trace of an earlier 8-week run exactly.
 - **Area is populated only for residences (10,000 for every cell) and public spaces.** For every other type area is 0, so the schema's area column is unused.
-- **Residence capacity does not follow the assigned count.** Residence locations are 100 m grid cells. Their capacity is the cell's population (median 92, sum 9.2 million, close to the population of Hungary), while the median number of sampled agents assigned is 2. The sample is therefore about 1 in 50 of the population, and the residence is a household of sampled agents drawn from a cell of about 90 residents. The assigned agents are real households (age gap within a location averages 13.6 years against 25.4 for random pairs; sizes 1 to 7, mean 2.6).
+- **Residence capacity does not follow the assigned count.** Residence locations are 100 m grid cells. Their capacity numbers have median 92 and sum 9.2 million, while the median number of assigned agents is 2. The ratio is about 1 in 50, and it is not a sampling fraction: the model is the single city of Szeged, and the capacity field is not the population the agents were drawn from. The assigned agents are real households (age gap within a location averages 13.6 years against 25.4 for random pairs; sizes 1 to 7, mean 2.6) sitting on a grid cell whose capacity number is much larger.
 - **The other types are constant or placeholder.** 14 (health centres) all 1000, 44 (universities) all 1200, 22 (nursing homes) all 55, 15 all 1,000,000; types 5, 9, 11, 12 have two distinct values.
 
 | type | locations | capacity median (max) | distinct values | in stated range | peak occupancy median | peak / capacity median | share of locations with peak above capacity |

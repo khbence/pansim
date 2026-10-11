@@ -1,0 +1,6 @@
+arm,household_share,venue_closure_pct,household_isolation_pct,masks_pct
+Set II strength 8,0.15,75.3,34.2,78.8
+Set II strength 4,0.21,75.4,37.6,79.5
+Set II strength 2,0.28,68.3,41.5,75.6
+Set I shape 1,0.42,37.2,53.3,73.6
+volume model E1,0.53,26.8,40.9,66.1

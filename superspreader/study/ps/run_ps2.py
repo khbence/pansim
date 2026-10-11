@@ -13,8 +13,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from analyze import load_trace, mom_k  # noqa: E402
+from analyze import mom_k  # noqa: E402
 from early_window import early_counts  # noqa: E402
+from ps_analysis import load_trace  # noqa: E402
 from ps_common import RESULTS, base_args, fmt, log_event, run_job  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -53,8 +54,10 @@ def calibrate(label, flags, k0, target=TARGET_R, tol=0.05, max_iter=9):
     cache = cache_path(label)
     if cache.exists():
         stored = json.loads(cache.read_text())
-        print(f"cal {label} cached k={stored['k']:.6g}", flush=True)
-        return stored["k"], stored["measured"], stored.get("iteration")
+        if abs(stored.get("target", target) - target) < 1e-6:
+            print(f"cal {label} cached k={stored['k']:.6g}", flush=True)
+            return stored["k"], stored["measured"], stored.get("iteration")
+        print(f"cal {label} cache target {stored.get('target')} differs from {target}; recalibrating", flush=True)
     points = []
     k = k0
     accepted = None
@@ -139,9 +142,8 @@ def stage_profile():
     trace = load_trace(RESULTS / name / "trace.tsv")
     delays = []
     for row in trace:
-        diagnosed = row["diagnosed"]
-        if diagnosed > 0:
-            delays.append(diagnosed // 144 - row["day"])
+        if row["diag"] > 0:
+            delays.append(row["diag"] // 144 - row["day"])
     delays.sort()
     median_delay = delays[len(delays) // 2] if delays else None
     before = sum(mean for day, mean in usable if median_delay is not None and day < median_delay)
@@ -222,7 +224,8 @@ def solve_shape(label, window, target_k, f_peak):
 def stage_calibrate():
     profile = json.loads((RESULTS / "ps2" / "profile.json").read_text())
     k_c, r_c, it_c = calibrate("C", shedding_flags(0.3, "constant", None), 0.00048)
-    k_a, r_a, _ = calibrate("A0", [], 0.00038)
+    # Distinct from the PS1 cache, which was calibrated to early R 1.39.
+    k_a, r_a, _ = calibrate("ps2_A0", [], 0.00038)
     target_k, n = pooled_k([RESULTS / f"cal/C/it{it_c:02d}_s{seed}" for seed in CAL_SEEDS])
     print(f"arm C early k target {target_k} from {n} infectors", flush=True)
     pk50 = solve_shape("Pk50", profile["window_50"], target_k, profile["f_peak_50"])

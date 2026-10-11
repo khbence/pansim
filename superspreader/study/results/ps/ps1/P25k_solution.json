@@ -1,0 +1,1 @@
+{"attempt": 0, "shape": 0.08, "coefficient": 0.00015872268390273927, "early_R": 1.4039729123926752, "early_k": 0.3388934321431528, "infectors": 649, "reached": true, "target_k": 0.3138955058002181, "flags": ["--traitShape", "0.08", "--traitPersist", "1", "--traitSusceptibilityExp", "0.25"]}

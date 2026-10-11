@@ -248,7 +248,8 @@ def solve_p25k(target_k):
         log_event({"experiment": "PS1", "label": "P25k_shape", **row, "target_k": target_k})
         print(f"P25k attempt {attempt} shape={shape:.4g} k_coef={k:.6g} early k={measured_k} target={target_k:.4g}", flush=True)
         if measured_k is None or math.isinf(measured_k):
-            shape = min(2.0, shape * 1.5) if measured_k is not None and math.isinf(measured_k) else shape * 0.7
+            # Infinite k means too little dispersion, so the shape has to come down.
+            shape = shape * 0.7
             continue
         points.append((shape, measured_k))
         best = row
