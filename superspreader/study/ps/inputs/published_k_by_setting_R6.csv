@@ -1,0 +1,18 @@
+setting,estimator,k,k_lo,k_hi,interval,mean_new_infections,prop80,prop80_lo,prop80_hi,locator,notes
+All settings,cluster_ascertainment,0.56,0.51,0.61,95% CI,1.29,0.2592,0.2482,0.2696,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",not one of the eight settings; included because the same table reports it
+Households,cluster_ascertainment,1.11,0.94,1.28,95% CI,1.00,0.3098,0.2938,0.3229,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",matches the abstract's household figure of about 1.1; row E06
+Restaurants,cluster_ascertainment,0.52,0.36,0.68,95% CI,1.47,0.2601,0.2143,0.2953,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",
+Care homes,cluster_ascertainment,0.09,0.03,0.16,95% CI,6.17,0.0912,0.0300,0.1368,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",mean new infections CI includes 0
+Nosocomial,cluster_ascertainment,0.29,0.10,0.48,95% CI,1.28,0.1865,0.0877,0.2481,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",
+Manual labour work,cluster_ascertainment,0.13,0.08,0.17,95% CI,1.04,0.1042,0.0713,0.1317,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",
+Office work,cluster_ascertainment,0.34,0.14,0.55,95% CI,0.38,0.1493,0.0903,0.1829,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",
+Close-social indoor activities,cluster_ascertainment,0.10,0.05,0.16,95% CI,7.09,0.0982,0.0499,0.1395,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",
+Retail and leisure activities,cluster_ascertainment,0.05,0.01,0.09,95% CI,0.58,0.0457,0.0020,0.0740,"Chen 2025 Table: Estimation results of k, CZ (cluster ascertainment model)",matches the abstract's retail figure of 0.05; row E05
+Households,individual_offspring_sensitivity,126.18,18.01,279.54,95% CI,0.81,0.3923,0.3882,0.3948,"Chen 2025 sensitivity table: individual-level offspring distribution",not the estimate cited in the abstract; household k is effectively uninformative
+Restaurants,individual_offspring_sensitivity,1.35,0.92,3.40,95% CI,1.18,0.3353,0.3211,0.3462,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Care homes,individual_offspring_sensitivity,0.27,0.19,0.41,95% CI,2.64,0.1961,0.1772,0.2114,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Nosocomial,individual_offspring_sensitivity,0.76,0.40,3.41,95% CI,1.03,0.2735,0.2446,0.3028,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Manual labour,individual_offspring_sensitivity,0.25,0.18,0.49,95% CI,0.92,0.1629,0.1539,0.1715,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Office work,individual_offspring_sensitivity,9.12,0.84,123.76,95% CI,0.34,0.2077,0.1950,0.2173,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Close-social indoor activities,individual_offspring_sensitivity,0.17,0.12,0.47,95% CI,5.32,0.1451,0.1379,0.1505,"Chen 2025 sensitivity table: individual-level offspring distribution",
+Retail and leisure activities,individual_offspring_sensitivity,0.10,0.05,0.35,95% CI,0.55,0.0820,0.0667,0.0926,"Chen 2025 sensitivity table: individual-level offspring distribution",
