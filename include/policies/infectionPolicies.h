@@ -7,6 +7,10 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <map>
+#include <sstream>
+#include <algorithm>
+#include <vector>
 
 template<class SimulationType>
 class BasicInfection {
@@ -21,6 +25,18 @@ private:
     double sheddingShape = 0.0;
     double densityExponent = 1.0;
     std::string infectionTracePath = "";
+    std::string occupancyStatsPath = "";
+    std::string volumeModelMode = "off";
+    std::string volumeTypeFactors = "";
+    unsigned volumeHomeType = 2;
+    bool volumeInitialised = false;
+    bool volumeFillOne = false;
+    bool volumeActive = false;
+    thrust::device_vector<float> volumeDenominator;
+    thrust::device_vector<unsigned> occupancyDayMax;
+    thrust::device_vector<unsigned> occupancyMax;
+    std::vector<std::vector<unsigned>> occupancyDailyHistory;
+    int occupancyCurrentDay = -1;
     bool initialSheddingDone = false;
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
     thrust::device_vector<bool> infectionFlagAtLocations;
@@ -119,6 +135,19 @@ public:
             ("densityExponent",
             "Infection density is the summed infectiousness divided by occupancy to this power. 1 is the original kernel",
             cxxopts::value<double>()->default_value("1"))
+            ("volumeModel",
+            "Replace the head-count density denominator by capacity times a per-type factor: off, nonresidential, all, "
+            "fillone (head count times the type factor, non-residential)",
+            cxxopts::value<std::string>()->default_value("off"))
+            ("volumeTypeFactors",
+            "Per-type effective removal factors for the volume model as type:factor,type:factor",
+            cxxopts::value<std::string>()->default_value(""))
+            ("volumeHomeType",
+            "Location type id of residences, which stay on the head-count form in nonresidential mode",
+            cxxopts::value<unsigned>()->default_value("2"))
+            ("occupancyStats",
+            "Write per-location occupancy statistics (max, daily maxima percentiles) to this TSV path",
+            cxxopts::value<std::string>()->default_value(""))
             ("infectionTrace",
             "Write one row per infection (agent, infector, place, time) to this TSV path",
             cxxopts::value<std::string>()->default_value(""))
@@ -143,6 +172,7 @@ public:
 
     void finalize() {
         writeInfectionTrace();
+        writeOccupancyStats();
         if (flagInfectionAtLocations)
             dumpstore->write(dumpDirectory);
         delete dumpstore;
@@ -161,8 +191,14 @@ protected:
         sheddingShape = result["sheddingShape"].as<double>();
         densityExponent = result["densityExponent"].as<double>();
         infectionTracePath = result["infectionTrace"].as<std::string>();
+        occupancyStatsPath = result["occupancyStats"].as<std::string>();
+        volumeModelMode = result["volumeModel"].as<std::string>();
+        volumeTypeFactors = result["volumeTypeFactors"].as<std::string>();
+        volumeHomeType = result["volumeHomeType"].as<unsigned>();
         if (flagInfectionAtLocations) dumpstore = new DumpStore();
-        if (dumpToFile || flagInfectionAtLocations || !infectionTracePath.empty()) Util::needAgentsSortedByLocation = 1;
+        if (dumpToFile || flagInfectionAtLocations || !infectionTracePath.empty() || !occupancyStatsPath.empty()
+            || volumeModelMode != "off")
+            Util::needAgentsSortedByLocation = 1;
     }
 
 public:
@@ -585,6 +621,88 @@ public:
             });
     }
 
+    void initialiseVolumeModel() {
+        if (volumeInitialised) return;
+        volumeInitialised = true;
+        if (volumeModelMode == "off") return;
+        auto realThis = static_cast<SimulationType*>(this);
+        std::map<unsigned, float> factors;
+        std::stringstream stream(volumeTypeFactors);
+        std::string item;
+        while (std::getline(stream, item, ',')) {
+            auto colon = item.find(':');
+            if (colon == std::string::npos) continue;
+            factors[static_cast<unsigned>(std::stoul(item.substr(0, colon)))] = std::stof(item.substr(colon + 1));
+        }
+        thrust::host_vector<unsigned> capacity = realThis->locs->capacity;
+        thrust::host_vector<typename SimulationType::TypeOfLocation_t> types = realThis->locs->locType;
+        thrust::host_vector<float> denominator(capacity.size(), 0.0f);
+        bool residences = volumeModelMode == "all";
+        volumeFillOne = volumeModelMode == "fillone";
+        for (unsigned i = 0; i < capacity.size(); ++i) {
+            unsigned type = types[i];
+            auto found = factors.find(type);
+            if (found == factors.end()) continue;
+            if (type == volumeHomeType && !residences) continue;
+            if (volumeFillOne) denominator[i] = found->second;
+            else denominator[i] = static_cast<float>(capacity[i]) * found->second;
+        }
+        volumeDenominator = denominator;
+        volumeActive = true;
+    }
+
+    void trackOccupancy(Timehandler& simTime) {
+        if (occupancyStatsPath.empty()) return;
+        auto realThis = static_cast<SimulationType*>(this);
+        unsigned* offsets = thrust::raw_pointer_cast(realThis->locs->locationListOffsets.data());
+        unsigned n = static_cast<unsigned>(realThis->locs->locationListOffsets.size()) - 1;
+        if (occupancyMax.size() != n) {
+            occupancyMax.assign(n, 0u);
+            occupancyDayMax.assign(n, 0u);
+        }
+        int day = static_cast<int>(simTime.getTimestamp() / simTime.getStepsPerDay());
+        if (occupancyCurrentDay >= 0 && day != occupancyCurrentDay) flushOccupancyDay();
+        occupancyCurrentDay = day;
+        unsigned* dayMax = thrust::raw_pointer_cast(occupancyDayMax.data());
+        unsigned* totalMax = thrust::raw_pointer_cast(occupancyMax.data());
+        thrust::for_each(thrust::make_counting_iterator<unsigned>(0), thrust::make_counting_iterator<unsigned>(n),
+            [=] HD(unsigned loc) {
+                unsigned count = offsets[loc + 1] - offsets[loc];
+                if (count > dayMax[loc]) dayMax[loc] = count;
+                if (count > totalMax[loc]) totalMax[loc] = count;
+            });
+    }
+
+    void flushOccupancyDay() {
+        if (occupancyDayMax.empty()) return;
+        thrust::host_vector<unsigned> host = occupancyDayMax;
+        occupancyDailyHistory.emplace_back(host.begin(), host.end());
+        thrust::fill(occupancyDayMax.begin(), occupancyDayMax.end(), 0u);
+    }
+
+    void writeOccupancyStats() {
+        if (occupancyStatsPath.empty() || occupancyMax.empty()) return;
+        flushOccupancyDay();
+        auto realThis = static_cast<SimulationType*>(this);
+        thrust::host_vector<typename SimulationType::TypeOfLocation_t> types = realThis->locs->locType;
+        thrust::host_vector<unsigned> maxima = occupancyMax;
+        std::ofstream out(occupancyStatsPath.c_str());
+        out << "location\tlocType\tmaxOccupancy\tdailyMaxMean\tdailyMaxP95\tdaysObserved\n";
+        std::vector<unsigned> series;
+        for (unsigned loc = 0; loc < maxima.size(); ++loc) {
+            series.clear();
+            for (const auto& day : occupancyDailyHistory) series.push_back(day[loc]);
+            if (series.empty()) continue;
+            double mean = 0.0;
+            for (unsigned v : series) mean += v;
+            mean /= series.size();
+            std::sort(series.begin(), series.end());
+            unsigned p95 = series[static_cast<size_t>(0.95 * (series.size() - 1))];
+            out << loc << '\t' << static_cast<unsigned>(types[loc]) << '\t' << maxima[loc] << '\t' << mean << '\t' << p95 << '\t'
+                << series.size() << '\n';
+        }
+    }
+
     void writeInfectionTrace() {
         if (infectionTracePath.empty()) return;
         auto realThis = static_cast<SimulationType*>(this);
@@ -655,7 +773,11 @@ public:
         //
         // Step 2 - calculate infection ratios, based on density of infected people
         //
+        initialiseVolumeModel();
+        trackOccupancy(simTime);
         float tmpK = this->k;
+        const float* volumePtr = volumeActive ? thrust::raw_pointer_cast(volumeDenominator.data()) : nullptr;
+        const bool volumeFill = volumeFillOne;
         float densityPower = static_cast<float>(densityExponent);
         float seasonality = seasonalityMultiplier(simTime);
         //if (simTime.getStepsUntilMidnight()==1) printf("%g\n", seasonality);
@@ -679,6 +801,13 @@ public:
                 float densityOfInfected = densityPower == 1.0f
                     ? numInfectedAgentsPresent / num_agents
                     : numInfectedAgentsPresent / powf(static_cast<float>(num_agents), densityPower);
+                if (volumePtr != nullptr) {
+                    float volume = volumePtr[thrust::get<4>(tuple)];
+                    if (volume > 0.0f) {
+                        densityOfInfected = volumeFill ? numInfectedAgentsPresent / (num_agents * volume)
+                                                       : numInfectedAgentsPresent / volume;
+                    }
+                }
                 float boost = hasEventBoost ? eventBoostPtr[thrust::get<4>(tuple)] : 1.0f;
                 /*float y =
                     1.0

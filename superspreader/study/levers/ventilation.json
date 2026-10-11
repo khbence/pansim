@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "name": "Ventilation",
+      "conditionType": "afterDays",
+      "threshold": 21,
+      "threshold2": 21,
+      "openAfter": 400,
+      "closeAfter": -1,
+      "parameter": "0.5",
+      "locationTypesToClose": [
+        5,
+        6,
+        8,
+        9
+      ]
+    }
+  ]
+}

@@ -1,0 +1,682 @@
+{
+ "agents": 184745,
+ "total_capacity_residences": 9227453,
+ "types": {
+  "1": {
+   "locations": 4103,
+   "capacity_positive": 4103,
+   "area_positive": 3946,
+   "capacity_min": 1,
+   "capacity_median": 24,
+   "capacity_p90": 115,
+   "capacity_max": 1000,
+   "max_over_median": 41.666666666666664,
+   "distinct_capacities": 278,
+   "total_capacity": 187804,
+   "total_assigned_candidates": 185601,
+   "locations_with_occupancy": 4103,
+   "peak_occupancy_median": 5,
+   "peak_occupancy_max": 4087,
+   "peak_over_capacity_median": 0.24242424242424243,
+   "peak_over_capacity_p90": 0.6,
+   "fraction_peak_above_capacity": 0.0004874482086278333,
+   "fraction_p95_above_capacity": 0.0004874482086278333,
+   "worst": [
+    {
+     "ID": "735500_110900",
+     "capacity": 5,
+     "peak": 4087
+    },
+    {
+     "ID": "735300_100000",
+     "capacity": 3,
+     "peak": 10
+    },
+    {
+     "ID": "136479_1216",
+     "capacity": 100,
+     "peak": 100
+    }
+   ]
+  },
+  "2": {
+   "locations": 73036,
+   "capacity_positive": 73036,
+   "area_positive": 72906,
+   "capacity_min": 1,
+   "capacity_median": 92.0,
+   "capacity_p90": 290,
+   "capacity_max": 520,
+   "max_over_median": 5.6521739130434785,
+   "distinct_capacities": 276,
+   "total_capacity": 9227453,
+   "total_assigned_candidates": 440850,
+   "locations_with_occupancy": 72986,
+   "peak_occupancy_median": 3.0,
+   "peak_occupancy_max": 20,
+   "peak_over_capacity_median": 0.034722222222222224,
+   "peak_over_capacity_p90": 0.18518518518518517,
+   "fraction_peak_above_capacity": 0.006275176061162415,
+   "fraction_p95_above_capacity": 0.0050420628613706735,
+   "worst": [
+    {
+     "ID": "f9_723300_105600",
+     "capacity": 1,
+     "peak": 3
+    },
+    {
+     "ID": "f12_723300_106300",
+     "capacity": 1,
+     "peak": 3
+    },
+    {
+     "ID": "f21_723500_105200",
+     "capacity": 1,
+     "peak": 3
+    }
+   ]
+  },
+  "3": {
+   "locations": 181,
+   "capacity_positive": 181,
+   "area_positive": 0,
+   "capacity_min": 21,
+   "capacity_median": 138,
+   "capacity_p90": 425,
+   "capacity_max": 979,
+   "max_over_median": 7.094202898550725,
+   "distinct_capacities": 79,
+   "total_capacity": 35525,
+   "total_assigned_candidates": 134880,
+   "locations_with_occupancy": 181,
+   "peak_occupancy_median": 114,
+   "peak_occupancy_max": 1417,
+   "peak_over_capacity_median": 0.9,
+   "peak_over_capacity_p90": 1.6388888888888888,
+   "fraction_peak_above_capacity": 0.4419889502762431,
+   "fraction_p95_above_capacity": 0.43646408839779005,
+   "worst": [
+    {
+     "ID": "109537szakk",
+     "capacity": 23,
+     "peak": 1417
+    },
+    {
+     "ID": "109826ovoda",
+     "capacity": 27,
+     "peak": 134
+    },
+    {
+     "ID": "148245bolcs",
+     "capacity": 36,
+     "peak": 131
+    }
+   ]
+  },
+  "4": {
+   "locations": 119,
+   "capacity_positive": 116,
+   "area_positive": 0,
+   "capacity_min": 0,
+   "capacity_median": 100.0,
+   "capacity_p90": 200,
+   "capacity_max": 500,
+   "max_over_median": 5.0,
+   "distinct_capacities": 7,
+   "total_capacity": 15380,
+   "total_assigned_candidates": 5575,
+   "locations_with_occupancy": 119,
+   "peak_occupancy_median": 10,
+   "peak_occupancy_max": 196,
+   "peak_over_capacity_median": 0.25,
+   "peak_over_capacity_p90": 1.72,
+   "fraction_peak_above_capacity": 0.13793103448275862,
+   "fraction_p95_above_capacity": 0.13793103448275862,
+   "worst": [
+    {
+     "ID": "64714_1876",
+     "capacity": 50,
+     "peak": 162
+    },
+    {
+     "ID": "105471_14",
+     "capacity": 50,
+     "peak": 100
+    },
+    {
+     "ID": "71466_1213",
+     "capacity": 50,
+     "peak": 100
+    }
+   ]
+  },
+  "5": {
+   "locations": 8,
+   "capacity_positive": 8,
+   "area_positive": 0,
+   "capacity_min": 100,
+   "capacity_median": 100.0,
+   "capacity_p90": 200,
+   "capacity_max": 200,
+   "max_over_median": 2.0,
+   "distinct_capacities": 2,
+   "total_capacity": 1100,
+   "total_assigned_candidates": 461202,
+   "stated_range": [
+    20,
+    100
+   ],
+   "fraction_in_stated_range": 0.625,
+   "locations_with_occupancy": 8,
+   "peak_occupancy_median": 3896.0,
+   "peak_occupancy_max": 3965,
+   "peak_over_capacity_median": 38.81,
+   "peak_over_capacity_p90": 39.08,
+   "fraction_peak_above_capacity": 1.0,
+   "fraction_p95_above_capacity": 1.0,
+   "worst": [
+    {
+     "ID": "76858_396",
+     "capacity": 100,
+     "peak": 3965
+    },
+    {
+     "ID": "9765_394",
+     "capacity": 100,
+     "peak": 3908
+    },
+    {
+     "ID": "77325_397",
+     "capacity": 100,
+     "peak": 3897
+    }
+   ]
+  },
+  "6": {
+   "locations": 20,
+   "capacity_positive": 20,
+   "area_positive": 0,
+   "capacity_min": 300,
+   "capacity_median": 1000.0,
+   "capacity_p90": 1000,
+   "capacity_max": 1000,
+   "max_over_median": 1.0,
+   "distinct_capacities": 3,
+   "total_capacity": 15800,
+   "total_assigned_candidates": 490445,
+   "stated_range": [
+    100,
+    1000
+   ],
+   "fraction_in_stated_range": 1.0,
+   "locations_with_occupancy": 20,
+   "peak_occupancy_median": 1406.0,
+   "peak_occupancy_max": 1476,
+   "peak_over_capacity_median": 1.4175,
+   "peak_over_capacity_p90": 2.934,
+   "fraction_peak_above_capacity": 1.0,
+   "fraction_p95_above_capacity": 1.0,
+   "worst": [
+    {
+     "ID": "2285_1760",
+     "capacity": 300,
+     "peak": 1406
+    },
+    {
+     "ID": "7795_2325",
+     "capacity": 500,
+     "peak": 1476
+    },
+    {
+     "ID": "98569_2327",
+     "capacity": 500,
+     "peak": 1467
+    }
+   ]
+  },
+  "7": {
+   "locations": 1074,
+   "capacity_positive": 1073,
+   "area_positive": 0,
+   "capacity_min": 0,
+   "capacity_median": 200,
+   "capacity_p90": 1000,
+   "capacity_max": 6000,
+   "max_over_median": 30.0,
+   "distinct_capacities": 16,
+   "total_capacity": 442810,
+   "total_assigned_candidates": 424284,
+   "locations_with_occupancy": 1074,
+   "peak_occupancy_median": 22.0,
+   "peak_occupancy_max": 1206,
+   "peak_over_capacity_median": 0.085,
+   "peak_over_capacity_p90": 0.745,
+   "fraction_peak_above_capacity": 0.08387698042870456,
+   "fraction_p95_above_capacity": 0.07642124883504194,
+   "worst": [
+    {
+     "ID": "222692_636",
+     "capacity": 10,
+     "peak": 84
+    },
+    {
+     "ID": "222768_642",
+     "capacity": 10,
+     "peak": 76
+    },
+    {
+     "ID": "222695_639",
+     "capacity": 10,
+     "peak": 60
+    }
+   ]
+  },
+  "8": {
+   "locations": 1280,
+   "capacity_positive": 1280,
+   "area_positive": 0,
+   "capacity_min": 20,
+   "capacity_median": 100.0,
+   "capacity_p90": 200,
+   "capacity_max": 10000,
+   "max_over_median": 100.0,
+   "distinct_capacities": 13,
+   "total_capacity": 206700,
+   "total_assigned_candidates": 355756,
+   "locations_with_occupancy": 1280,
+   "peak_occupancy_median": 20.0,
+   "peak_occupancy_max": 1437,
+   "peak_over_capacity_median": 0.24,
+   "peak_over_capacity_p90": 1.0,
+   "fraction_peak_above_capacity": 0.1,
+   "fraction_p95_above_capacity": 0.0921875,
+   "worst": [
+    {
+     "ID": "26518_2624",
+     "capacity": 50,
+     "peak": 1437
+    },
+    {
+     "ID": "114709_2030",
+     "capacity": 20,
+     "peak": 99
+    },
+    {
+     "ID": "114694_1151",
+     "capacity": 30,
+     "peak": 148
+    }
+   ]
+  },
+  "9": {
+   "locations": 22,
+   "capacity_positive": 22,
+   "area_positive": 0,
+   "capacity_min": 100,
+   "capacity_median": 100.0,
+   "capacity_p90": 100,
+   "capacity_max": 1000,
+   "max_over_median": 10.0,
+   "distinct_capacities": 2,
+   "total_capacity": 3100,
+   "total_assigned_candidates": 489299,
+   "stated_range": [
+    50,
+    500
+   ],
+   "fraction_in_stated_range": 0.9545454545454546,
+   "locations_with_occupancy": 22,
+   "peak_occupancy_median": 1429.5,
+   "peak_occupancy_max": 1514,
+   "peak_over_capacity_median": 14.295,
+   "peak_over_capacity_p90": 14.47,
+   "fraction_peak_above_capacity": 1.0,
+   "fraction_p95_above_capacity": 1.0,
+   "worst": [
+    {
+     "ID": "130446_2387",
+     "capacity": 100,
+     "peak": 1514
+    },
+    {
+     "ID": "133408_2394",
+     "capacity": 100,
+     "peak": 1457
+    },
+    {
+     "ID": "135172_2392",
+     "capacity": 100,
+     "peak": 1452
+    }
+   ]
+  },
+  "10": {
+   "locations": 15,
+   "capacity_positive": 15,
+   "area_positive": 0,
+   "capacity_min": 50,
+   "capacity_median": 200,
+   "capacity_p90": 2000,
+   "capacity_max": 2000,
+   "max_over_median": 10.0,
+   "distinct_capacities": 5,
+   "total_capacity": 11900,
+   "total_assigned_candidates": 501034,
+   "locations_with_occupancy": 15,
+   "peak_occupancy_median": 1288,
+   "peak_occupancy_max": 1331,
+   "peak_over_capacity_median": 6.425,
+   "peak_over_capacity_p90": 13.08,
+   "fraction_peak_above_capacity": 0.6666666666666666,
+   "fraction_p95_above_capacity": 0.6666666666666666,
+   "worst": [
+    {
+     "ID": "76635_1197",
+     "capacity": 50,
+     "peak": 1307
+    },
+    {
+     "ID": "9776_1196",
+     "capacity": 50,
+     "peak": 1263
+    },
+    {
+     "ID": "212113_2424",
+     "capacity": 100,
+     "peak": 1308
+    }
+   ]
+  },
+  "11": {
+   "locations": 8,
+   "capacity_positive": 8,
+   "area_positive": 0,
+   "capacity_min": 5,
+   "capacity_median": 50.0,
+   "capacity_p90": 50,
+   "capacity_max": 50,
+   "max_over_median": 1.0,
+   "distinct_capacities": 2,
+   "total_capacity": 310,
+   "total_assigned_candidates": 500,
+   "locations_with_occupancy": 8,
+   "peak_occupancy_median": 50.0,
+   "peak_occupancy_max": 100,
+   "peak_over_capacity_median": 1.0,
+   "peak_over_capacity_p90": 20.0,
+   "fraction_peak_above_capacity": 0.25,
+   "fraction_p95_above_capacity": 0.25,
+   "worst": [
+    {
+     "ID": "14396_408",
+     "capacity": 5,
+     "peak": 100
+    },
+    {
+     "ID": "114028_409",
+     "capacity": 5,
+     "peak": 100
+    },
+    {
+     "ID": "45140_47",
+     "capacity": 50,
+     "peak": 50
+    }
+   ]
+  },
+  "12": {
+   "locations": 17,
+   "capacity_positive": 17,
+   "area_positive": 0,
+   "capacity_min": 150,
+   "capacity_median": 750,
+   "capacity_p90": 750,
+   "capacity_max": 750,
+   "max_over_median": 1.0,
+   "distinct_capacities": 2,
+   "total_capacity": 11550,
+   "total_assigned_candidates": 191163,
+   "locations_with_occupancy": 17,
+   "peak_occupancy_median": 429,
+   "peak_occupancy_max": 473,
+   "peak_over_capacity_median": 0.572,
+   "peak_over_capacity_p90": 0.5826666666666667,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "105753_1502",
+     "capacity": 750,
+     "peak": 473
+    },
+    {
+     "ID": "64114_1492",
+     "capacity": 750,
+     "peak": 441
+    },
+    {
+     "ID": "64148_1500",
+     "capacity": 750,
+     "peak": 437
+    }
+   ]
+  },
+  "13": {
+   "locations": 92,
+   "capacity_positive": 92,
+   "area_positive": 0,
+   "capacity_min": 100,
+   "capacity_median": 200.0,
+   "capacity_p90": 200,
+   "capacity_max": 20000,
+   "max_over_median": 100.0,
+   "distinct_capacities": 4,
+   "total_capacity": 37700,
+   "total_assigned_candidates": 994,
+   "locations_with_occupancy": 92,
+   "peak_occupancy_median": 7.0,
+   "peak_occupancy_max": 144,
+   "peak_over_capacity_median": 0.035,
+   "peak_over_capacity_p90": 0.1,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "66971_1441",
+     "capacity": 100,
+     "peak": 10
+    },
+    {
+     "ID": "66972_1442",
+     "capacity": 100,
+     "peak": 10
+    },
+    {
+     "ID": "114691_1443",
+     "capacity": 100,
+     "peak": 10
+    }
+   ]
+  },
+  "14": {
+   "locations": 95,
+   "capacity_positive": 95,
+   "area_positive": 0,
+   "capacity_min": 1000,
+   "capacity_median": 1000,
+   "capacity_p90": 1000,
+   "capacity_max": 1000,
+   "max_over_median": 1.0,
+   "distinct_capacities": 1,
+   "total_capacity": 95000,
+   "total_assigned_candidates": 188036,
+   "locations_with_occupancy": 95,
+   "peak_occupancy_median": 32,
+   "peak_occupancy_max": 35,
+   "peak_over_capacity_median": 0.032,
+   "peak_over_capacity_p90": 0.033,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "148486_2111",
+     "capacity": 1000,
+     "peak": 35
+    },
+    {
+     "ID": "148258_2116",
+     "capacity": 1000,
+     "peak": 35
+    },
+    {
+     "ID": "148522_2140",
+     "capacity": 1000,
+     "peak": 35
+    }
+   ]
+  },
+  "15": {
+   "locations": 5,
+   "capacity_positive": 5,
+   "area_positive": 0,
+   "capacity_min": 1000000,
+   "capacity_median": 1000000,
+   "capacity_p90": 1000000,
+   "capacity_max": 1000000,
+   "max_over_median": 1.0,
+   "distinct_capacities": 1,
+   "total_capacity": 5000000,
+   "total_assigned_candidates": 60918,
+   "locations_with_occupancy": 2,
+   "peak_occupancy_median": 10992.5,
+   "peak_occupancy_max": 16437,
+   "peak_over_capacity_median": 0.0109925,
+   "peak_over_capacity_p90": 0.005548,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "work_commuter_box",
+     "capacity": 1000000,
+     "peak": 16437
+    },
+    {
+     "ID": "school_commuter_box",
+     "capacity": 1000000,
+     "peak": 5548
+    }
+   ]
+  },
+  "22": {
+   "locations": 8,
+   "capacity_positive": 8,
+   "area_positive": 0,
+   "capacity_min": 55,
+   "capacity_median": 55.0,
+   "capacity_p90": 55,
+   "capacity_max": 55,
+   "max_over_median": 1.0,
+   "distinct_capacities": 1,
+   "total_capacity": 440,
+   "total_assigned_candidates": 7455,
+   "locations_with_occupancy": 8,
+   "peak_occupancy_median": 112.5,
+   "peak_occupancy_max": 164,
+   "peak_over_capacity_median": 2.0454545454545454,
+   "peak_over_capacity_p90": 2.4727272727272727,
+   "fraction_peak_above_capacity": 1.0,
+   "fraction_p95_above_capacity": 1.0,
+   "worst": [
+    {
+     "ID": "109021_1208",
+     "capacity": 55,
+     "peak": 164
+    },
+    {
+     "ID": "108800_1205",
+     "capacity": 55,
+     "peak": 136
+    },
+    {
+     "ID": "108580_1202",
+     "capacity": 55,
+     "peak": 116
+    }
+   ]
+  },
+  "33": {
+   "locations": 775,
+   "capacity_positive": 775,
+   "area_positive": 0,
+   "capacity_min": 23,
+   "capacity_median": 300,
+   "capacity_p90": 749,
+   "capacity_max": 979,
+   "max_over_median": 3.263333333333333,
+   "distinct_capacities": 38,
+   "total_capacity": 314809,
+   "total_assigned_candidates": 21351,
+   "locations_with_occupancy": 772,
+   "peak_occupancy_median": 28.0,
+   "peak_occupancy_max": 49,
+   "peak_over_capacity_median": 0.07623083131557709,
+   "peak_over_capacity_p90": 0.15,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "2a_109537szakk",
+     "capacity": 23,
+     "peak": 10
+    },
+    {
+     "ID": "2a_43336szakk",
+     "capacity": 138,
+     "peak": 49
+    },
+    {
+     "ID": "3a_109537szakk",
+     "capacity": 23,
+     "peak": 6
+    }
+   ]
+  },
+  "44": {
+   "locations": 19,
+   "capacity_positive": 19,
+   "area_positive": 0,
+   "capacity_min": 1200,
+   "capacity_median": 1200,
+   "capacity_p90": 1200,
+   "capacity_max": 1200,
+   "max_over_median": 1.0,
+   "distinct_capacities": 1,
+   "total_capacity": 22800,
+   "total_assigned_candidates": 15069,
+   "locations_with_occupancy": 19,
+   "peak_occupancy_median": 271,
+   "peak_occupancy_max": 890,
+   "peak_over_capacity_median": 0.22583333333333333,
+   "peak_over_capacity_p90": 0.7308333333333333,
+   "fraction_peak_above_capacity": 0.0,
+   "fraction_p95_above_capacity": 0.0,
+   "worst": [
+    {
+     "ID": "56400egyet",
+     "capacity": 1200,
+     "peak": 890
+    },
+    {
+     "ID": "184493egyet",
+     "capacity": 1200,
+     "peak": 883
+    },
+    {
+     "ID": "60716egyet",
+     "capacity": 1200,
+     "peak": 877
+    }
+   ]
+  }
+ }
+}

@@ -101,7 +101,7 @@ public:
         for (const parser::ClosureRules::Rule& rule : rules.rules) {
 
             // check if masks/closures are enabled
-            if (!enableClosures && !(rule.name.compare("Masks") == 0) && !(rule.name.compare("Curfew") == 0)
+            if (!enableClosures && !(rule.name.compare("Masks") == 0) && !(rule.name.compare("Ventilation") == 0) && !(rule.name.compare("Curfew") == 0)
                 && !(rule.name.compare("HolidayMode") == 0) && !(rule.name.compare("SchoolAgeRestriction") == 0)
                 && !(rule.name.compare("ExposeToMutation") == 0) && !(rule.name.compare("ReduceMovement") == 0)
                 && !(rule.name.compare("QuarantinePolicy")==0) && !(rule.name.compare("QuarantineImmune")==0)
@@ -242,6 +242,38 @@ public:
                         r->previousOpenState = shouldBeOpen;
                         if (diags > 0)
                             printf("Masks %s with %g multiplier\n", (int)shouldBeOpen ? "off" : "on", maskCoefficient2);
+                    }
+                });
+            } else if (rule.name.compare("Ventilation") == 0) {
+                thrust::device_vector<float>& locInfectiousness = realThis->locs->infectiousness;
+                thrust::device_vector<typename SimulationType::TypeOfLocation_t>& locTypes = realThis->locs->locType;
+                double factor = std::stod(rule.parameter);
+                std::vector<int> typeList = rule.locationTypesToClose;
+                std::vector<GlobalCondition*> conds = { &globalConditions[globalConditions.size() - 1] };
+                auto realThis = static_cast<SimulationType*>(this);
+                this->rules.emplace_back(rule.name, conds, [&, typeList, factor, diags, realThis](Rule* r) {
+                    bool close = true;
+                    for (GlobalCondition* c : r->conditions) { close = close && c->active; }
+                    bool shouldBeOpen = !close;
+                    if (r->previousOpenState != shouldBeOpen) {
+                        thrust::device_vector<int> types(typeList.begin(), typeList.end());
+                        int* typePtr = thrust::raw_pointer_cast(types.data());
+                        int typeCount = static_cast<int>(typeList.size());
+                        thrust::for_each(
+                            thrust::make_zip_iterator(thrust::make_tuple(locTypes.begin(), locInfectiousness.begin())),
+                            thrust::make_zip_iterator(thrust::make_tuple(locTypes.end(), locInfectiousness.end())),
+                            [typePtr, typeCount, factor, shouldBeOpen] HD(
+                                thrust::tuple<typename SimulationType::TypeOfLocation_t&, float&> tup) {
+                                int type = static_cast<int>(thrust::get<0>(tup));
+                                for (int i = 0; i < typeCount; ++i) {
+                                    if (typePtr[i] != type) continue;
+                                    float& infectiousness = thrust::get<1>(tup);
+                                    if (shouldBeOpen) infectiousness = infectiousness / static_cast<float>(factor);
+                                    else infectiousness = infectiousness * static_cast<float>(factor);
+                                }
+                            });
+                        r->previousOpenState = shouldBeOpen;
+                        if (diags > 0) printf("Ventilation %s with %g multiplier\n", (int)shouldBeOpen ? "off" : "on", factor);
                     }
                 });
             } else if (rule.name.compare("Curfew") == 0) {

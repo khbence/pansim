@@ -1,0 +1,64 @@
+{
+ "chain_flat_shed0.04": {
+  "non_seed_infections": 16119,
+  "hospital_share": 0.06222470376574229,
+  "by_parent_type": {
+   "2": {
+    "n": 5807,
+    "mean_offspring": 0.24918202169795076,
+    "child_in_hospital": 0.07118175535590877
+   },
+   "12": {
+    "n": 1003,
+    "mean_offspring": 0.46560319042871384,
+    "child_in_hospital": 0.4689507494646681
+   },
+   "7": {
+    "n": 1714,
+    "mean_offspring": 0.32380396732788796,
+    "child_in_hospital": 0.016216216216216217
+   },
+   "8": {
+    "n": 1486,
+    "mean_offspring": 0.2570659488559892,
+    "child_in_hospital": 0.020942408376963352
+   },
+   "14": {
+    "n": 484,
+    "mean_offspring": 0.3409090909090909,
+    "child_in_hospital": 0.10909090909090909
+   }
+  }
+ },
+ "chain_caregiving_shed0.09": {
+  "non_seed_infections": 18152,
+  "hospital_share": 0.21005949757602468,
+  "by_parent_type": {
+   "2": {
+    "n": 10539,
+    "mean_offspring": 0.22212733655944586,
+    "child_in_hospital": 0.16744980777445537
+   },
+   "12": {
+    "n": 3813,
+    "mean_offspring": 0.6813532651455547,
+    "child_in_hospital": 0.6963048498845266
+   },
+   "7": {
+    "n": 396,
+    "mean_offspring": 0.255050505050505,
+    "child_in_hospital": 0.019801980198019802
+   },
+   "8": {
+    "n": 389,
+    "mean_offspring": 0.3059125964010283,
+    "child_in_hospital": 0.025210084033613446
+   },
+   "14": {
+    "n": 847,
+    "mean_offspring": 0.4592680047225502,
+    "child_in_hospital": 0.061696658097686374
+   }
+  }
+ }
+}

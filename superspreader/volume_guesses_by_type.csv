@@ -1,0 +1,17 @@
+ID,type,m3_per_person,ACH_low,ACH_mid,ACH_high,basis,Veff_low,Veff_mid,Veff_high,rel_to_home_mid,spread_high_over_low
+2,Residence,40,0.3,0.5,1.0,"shared living volume, windows closed in cold season",52.0,60.0,80.0,1.0,1.5
+3,School stay site (non-classroom),15,1.0,2.0,4.0,"corridors, canteen, gym; mixed",30.0,45.0,75.0,0.75,2.5
+33,Classroom,6,0.7,1.5,4.0,~2 m2/pupil x ~3 m; natural ventilation dominates,10.2,15.0,30.0,0.25,2.9
+4,Standard workplace,30,1.0,2.0,4.0,open office ~10 m2/person; factory/pharmacy larger,60.0,90.0,150.0,1.5,2.5
+13,Non-standard-schedule workplace,40,1.0,2.0,4.0,"night shifts, plants, services",80.0,120.0,200.0,2.0,2.5
+44,University,10,1.0,3.0,6.0,"lecture halls ~1.5-2 m2/seat, high ceilings",20.0,40.0,70.0,0.67,3.5
+5,Restaurant / pub (20-100),6,1.0,3.0,6.0,~1.5-2 m2/seat x ~3.2 m,12.0,24.0,42.0,0.4,3.5
+6,Cinema / theatre / concert (100-1000),6,3.0,6.0,10.0,mechanical HVAC usual,24.0,42.0,66.0,0.7,2.8
+7,Short-visit shop / front office,25,2.0,4.0,8.0,~8 m2/person x ~3.5 m,75.0,125.0,225.0,2.08,3.0
+8,Longer-visit shop / gym / playground,30,1.0,3.0,8.0,"gym adds exertion emission, handled separately",60.0,120.0,270.0,2.0,4.5
+9,Church (50-500),15,0.3,1.0,2.0,"high ceilings, poor ventilation, singing",19.5,30.0,45.0,0.5,2.3
+10,Outdoor recreation,500,10.0,20.0,50.0,treat as open air; cannot accumulate,5500.0,10500.0,25500.0,175.0,4.6
+11,Closed facility (prison),12,0.3,0.7,1.5,"shared cells, dayrooms",15.600000000000001,20.4,30.0,0.34,1.9
+12,Hospital,25,2.0,4.0,6.0,"wards 6 to 12 ACH for isolation, 2-4 elsewhere",75.0,125.0,175.0,2.08,2.3
+14,Health centre,12,1.0,3.0,6.0,waiting rooms dense,24.0,48.0,84.0,0.8,3.5
+22,Nursing home,20,0.3,1.0,2.0,"shared rooms, poor ventilation",26.0,40.0,60.0,0.67,2.3

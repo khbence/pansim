@@ -6,12 +6,13 @@ alpha wave in viz/fitted_parameters2.json. One GPU run at a time.
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BINARY = ROOT / "build_gpu" / "panSim"
+BINARY = Path(os.environ.get("PANSIM_BIN", ROOT / "build_gpu" / "panSim"))
 RESULTS = Path(__file__).resolve().parent / "results"
 PARAMS = json.loads((ROOT / "viz" / "fitted_parameters2.json").read_text())
 CLOSURE_FITTED = ROOT / "inputConfigFiles" / "closureJun6_real_later3_delta_omicronBA2_earlier8.json"
@@ -39,8 +40,7 @@ def run_job(name, args):
         "inputConfigFiles/agentTypes_3.json",
         "-a",
         "inputRealExample/agents1.json",
-        "-l",
-        "inputRealExample/locations0.json",
+        *([] if "-l" in args else ["-l", "inputRealExample/locations0.json"]),
         "--infectiousnessMultiplier",
         INF,
         "--diseaseProgressionScaling",

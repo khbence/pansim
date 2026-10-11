@@ -49,16 +49,18 @@ Reading:
 
 Gamma per-infection multiplier (shape: off, 1, 0.3, 0.1) crossed with the covid venue profile (off, strength 1). Each cell is calibrated to early R 1.39 on two seeds and has 4 replicates; the four-replicate early R differs from the target by up to 9% (the shape 0.3 plus covid cell is highest at 1.52). Shuffled schedules are off.
 
-| multiplier shape | venue profile | early R | early k | 95% CI | zero share | top 20% share | CV² |
+| multiplier shape | venue profile | early R | early k | 95% CI | zero share | top 20% share | 1/k |
 |---|---|---|---|---|---|---|---|
-| off | off | 1.41 | 5.25 | 4.35 to 6.99 | 0.28 | 0.50 | 0.90 |
-| off | covid | 1.48 | 3.51 | 3.03 to 4.24 | 0.29 | 0.51 | 0.96 |
-| 1 | off | 1.37 | 0.88 | 0.77 to 0.99 | 0.44 | 0.64 | 1.86 |
-| 1 | covid | 1.45 | 0.69 | 0.60 to 0.82 | 0.43 | 0.65 | 2.13 |
-| 0.3 | off | 1.34 | 0.33 | 0.29 to 0.37 | 0.59 | 0.79 | 3.76 |
-| 0.3 | covid | 1.52 | 0.30 | 0.27 to 0.33 | 0.58 | 0.80 | 4.00 |
-| 0.1 | off | 1.35 | 0.127 | 0.108 to 0.148 | 0.73 | 0.95 | 8.63 |
-| 0.1 | covid | 1.35 | 0.119 | 0.106 to 0.138 | 0.75 | 0.96 | 9.17 |
+| off | off | 1.41 | 5.25 | 4.35 to 6.99 | 0.28 | 0.50 | 0.19 |
+| off | covid | 1.48 | 3.51 | 3.03 to 4.24 | 0.29 | 0.51 | 0.29 |
+| 1 | off | 1.37 | 0.88 | 0.77 to 0.99 | 0.44 | 0.64 | 1.13 |
+| 1 | covid | 1.45 | 0.69 | 0.60 to 0.82 | 0.43 | 0.65 | 1.44 |
+| 0.3 | off | 1.34 | 0.33 | 0.29 to 0.37 | 0.59 | 0.79 | 3.01 |
+| 0.3 | covid | 1.52 | 0.30 | 0.27 to 0.33 | 0.58 | 0.80 | 3.34 |
+| 0.1 | off | 1.35 | 0.127 | 0.108 to 0.148 | 0.73 | 0.95 | 7.89 |
+| 0.1 | covid | 1.35 | 0.119 | 0.106 to 0.138 | 0.75 | 0.96 | 8.43 |
+
+The last column is 1/k, the quantity that adds across independent sources of variation. An earlier version of this table reported the squared coefficient of variation of realised offspring, which equals 1/R + 1/k and includes Poisson sampling noise (0.71 of the 0.90 in the first row), so it could not be read as a variance partition.
 
 - Early k tracks the shape. The gamma composition rule, 1/k_total = 1/k_base + 1/shape + 1/(k_base * shape), predicts 0.72, 0.24 and 0.083 for shapes 1, 0.3 and 0.1 with a base k of 5.25. The measured values (0.88, 0.33, 0.127) are 20% to 50% above that, so the base dispersion adds less than the composition rule assumes. Early k is within a factor of 1.3 of the shape in every multiplier cell.
 - The covid venue profile at strength 1 lowers k only modestly (5.25 to 3.51 with no multiplier, 0.127 to 0.119 with shape 0.1). It is a minor contributor next to the multiplier, in agreement with 06 and with the kernel algebra.

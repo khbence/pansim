@@ -1,0 +1,31 @@
+id,doi,doi_resolves_via_doi.org(HTTP redirect),crossref_record_found,crossref_first_authors,crossref_year,crossref_title,journal,abstract_read_in_pubmed,full_text_read
+R1,10.1073/pnas.94.1.338,yes,yes,Woolhouse;Dye,1997,Heterogeneities in the transmission of infectious agents: Implications for the design of control programs,Proceedings of the National Academy of Sciences,yes,no
+R2,10.1038/nature04153,yes,yes,Lloyd-Smith;Schreiber,2005,Superspreading and the effect of individual variation on disease emergence,Nature,yes,no
+R3,10.12688/wellcomeopenres.15842.3,yes,yes,Endo;,2020,Estimating the overdispersion in COVID-19 transmission using outbreak sizes outside China,Wellcome Open Research,yes,no
+R4,10.1038/s41591-020-1092-0,yes,yes,Adam;Wu,2020,Clustering and superspreading potential of SARS-CoV-2 infections in Hong Kong,Nature Medicine,yes,no
+R5,10.1126/science.abe2424,yes,yes,Sun;Wang,2021,"Transmission heterogeneities, kinetics, and controllability of SARS-CoV-2",Science,yes,no
+R6,10.1038/s41467-025-60591-x,yes,yes,Chen;Adam,2025,Investigating setting-specific superspreading potential and generation intervals of COVID-19 in Hong Kong,Nature Communications,yes,no
+R7,10.1186/s12889-023-15915-1,yes,yes,Wegehaupt;Endo,2023,"Superspreading, overdispersion and their implications in the SARS-CoV-2 (COVID-19) pandemic: a systematic review and meta-analysis of the literature",BMC Public Health,yes,no
+R8,10.1038/s41598-021-93578-x,yes,yes,Kremer;Torneri,2021,Quantifying superspreading for COVID-19 using Poisson mixture distributions,Scientific Reports,yes,no
+R9,10.12688/wellcomeopenres.16344.3,yes,yes,Endo;,2021,Implication of backward contact tracing in the presence of overdispersed transmission in COVID-19 outbreaks,Wellcome Open Research,yes,no
+R10,10.12688/wellcomeopenres.15889.2,yes,yes,Leclerc;Fuller,2020,What settings have been linked to SARS-CoV-2 transmission clusters?,Wellcome Open Research,yes,no
+R11,10.1111/ina.12751,yes,yes,Miller;Nazaroff,2020,Transmission of SARS‐CoV‐2 by inhalation of respiratory aerosol in the Skagit Valley Chorale superspreading event,Indoor Air,yes,no
+R12,10.7554/eLife.63537,yes,yes,Goyal;Reeves,2021,Viral load and contact heterogeneity predict SARS-CoV-2 transmission and super-spreading events,eLife,yes,no
+R13,10.1038/s41564-022-01105-z,yes,yes,Ke;Martinez,2022,Daily longitudinal sampling of SARS-CoV-2 infection reveals substantial heterogeneity in infectiousness,Nature Microbiology,yes,no
+R14,10.1016/S1473-3099(20)30985-3,yes,yes,Marks;Millat-Martinez,2021,"Transmission of COVID-19 in 282 clusters in Catalonia, Spain: a cohort study",The Lancet Infectious Diseases,yes,no
+R15,10.7554/eLife.65774,yes,yes,Chen;Bobrovitz,2021,Heterogeneity in transmissibility and shedding SARS-CoV-2 via droplets and aerosols,eLife,yes,no
+R16,10.1073/pnas.2021830118,yes,yes,Edwards;Ausiello,2021,"Exhaled aerosol increases with COVID-19 infection, age, and obesity",Proceedings of the National Academy of Sciences,yes,no
+R17,10.1016/S2666-5247(20)30172-5,yes,yes,Cevik;Tate,2021,"SARS-CoV-2, SARS-CoV, and MERS-CoV viral load dynamics, duration of viral shedding, and infectiousness: a systematic review and meta-analysis",The Lancet Microbe,yes,no
+R18,10.3201/eid1508.081237,yes,yes,Luby;Hossain,2009,"Recurrent Zoonotic Transmission of Nipah Virus into Humans, Bangladesh, 2001-2007",Emerging Infectious Diseases,yes,no
+R19,10.3201/eid1307.061128,yes,yes,Gurley;Montgomery,2007,Person-to-Person Transmission of Nipah Virus in a Bangladeshi Community,Emerging Infectious Diseases,yes,no
+R20,10.3201/eid1902.120971,yes,yes,Sazzad;Hossain,2013,"Nipah Virus Infection Outbreak with Nosocomial and Corpse-to-Human Transmission, Bangladesh",Emerging Infectious Diseases,yes,no
+R21,10.1056/NEJMoa1805376,yes,yes,Nikolay;Salje,2019,Transmission of Nipah Virus - 14 Years of Investigations in Bangladesh,New England Journal of Medicine,yes,no
+R22,10.1016/j.ijid.2026.108683,yes,yes,Pan;Guo,2026,Superspreading potential of Nipah virus disease despite self-limited human-to-human transmission in community,International Journal of Infectious Diseases,yes,no
+R23,10.1016/S1473-3099(26)00239-2,yes,yes,Naidoo;Morgenstern,2026,"A systematic review of Nipah virus disease epidemiological parameters, outbreaks, and mathematical models",The Lancet Infectious Diseases,yes,no
+R24,10.1056/NEJMoa044021,yes,yes,Ungchusak;Auewarakul,2005,Probable Person-to-Person Transmission of Avian Influenza A (H5N1),New England Journal of Medicine,yes,no
+R25,10.1056/NEJMoa060930,yes,yes,Kandun;Wibisono,2006,Three Indonesian Clusters of H5N1 Virus Infection in 2005,New England Journal of Medicine,yes,no
+R26,10.1371/journal.pone.0029971,yes,yes,Aditama;Samaan,2012,"Avian Influenza H5N1 Transmission in Households, Indonesia",PLoS ONE,yes,no
+R27,10.1056/NEJMoa2414610,yes,yes,Garg;Reinhart,2025,Highly Pathogenic Avian Influenza A(H5N1) Virus Infections in Humans,New England Journal of Medicine,yes,no
+R28,10.1186/s12879-025-11933-z,yes,yes,Ward;Lambert,2025,Estimates of epidemiological parameters for H5N1 influenza in humans: a rapid review,BMC Infectious Diseases,yes,no
+R29,10.1073/pnas.2016623118,yes,yes,Sneppen;Nielsen,2021,Overdispersion in COVID-19 increases the effectiveness of limiting nonrepetitive contacts for transmission control,Proceedings of the National Academy of Sciences,yes,no
+R30,10.1038/s41586-020-2923-3,yes,yes,Chang;Pierson,2020,Mobility network models of COVID-19 explain inequities and inform reopening,Nature,yes,no
