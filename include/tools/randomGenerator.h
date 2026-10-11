@@ -21,6 +21,7 @@ class RandomGenerator {
 
 public:
     static void init(unsigned agents, std::uint64_t seed);
+    [[nodiscard]] static std::uint64_t getBaseSeed() { return baseSeed; }
     static void resize(unsigned agents);
 
     [[nodiscard]] static __host__ thrust::host_vector<float> fillUnitf(unsigned size) {

@@ -1,0 +1,48 @@
+{
+ "T2_gamma_rho0.5_s5": {
+  "mean": 1.003053737029035,
+  "cv2": 3.3404076646026546,
+  "cv2_target": 3.3333333333333335,
+  "susc_mean": 1.000000000049328,
+  "pass": true
+ },
+ "T2_gamma_rho1_s5": {
+  "mean": 1.003053737029035,
+  "cv2": 3.3404076646026546,
+  "cv2_target": 3.3333333333333335,
+  "susc_mean": 0.999999999952035,
+  "pass": true
+ },
+ "T2_gamma_a0.08_s5": {
+  "mean": 0.9970186036260709,
+  "cv2": 12.622599960842752,
+  "cv2_target": 12.5,
+  "susc_mean": 0.9999999999907258,
+  "pass": true
+ },
+ "T2_lognormal_rho1_s5": {
+  "mean": 1.003361643213338,
+  "cv2": 3.2188081718566215,
+  "cv2_target": 3.3333333333333335,
+  "susc_mean": 0.9999999999708327,
+  "pass": true
+ },
+ "T2_gamma_rho0_s5": {
+  "mean": 1.003053737029035,
+  "cv2": 3.3404076646026546,
+  "cv2_target": 3.3333333333333335,
+  "susc_mean": 1.0,
+  "pass": true
+ },
+ "T3": {
+  "same_seed_same_trait_across_rho": true,
+  "different_seed_differs": true,
+  "pass": true
+ },
+ "T4": {
+  "infected_agents": 18372,
+  "reinfected_agents": 62,
+  "agents_with_shed_not_equal_trait": 0,
+  "pass": true
+ }
+}

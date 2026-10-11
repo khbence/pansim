@@ -392,28 +392,37 @@ public:
                         thrust::device_vector<unsigned> exposed(realThis->agents->PPValues.size(), 0);
                         unsigned timestamp = realThis->getSimTime().getTimestamp();
                         double sheddingShape = realThis->getSheddingShape();
+                        const float* traitPtr = realThis->getTraitInfectiousnessPtr();
+                        const bool peak = realThis->getPeakMode();
                         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.begin(),
                                              realThis->agents->location.begin(),
                                              exposed.begin(),
-                                             realThis->agents->agentStats.begin())),
+                                             realThis->agents->agentStats.begin(),
+                                             thrust::make_counting_iterator<unsigned>(0))),
                             thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.end(),
                                 realThis->agents->location.end(),
                                 exposed.end(),
-                                realThis->agents->agentStats.end())),
-                            [fraction, timestamp, variantIdx, sheddingShape] HD(
-                                thrust::tuple<typename SimulationType::PPState_t&, unsigned&, unsigned&, AgentStats&> tup) {
+                                realThis->agents->agentStats.end(),
+                                thrust::make_counting_iterator<unsigned>(0) + realThis->agents->PPValues.size())),
+                            [fraction, timestamp, variantIdx, sheddingShape, traitPtr, peak] HD(
+                                thrust::tuple<typename SimulationType::PPState_t&, unsigned&, unsigned&, AgentStats&, unsigned> tup) {
                                 auto& state = thrust::get<0>(tup);
                                 auto& agentLocation = thrust::get<1>(tup);
                                 auto& exposed = thrust::get<2>(tup);
                                 auto& agentStat = thrust::get<3>(tup);
+                                unsigned agentID = thrust::get<4>(tup);
                                 if (state.getSusceptible(variantIdx) > 0.0f
                                     && RandomGenerator::randomUnit() < fraction * state.getSusceptible(variantIdx)) {
                                     state.gotInfected(variantIdx);
-                                    float shed = sheddingShape > 0.0
-                                        ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape))
-                                        : 1.0f;
-                                    state.setShedMultiplier(shed);
+                                    float shed;
+                                    if (traitPtr != nullptr) {
+                                        shed = traitPtr[agentID];
+                                    } else {
+                                        shed = sheddingShape > 0.0 ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape)) : 1.0f;
+                                    }
+                                    state.setShedMultiplier(peak ? 1.0f : shed);
                                     agentStat.shedMultiplier = shed;
+                                    agentStat.symptomOnsetTimestamp = 0xffffffffu;
                                     agentStat.infectedTimestamp = timestamp;
                                     agentStat.infectedLocation = agentLocation;
                                     agentStat.infectedCount++;

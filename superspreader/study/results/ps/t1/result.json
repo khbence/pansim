@@ -1,0 +1,10 @@
+{
+ "none": {
+  "daily_identical": true,
+  "trace_first13_identical": true
+ },
+ "shed0.3": {
+  "daily_identical": true,
+  "trace_first13_identical": true
+ }
+}

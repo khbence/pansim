@@ -11,6 +11,10 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <random>
+#include <cmath>
+#include <cstdint>
+#include "customExceptions.h"
 
 template<class SimulationType>
 class BasicInfection {
@@ -23,6 +27,23 @@ private:
     bool flagInfectionAtLocations = false;
     std::string dumpDirectory = "";
     double sheddingShape = 0.0;
+    double traitShape = 0.0;
+    std::string traitDist = "gamma";
+    unsigned traitPersist = 1;
+    double traitSusceptibilityExp = 0.0;
+    std::string traitDumpPath = "";
+    std::string sheddingMode = "constant";
+    bool peakMode = false;
+    int peakStartDay = 0;
+    int peakEndDay = -1;
+    int peakAppliedDay = -1;
+    std::string profileOutPath = "";
+    std::vector<double> profileSum = std::vector<double>(61, 0.0);
+    std::vector<double> profileCount = std::vector<double>(61, 0.0);
+    thrust::device_vector<float> traitInfectiousness;
+    thrust::device_vector<float> traitSusceptibility;
+    bool traitsInitialised = false;
+    int profileAppliedDay = -1;
     double densityExponent = 1.0;
     std::string infectionTracePath = "";
     std::string occupancyStatsPath = "";
@@ -132,6 +153,30 @@ public:
             ("sheddingShape",
             "Gamma shape of a per-infection shedding multiplier with mean 1. <=0 disables it",
             cxxopts::value<double>()->default_value("0"))
+            ("traitShape",
+            "Shape of a persistent per-agent infectiousness trait with mean 1 (gamma CV2 = 1/shape, lognormal likewise). <=0 disables it",
+            cxxopts::value<double>()->default_value("0"))
+            ("traitDist",
+            "Family of the persistent trait: gamma or lognormal",
+            cxxopts::value<std::string>()->default_value("gamma"))
+            ("traitPersist",
+            "1: the trait is drawn once per agent and kept for life",
+            cxxopts::value<unsigned>()->default_value("1"))
+            ("traitSusceptibilityExp",
+            "Exponent rho: susceptibility weight is trait^rho scaled to mean 1 over agents, applied on the hazard scale. 0 disables it",
+            cxxopts::value<double>()->default_value("0"))
+            ("traitDump",
+            "Write per-agent trait, susceptibility weight, age, agent type and home location type to this CSV path",
+            cxxopts::value<std::string>()->default_value(""))
+            ("sheddingMode",
+            "constant: the per-episode multiplier scales infectiousness at all times; peak: only on days since infection inside sheddingPeakWindow",
+            cxxopts::value<std::string>()->default_value("constant"))
+            ("sheddingPeakWindow",
+            "t1,t2: calendar days since the infection day (inclusive) in which the multiplier acts in peak mode",
+            cxxopts::value<std::string>()->default_value(""))
+            ("profileOut",
+            "Write the mean infectiousness by days since infection to this CSV path",
+            cxxopts::value<std::string>()->default_value(""))
             ("densityExponent",
             "Infection density is the summed infectiousness divided by occupancy to this power. 1 is the original kernel",
             cxxopts::value<double>()->default_value("1"))
@@ -169,16 +214,53 @@ public:
     }
 
     [[nodiscard]] double getSheddingShape() const { return sheddingShape; }
+    [[nodiscard]] const float* getTraitInfectiousnessPtr() const {
+        return traitInfectiousness.empty() ? nullptr : thrust::raw_pointer_cast(traitInfectiousness.data());
+    }
+    [[nodiscard]] bool getPeakMode() const { return peakMode; }
 
     void finalize() {
         writeInfectionTrace();
         writeOccupancyStats();
+        writeProfile();
         if (flagInfectionAtLocations)
             dumpstore->write(dumpDirectory);
         delete dumpstore;
     }
 
 protected:
+    void validateTraitOptions(const std::string& window) {
+        if (traitShape > 0.0 && sheddingShape > 0.0) {
+            throw CustomErrors("--sheddingShape and --traitShape are mutually exclusive");
+        }
+        if (traitDist != "gamma" && traitDist != "lognormal") {
+            throw CustomErrors("--traitDist must be gamma or lognormal");
+        }
+        if (traitShape > 0.0 && traitPersist != 1) {
+            throw CustomErrors("--traitShape needs --traitPersist 1; the per-episode case is --sheddingShape");
+        }
+        if (traitSusceptibilityExp != 0.0 && !(traitShape > 0.0)) {
+            throw CustomErrors("--traitSusceptibilityExp needs --traitShape > 0");
+        }
+        if (traitSusceptibilityExp < 0.0) {
+            throw CustomErrors("--traitSusceptibilityExp must not be negative");
+        }
+        if (sheddingMode != "constant" && sheddingMode != "peak") {
+            throw CustomErrors("--sheddingMode must be constant or peak");
+        }
+        peakMode = sheddingMode == "peak";
+        if (peakMode) {
+            if (!(sheddingShape > 0.0)) throw CustomErrors("--sheddingMode peak needs --sheddingShape > 0");
+            auto comma = window.find(',');
+            if (comma == std::string::npos) throw CustomErrors("--sheddingMode peak needs --sheddingPeakWindow t1,t2");
+            peakStartDay = std::stoi(window.substr(0, comma));
+            peakEndDay = std::stoi(window.substr(comma + 1));
+            if (peakStartDay < 1 || peakEndDay < peakStartDay) {
+                throw CustomErrors("--sheddingPeakWindow needs 1 <= t1 <= t2");
+            }
+        }
+    }
+
     void initializeArgs(const cxxopts::ParseResult& result) {
         this->k = result["infectionCoefficient"].as<double>();
         dumpToFile = result["dumpLocationInfections"].as<unsigned>();
@@ -189,6 +271,14 @@ protected:
         trunc = result["trunc"].as<double>();
         flagInfectionAtLocations = (dumpDirectory == "") ? false : true;
         sheddingShape = result["sheddingShape"].as<double>();
+        traitShape = result["traitShape"].as<double>();
+        traitDist = result["traitDist"].as<std::string>();
+        traitPersist = result["traitPersist"].as<unsigned>();
+        traitSusceptibilityExp = result["traitSusceptibilityExp"].as<double>();
+        traitDumpPath = result["traitDump"].as<std::string>();
+        sheddingMode = result["sheddingMode"].as<std::string>();
+        profileOutPath = result["profileOut"].as<std::string>();
+        validateTraitOptions(result["sheddingPeakWindow"].as<std::string>());
         densityExponent = result["densityExponent"].as<double>();
         infectionTracePath = result["infectionTrace"].as<std::string>();
         occupancyStatsPath = result["occupancyStats"].as<std::string>();
@@ -551,32 +641,159 @@ public:
     }
 
 
+    static std::uint64_t mixBits(std::uint64_t x) {
+        x += 0x9e3779b97f4a7c15ULL;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+        return x ^ (x >> 31);
+    }
+
+    void initialiseTraits() {
+        if (traitsInitialised) return;
+        traitsInitialised = true;
+        auto realThis = static_cast<SimulationType*>(this);
+        const std::size_t n = realThis->agents->PPValues.size();
+        std::vector<float> trait(n, 1.0f);
+        std::vector<float> weight(n, 1.0f);
+        if (traitShape > 0.0) {
+            const std::uint64_t base = RandomGenerator::getBaseSeed();
+            const bool lognormal = traitDist == "lognormal";
+            const double logVar = std::log(1.0 + 1.0 / traitShape);
+            std::vector<double> draws(n);
+            for (std::size_t i = 0; i < n; ++i) {
+                std::mt19937_64 generator(mixBits(base ^ 0x7472616974ULL) + mixBits(static_cast<std::uint64_t>(i) + 1ULL));
+                if (lognormal) {
+                    std::lognormal_distribution<double> dist(-0.5 * logVar, std::sqrt(logVar));
+                    draws[i] = dist(generator);
+                } else {
+                    std::gamma_distribution<double> dist(traitShape, 1.0 / traitShape);
+                    draws[i] = dist(generator);
+                }
+                trait[i] = static_cast<float>(draws[i]);
+            }
+            if (traitSusceptibilityExp > 0.0) {
+                double total = 0.0;
+                for (std::size_t i = 0; i < n; ++i) total += std::pow(draws[i], traitSusceptibilityExp);
+                const double mean = total / static_cast<double>(n);
+                for (std::size_t i = 0; i < n; ++i) {
+                    weight[i] = static_cast<float>(std::pow(draws[i], traitSusceptibilityExp) / mean);
+                }
+            }
+            traitInfectiousness = trait;
+            if (traitSusceptibilityExp > 0.0) traitSusceptibility = weight;
+        }
+        if (!traitDumpPath.empty()) writeTraitDump(trait, weight);
+    }
+
+    void writeTraitDump(const std::vector<float>& trait, const std::vector<float>& weight) {
+        auto realThis = static_cast<SimulationType*>(this);
+        thrust::host_vector<typename SimulationType::AgentMeta_t> meta = realThis->agents->agentMetaData;
+        thrust::host_vector<unsigned> types = realThis->agents->types;
+        thrust::host_vector<unsigned long> offsets = realThis->agents->locationOffset;
+        thrust::host_vector<unsigned> possibleTypes = realThis->agents->possibleTypes;
+        thrust::host_vector<unsigned> possibleLocations = realThis->agents->possibleLocations;
+        thrust::host_vector<typename SimulationType::TypeOfLocation_t> locTypes = realThis->locs->locType;
+        std::ofstream out(traitDumpPath.c_str());
+        out << "agent,trait,susceptibilityWeight,age,agentType,homeLocType\n";
+        out.precision(9);
+        for (std::size_t i = 0; i < trait.size(); ++i) {
+            int homeLocType = -1;
+            for (unsigned long j = offsets[i]; j < offsets[i + 1]; ++j) {
+                if (possibleTypes[j] == realThis->homeType) {
+                    homeLocType = static_cast<int>(locTypes[possibleLocations[j]]);
+                    break;
+                }
+            }
+            out << i << ',' << trait[i] << ',' << weight[i] << ',' << static_cast<int>(meta[i].getAge()) << ',' << types[i] << ','
+                << homeLocType << '\n';
+        }
+    }
+
     void ensureInitialShedding() {
         if (initialSheddingDone) return;
         initialSheddingDone = true;
+        initialiseTraits();
         auto realThis = static_cast<SimulationType*>(this);
         double shape = sheddingShape;
+        const bool peak = peakMode;
+        const float* traitPtr = getTraitInfectiousnessPtr();
         const unsigned unknownTime = 0xffffffffu;
         thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.begin(),
                              realThis->agents->agentStats.begin(),
-                             realThis->agents->location.begin())),
+                             realThis->agents->location.begin(),
+                             thrust::make_counting_iterator<unsigned>(0))),
             thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.end(),
                 realThis->agents->agentStats.end(),
-                realThis->agents->location.end())),
-            [shape, unknownTime] HD(thrust::tuple<typename SimulationType::PPState_t&, AgentStats&, unsigned&> tup) {
+                realThis->agents->location.end(),
+                thrust::make_counting_iterator<unsigned>(0) + realThis->agents->PPValues.size())),
+            [shape, unknownTime, traitPtr, peak] HD(thrust::tuple<typename SimulationType::PPState_t&, AgentStats&, unsigned&, unsigned> tup) {
                 auto& state = thrust::get<0>(tup);
                 auto& stat = thrust::get<1>(tup);
                 unsigned place = thrust::get<2>(tup);
+                unsigned agentID = thrust::get<3>(tup);
                 if (!state.isInfected()) return;
                 if (stat.infectedTimestamp == unknownTime) {
                     stat.infectedTimestamp = 0;
                     stat.infectedLocation = place;
                 }
-                if (!(shape > 0.0)) return;
-                float multiplier = static_cast<float>(RandomGenerator::gammaMeanOne(shape));
-                state.setShedMultiplier(multiplier);
+                float multiplier;
+                if (traitPtr != nullptr) {
+                    multiplier = traitPtr[agentID];
+                } else if (shape > 0.0) {
+                    multiplier = static_cast<float>(RandomGenerator::gammaMeanOne(shape));
+                } else {
+                    return;
+                }
+                state.setShedMultiplier(peak ? 1.0f : multiplier);
                 stat.shedMultiplier = multiplier;
             });
+    }
+
+    void applyPeakWindow(Timehandler& simTime) {
+        if (!peakMode) return;
+        const unsigned stepsPerDay = simTime.getStepsPerDay();
+        const int day = static_cast<int>(simTime.getTimestamp() / stepsPerDay);
+        if (day == peakAppliedDay) return;
+        peakAppliedDay = day;
+        auto realThis = static_cast<SimulationType*>(this);
+        const int t1 = peakStartDay;
+        const int t2 = peakEndDay;
+        thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.begin(), realThis->agents->agentStats.begin())),
+            thrust::make_zip_iterator(thrust::make_tuple(realThis->agents->PPValues.end(), realThis->agents->agentStats.end())),
+            [day, t1, t2, stepsPerDay] HD(thrust::tuple<typename SimulationType::PPState_t&, AgentStats&> tup) {
+                auto& state = thrust::get<0>(tup);
+                auto& stat = thrust::get<1>(tup);
+                if (!state.isInfected() || stat.infectedTimestamp == 0xffffffffu) return;
+                int age = day - static_cast<int>(stat.infectedTimestamp / stepsPerDay);
+                float target = (age >= t1 && age <= t2) ? stat.shedMultiplier : 1.0f;
+                if (state.getShedMultiplier() != target) state.setShedMultiplier(target);
+            });
+    }
+
+    void accumulateProfile(Timehandler& simTime) {
+        if (profileOutPath.empty()) return;
+        const unsigned stepsPerDay = simTime.getStepsPerDay();
+        const int day = static_cast<int>(simTime.getTimestamp() / stepsPerDay);
+        if (day == profileAppliedDay) return;
+        profileAppliedDay = day;
+        auto realThis = static_cast<SimulationType*>(this);
+        thrust::host_vector<typename SimulationType::PPState_t> states = realThis->agents->PPValues;
+        thrust::host_vector<AgentStats> stats = realThis->agents->agentStats;
+        for (std::size_t i = 0; i < states.size(); ++i) {
+            if (!states[i].isInfected() || stats[i].infectedTimestamp == 0xffffffffu || stats[i].infectedTimestamp == 0) continue;
+            int age = day - static_cast<int>(stats[i].infectedTimestamp / stepsPerDay);
+            if (age < 0 || age >= static_cast<int>(profileSum.size())) continue;
+            profileSum[age] += states[i].isInfectious();
+            profileCount[age] += 1.0;
+        }
+    }
+
+    void writeProfile() {
+        if (profileOutPath.empty()) return;
+        std::ofstream out(profileOutPath.c_str());
+        out << "daysSinceInfection,sumInfectiousness,infectedAgents\n";
+        out.precision(10);
+        for (std::size_t d = 0; d < profileSum.size(); ++d) out << d << ',' << profileSum[d] << ',' << profileCount[d] << '\n';
     }
 
     void attributeInfectors(uint8_t variant) {
@@ -589,6 +806,7 @@ public:
         unsigned* newly = thrust::raw_pointer_cast(newlyInfectedAgents.data());
         unsigned nAgents = static_cast<unsigned>(realThis->agents->PPValues.size());
         const unsigned unknown = 0xffffffffu;
+        const bool keepEpisodeMultiplier = peakMode || traitInfectiousness.size() > 0;
         thrust::for_each(thrust::make_counting_iterator<unsigned>(0),
             thrust::make_counting_iterator<unsigned>(nAgents),
             [=] HD(unsigned agent) {
@@ -615,7 +833,9 @@ public:
                     }
                 }
                 stats[agent].infectorId = infector;
-                stats[agent].shedMultiplier = states[agent].getShedMultiplier();
+                if (!keepEpisodeMultiplier) stats[agent].shedMultiplier = states[agent].getShedMultiplier();
+                stats[agent].infectorShed = infector != unknown ? stats[infector].shedMultiplier : 1.0f;
+                stats[agent].infectorInfectedTimestamp = infector != unknown ? stats[infector].infectedTimestamp : unknown;
                 stats[agent].infectedOccupancy = offsets[place + 1] - offsets[place];
                 stats[agent].infectiousPresent = total;
             });
@@ -714,7 +934,8 @@ public:
             return;
         }
         out << "agent\tinfector\tlocation\tlocType\ttimestamp\tvariant\tshed\tdiagnosed\t"
-               "hospitalized\tinfectedCount\tworstState\toccupancy\tinfectiousPresent\n";
+               "hospitalized\tinfectedCount\tworstState\toccupancy\tinfectiousPresent\tinfectorShed\tinfectorTimestamp\t"
+               "symptomOnset\tquarantinedFrom\tquarantinedUntil\n";
         const unsigned unknownTime = std::numeric_limits<unsigned>::max();
         for (unsigned agent = 0; agent < stats.size(); ++agent) {
             const AgentStats& stat = stats[agent];
@@ -725,7 +946,9 @@ public:
                 << stat.infectedTimestamp << '\t' << stat.variant << '\t' << stat.shedMultiplier << '\t'
                 << stat.diagnosedTimestamp << '\t' << stat.hospitalizedTimestamp << '\t'
                 << static_cast<unsigned>(stat.infectedCount) << '\t' << static_cast<int>(stat.worstState) << '\t'
-                << stat.infectedOccupancy << '\t' << stat.infectiousPresent << '\n';
+                << stat.infectedOccupancy << '\t' << stat.infectiousPresent << '\t' << stat.infectorShed << '\t'
+                << stat.infectorInfectedTimestamp << '\t' << stat.symptomOnsetTimestamp << '\t' << stat.quarantinedTimestamp << '\t'
+                << stat.quarantinedUntilTimestamp << '\n';
         }
     }
 
@@ -733,6 +956,8 @@ public:
         PROFILE_FUNCTION();
         auto realThis = static_cast<SimulationType*>(this);
         ensureInitialShedding();
+        applyPeakWindow(simTime);
+        accumulateProfile(simTime);
         if (realThis->locs->eventRate > 0.0) {
             realThis->locs->updateDailyEvents(simTime.getTimestamp() / simTime.getStepsPerDay());
         }
@@ -831,7 +1056,10 @@ public:
             recordNewInfections,
             simTime,
             variant,
-            sheddingShape);
+            sheddingShape,
+            getTraitInfectiousnessPtr(),
+            traitSusceptibility.empty() ? nullptr : thrust::raw_pointer_cast(traitSusceptibility.data()),
+            peakMode);
         if (!infectionTracePath.empty()) attributeInfectors(variant);
         if (flagInfectionAtLocations) {
             thrust::device_vector<unsigned> fullInfectedCounts2(fullInfectedCounts.size(), 0);

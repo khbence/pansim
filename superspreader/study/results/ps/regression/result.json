@@ -1,0 +1,42 @@
+{
+ "baseline": {
+  "published": [
+   5.25,
+   4.35,
+   6.99
+  ],
+  "k": 5.247922129205944,
+  "infectors": 3860,
+  "k_infector_ci": {
+   "low": 4.2887227647312125,
+   "high": 6.969777465663121,
+   "finite_fraction": 1.0
+  },
+  "k_cluster_ci": {
+   "low": 4.534006744104697,
+   "high": 6.234819649635918,
+   "finite_fraction": 1.0
+  },
+  "inside_published_interval": true
+ },
+ "shape0.3": {
+  "published": [
+   0.33,
+   0.29,
+   0.37
+  ],
+  "k": 0.3324611286505867,
+  "infectors": 3950,
+  "k_infector_ci": {
+   "low": 0.2942501683969516,
+   "high": 0.3723051050709081,
+   "finite_fraction": 1.0
+  },
+  "k_cluster_ci": {
+   "low": 0.31915482265837447,
+   "high": 0.3510791070579142,
+   "finite_fraction": 1.0
+  },
+  "inside_published_interval": true
+ }
+}

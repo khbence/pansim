@@ -103,7 +103,10 @@ public:
         bool flagInfectionsAtLocation,
         Timehandler& simTime,
         uint8_t variant,
-        double sheddingShape) {
+        double sheddingShape,
+        const float* traitInfectiousness = nullptr,
+        const float* traitSusceptibility = nullptr,
+        bool peakMode = false) {
         //        PROFILE_FUNCTION();
         auto& ppstates = SimulationType::AgentListType::getInstance()->PPValues;
         auto& agentStats = SimulationType::AgentListType::getInstance()->agentStats;
@@ -131,7 +134,7 @@ public:
                 thrust::make_counting_iterator<unsigned>(0) + ppstates.size(),
                 thrust::make_permutation_iterator(infectionAtLocation.begin(), agentLocations.end()),
                 newlyInfectedAgents.begin() + ppstates.size())),
-            [timestamp, tracked2, flagInfectionsAtLocation, variant, sheddingShape] HD(thrust::tuple<typename SimulationType::PPState_t&,
+            [timestamp, tracked2, flagInfectionsAtLocation, variant, sheddingShape, traitInfectiousness, traitSusceptibility, peakMode] HD(thrust::tuple<typename SimulationType::PPState_t&,
                 float&,
                 TypeOfLocation&,
                 AgentStats&,
@@ -147,14 +150,23 @@ public:
                 unsigned agentID = thrust::get<5>(tuple);
                 bool& infectionAtLocation = thrust::get<6>(tuple);
                 unsigned& newlyInfectedAgent = thrust::get<7>(tuple);
+                float infectionProbability = infectionRatio * ppstate.getSusceptible(variant);
+                if (traitSusceptibility != nullptr && ppstate.getSusceptible(variant) > 0.0f) {
+                    float weight = traitSusceptibility[agentID];
+                    if (weight != 1.0f) infectionProbability = -expm1f(weight * log1pf(-infectionProbability));
+                }
                 if (ppstate.getSusceptible(variant) > 0.0f
-                    && RandomGenerator::randomUnit() < infectionRatio * ppstate.getSusceptible(variant)) {
+                    && RandomGenerator::randomUnit() < infectionProbability) {
                     ppstate.gotInfected(variant);
-                    float shed = sheddingShape > 0.0
-                        ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape))
-                        : 1.0f;
-                    ppstate.setShedMultiplier(shed);
+                    float shed;
+                    if (traitInfectiousness != nullptr) {
+                        shed = traitInfectiousness[agentID];
+                    } else {
+                        shed = sheddingShape > 0.0 ? static_cast<float>(RandomGenerator::gammaMeanOne(sheddingShape)) : 1.0f;
+                    }
+                    ppstate.setShedMultiplier(peakMode ? 1.0f : shed);
                     agentStat.shedMultiplier = shed;
+                    agentStat.symptomOnsetTimestamp = 0xffffffffu;
                     agentStat.infectedTimestamp = timestamp;
                     agentStat.infectedCount++;
                     agentStat.infectedLocation = agentLocation;

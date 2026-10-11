@@ -11,6 +11,9 @@ public:
     float shedMultiplier = 1.0f;
     unsigned infectedOccupancy = 0;
     float infectiousPresent = 0.0f;
+    float infectorShed = 1.0f;
+    unsigned infectorInfectedTimestamp = std::numeric_limits<unsigned>::max();
+    unsigned symptomOnsetTimestamp = std::numeric_limits<unsigned>::max();
     unsigned worstStateTimestamp = 0;
     unsigned worstStateEndTimestamp = 0;
     unsigned diagnosedTimestamp = 0;

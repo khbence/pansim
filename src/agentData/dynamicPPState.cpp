@@ -259,6 +259,9 @@ bool HD DynamicPPState::update(float scalingSymptoms, AgentStats& stats, BasicAg
         auto tmp = getTransition(progressionID).calculateNextState(state, scalingSymptoms, variant);
         state = thrust::get<0>(tmp);
         updateMeta();
+        if (stats.symptomOnsetTimestamp == 0xffffffffu && isInfected() && getWBState() != states::WBStates::W) {
+            stats.symptomOnsetTimestamp = simTime;
+        }
         daysBeforeNextState = thrust::get<1>(tmp);
         if (variant>=3 && state < 8) {
             float mul;
