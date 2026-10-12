@@ -1,0 +1,229 @@
+{
+ "A1": {
+  "seeds": 12,
+  "early_k_difference_P0_minus_E": {
+   "mean": -0.0110192676863895,
+   "low": -0.04546990320934735,
+   "high": 0.02343136783656835,
+   "n": 12,
+   "sd": 0.054221036873057876
+  },
+  "relative_to_E": -0.03467069479008556,
+  "equivalence_half_width_over_level": 0.10839445084143422,
+  "replicates_for_plus_minus_5_percent": 56.39691347143725,
+  "final_size_difference_P0_minus_E": {
+   "mean": 2410.1666666666665,
+   "low": -1547.062424969893,
+   "high": 6367.395758303226,
+   "n": 12,
+   "sd": 6228.18886315689
+  },
+  "final_size_E": {
+   "mean": 48273.583333333336,
+   "low": 45744.05098413284,
+   "high": 50803.11568253383,
+   "n": 12,
+   "sd": 3981.1708752424565
+  },
+  "final_size_P0": {
+   "mean": 50683.75,
+   "low": 47885.816395256974,
+   "high": 53481.683604743026,
+   "n": 12,
+   "sd": 4403.601235455941
+  }
+ },
+ "A2": {
+  "negative_binomial": {
+   "flat_shed0.04": {
+    "chains": 38630,
+    "observed_gt_10": 415.99999999999994,
+    "observed_gt_50": 17,
+    "expected_gt_10": 436.9053,
+    "expected_gt_50": 14.164333333333333,
+    "max_observed": 101
+   },
+   "caregiving_shed0.09": {
+    "chains": 38658,
+    "observed_gt_10": 235.0,
+    "observed_gt_50": 19,
+    "expected_gt_10": 423.43396,
+    "expected_gt_50": 4.38124,
+    "max_observed": 249
+   }
+  },
+  "chains_gt_50": {
+   "flat": 17,
+   "caregiving": 19,
+   "z": -0.33123681947380634,
+   "two_sided_p": 0.7404656105799929
+  },
+  "chains_per_arm_to_detect_doubling_of_gt_50": 50513.306715306666,
+  "note": "The between-arm count of chains above 50 is not evidence of a difference. The caregiving departure from its own negative binomial is."
+ },
+ "A3": {
+  "studies": [
+   {
+    "kept": 4000,
+    "p05": 0.18053177327296716,
+    "p50": 0.33648078330835074,
+    "p95": 0.5810537531183906,
+    "R": 0.8,
+    "index_cases": 100,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.2032674967510335,
+    "p50": 0.3199645337359625,
+    "p95": 0.4896109876413225,
+    "R": 0.8,
+    "index_cases": 200,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.23155861362974212,
+    "p50": 0.3104011128918121,
+    "p95": 0.4045557455796759,
+    "R": 0.8,
+    "index_cases": 500,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.18676722213346425,
+    "p50": 0.33412026577622733,
+    "p95": 0.5630823238105377,
+    "R": 1.0,
+    "index_cases": 100,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.2083086116216657,
+    "p50": 0.3193145728687573,
+    "p95": 0.46874712663585366,
+    "R": 1.0,
+    "index_cases": 200,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.23216400302337975,
+    "p50": 0.30862369047478067,
+    "p95": 0.3982961571824669,
+    "R": 1.0,
+    "index_cases": 500,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.19492564895373465,
+    "p50": 0.3322292468774871,
+    "p95": 0.5313368264998235,
+    "R": 1.4,
+    "index_cases": 100,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.2155974673393569,
+    "p50": 0.3198538234621293,
+    "p95": 0.45134205653878706,
+    "R": 1.4,
+    "index_cases": 200,
+    "true_k": 0.3
+   },
+   {
+    "kept": 4000,
+    "p05": 0.23675179537012359,
+    "p50": 0.30815968845528063,
+    "p95": 0.39100560415540825,
+    "R": 1.4,
+    "index_cases": 500,
+    "true_k": 0.3
+   }
+  ],
+  "reading": "At a few hundred index cases the sampling range of k covers 0.2 to 0.5, so a tracing study of that size does not separate those two values."
+ },
+ "X1": {
+  "ward": {
+   "flat_shed0.04": {
+    "chains": 38534,
+    "mean_chain": 1.5114184875694192,
+    "all_node_mean_offspring": 0.3405438707579621,
+    "all_node_k": 0.04269549361932621,
+    "chains_gt_10": 525,
+    "chains_gt_50": 19,
+    "max_chain": 138,
+    "same_location_child_share": 0.19258602865160243,
+    "nonseed": 19899,
+    "by_parent_type": {
+     "2": {
+      "n": 7124,
+      "mean_offspring": 0.29505895564289725,
+      "child_in_hospital": 0.009990485252140819
+     },
+     "12": {
+      "n": 169,
+      "mean_offspring": 0.16568047337278108,
+      "child_in_hospital": 0.10714285714285714
+     },
+     "14": {
+      "n": 97,
+      "mean_offspring": 0.12371134020618557,
+      "child_in_hospital": 0.0
+     },
+     "22": {
+      "n": 126,
+      "mean_offspring": 0.42063492063492064,
+      "child_in_hospital": 0.0
+     }
+    },
+    "expected_gt_10": 540.24668,
+    "expected_gt_50": 29.86385
+   },
+   "caregiving_shed0.09": {
+    "chains": 38520,
+    "mean_chain": 1.4595794392523365,
+    "all_node_mean_offspring": 0.3169122732350907,
+    "all_node_k": 0.15090118436374703,
+    "chains_gt_10": 195,
+    "chains_gt_50": 0,
+    "max_chain": 42,
+    "same_location_child_share": 0.39373935264054516,
+    "nonseed": 17871,
+    "by_parent_type": {
+     "2": {
+      "n": 12702,
+      "mean_offspring": 0.22335065344040309,
+      "child_in_hospital": 0.03348607684173423
+     },
+     "12": {
+      "n": 527,
+      "mean_offspring": 0.3301707779886148,
+      "child_in_hospital": 0.16091954022988506
+     },
+     "14": {
+      "n": 120,
+      "mean_offspring": 0.25,
+      "child_in_hospital": 0.0
+     },
+     "22": {
+      "n": 347,
+      "mean_offspring": 0.7377521613832853,
+      "child_in_hospital": 0.0234375
+     }
+    },
+    "expected_gt_10": 300.8412,
+    "expected_gt_50": 0.9630000000000001
+   }
+  },
+  "original_flat_gt_10": 415.99999999999994,
+  "original_care_gt_10": 235.0,
+  "original_flat_gt_50": 17,
+  "original_care_gt_50": 19,
+  "nb_placeholder": true
+ }
+}

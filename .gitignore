@@ -19,6 +19,8 @@ superspreader/study/results/**/stdout.txt
 superspreader/study/results/**/stdout.partial
 superspreader/study/results/**/stdout.failed
 superspreader/study/results/**/command.json
+superspreader/study/inputs/x21/agents_wards.json
+superspreader/study/inputs/x21/locations_wards.json
 
 
 # Polcz:

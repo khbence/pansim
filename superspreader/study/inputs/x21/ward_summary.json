@@ -1,0 +1,1099 @@
+{
+ "split_types": [
+  12,
+  14,
+  22
+ ],
+ "target_agents_per_ward": 30,
+ "left_whole_at_or_below": 40,
+ "locations_split": 120,
+ "wards_created": 12886,
+ "agents_reassigned": 184745,
+ "schedule_slots_reassigned": 387801,
+ "capacity_before": 106990,
+ "capacity_after": 106990,
+ "places_before": 80877,
+ "places_after": 93643,
+ "by_location": [
+  {
+   "id": "108580_1202",
+   "type": 22,
+   "agents": 1063,
+   "wards": 35,
+   "capacity": 55,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "108734_1203",
+   "type": 22,
+   "agents": 1075,
+   "wards": 36,
+   "capacity": 55,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "108777_1204",
+   "type": 22,
+   "agents": 958,
+   "wards": 32,
+   "capacity": 55,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "108800_1205",
+   "type": 22,
+   "agents": 1632,
+   "wards": 54,
+   "capacity": 55,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "109019_1206",
+   "type": 22,
+   "agents": 100,
+   "wards": 3,
+   "capacity": 55,
+   "ward_agents_min": 33,
+   "ward_agents_max": 34
+  },
+  {
+   "id": "109020_1207",
+   "type": 22,
+   "agents": 733,
+   "wards": 24,
+   "capacity": 55,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "109021_1208",
+   "type": 22,
+   "agents": 1638,
+   "wards": 55,
+   "capacity": 55,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "109193_1209",
+   "type": 22,
+   "agents": 256,
+   "wards": 9,
+   "capacity": 55,
+   "ward_agents_min": 28,
+   "ward_agents_max": 29
+  },
+  {
+   "id": "28565_1491",
+   "type": 12,
+   "agents": 11469,
+   "wards": 382,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64114_1492",
+   "type": 12,
+   "agents": 11276,
+   "wards": 376,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64123_1493",
+   "type": 12,
+   "agents": 11182,
+   "wards": 373,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64130_1494",
+   "type": 12,
+   "agents": 11301,
+   "wards": 377,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64117_1495",
+   "type": 12,
+   "agents": 11388,
+   "wards": 380,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64118_1496",
+   "type": 12,
+   "agents": 11196,
+   "wards": 373,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64142_1497",
+   "type": 12,
+   "agents": 11145,
+   "wards": 372,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64143_1498",
+   "type": 12,
+   "agents": 11139,
+   "wards": 371,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64145_1499",
+   "type": 12,
+   "agents": 11071,
+   "wards": 369,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64148_1500",
+   "type": 12,
+   "agents": 11245,
+   "wards": 375,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64631_1501",
+   "type": 12,
+   "agents": 11396,
+   "wards": 380,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "105753_1502",
+   "type": 12,
+   "agents": 11531,
+   "wards": 384,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "178777_1503",
+   "type": 12,
+   "agents": 11390,
+   "wards": 380,
+   "capacity": 750,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221632_1504",
+   "type": 12,
+   "agents": 11170,
+   "wards": 372,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "221633_1505",
+   "type": 12,
+   "agents": 11382,
+   "wards": 379,
+   "capacity": 750,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114591_1685",
+   "type": 12,
+   "agents": 11081,
+   "wards": 369,
+   "capacity": 150,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148295_1686",
+   "type": 12,
+   "agents": 10801,
+   "wards": 360,
+   "capacity": 150,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "18557_2075",
+   "type": 14,
+   "agents": 1979,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "28565_2076",
+   "type": 14,
+   "agents": 1966,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "28566_2077",
+   "type": 14,
+   "agents": 2020,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "28634_2078",
+   "type": 14,
+   "agents": 1953,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "45140_2079",
+   "type": 14,
+   "agents": 1937,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64114_2080",
+   "type": 14,
+   "agents": 2034,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64123_2081",
+   "type": 14,
+   "agents": 1942,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64117_2082",
+   "type": 14,
+   "agents": 2007,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64118_2083",
+   "type": 14,
+   "agents": 1948,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64121_2084",
+   "type": 14,
+   "agents": 1885,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64130_2085",
+   "type": 14,
+   "agents": 1995,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64138_2086",
+   "type": 14,
+   "agents": 2019,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64142_2087",
+   "type": 14,
+   "agents": 1969,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64145_2088",
+   "type": 14,
+   "agents": 1942,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "64165_2089",
+   "type": 14,
+   "agents": 1964,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64631_2090",
+   "type": 14,
+   "agents": 1955,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "64833_2091",
+   "type": 14,
+   "agents": 1976,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "105753_2092",
+   "type": 14,
+   "agents": 1931,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "108734_2093",
+   "type": 14,
+   "agents": 2050,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "108777_2094",
+   "type": 14,
+   "agents": 1910,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "109021_2095",
+   "type": 14,
+   "agents": 2041,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114595_2096",
+   "type": 14,
+   "agents": 1901,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114608_2097",
+   "type": 14,
+   "agents": 1977,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "114722_2098",
+   "type": 14,
+   "agents": 2057,
+   "wards": 69,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "114732_2099",
+   "type": 14,
+   "agents": 1950,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "114591_2100",
+   "type": 14,
+   "agents": 1991,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114621_2101",
+   "type": 14,
+   "agents": 1985,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114647_2102",
+   "type": 14,
+   "agents": 1996,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "114653_2103",
+   "type": 14,
+   "agents": 2033,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "114706_2104",
+   "type": 14,
+   "agents": 1935,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "114742_2105",
+   "type": 14,
+   "agents": 1971,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "143425_2106",
+   "type": 14,
+   "agents": 2005,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148301_2107",
+   "type": 14,
+   "agents": 2014,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148303_2108",
+   "type": 14,
+   "agents": 1900,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148482_2109",
+   "type": 14,
+   "agents": 1964,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148485_2110",
+   "type": 14,
+   "agents": 1920,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148486_2111",
+   "type": 14,
+   "agents": 1922,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148490_2112",
+   "type": 14,
+   "agents": 2061,
+   "wards": 69,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148241_2113",
+   "type": 14,
+   "agents": 1945,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148242_2114",
+   "type": 14,
+   "agents": 1992,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148244_2115",
+   "type": 14,
+   "agents": 2022,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148258_2116",
+   "type": 14,
+   "agents": 2011,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148265_2117",
+   "type": 14,
+   "agents": 1987,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148269_2118",
+   "type": 14,
+   "agents": 2085,
+   "wards": 70,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148272_2119",
+   "type": 14,
+   "agents": 1960,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148277_2120",
+   "type": 14,
+   "agents": 1984,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148289_2121",
+   "type": 14,
+   "agents": 1972,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148295_2122",
+   "type": 14,
+   "agents": 2036,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148313_2123",
+   "type": 14,
+   "agents": 1912,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148323_2124",
+   "type": 14,
+   "agents": 1919,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148329_2125",
+   "type": 14,
+   "agents": 2048,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148330_2126",
+   "type": 14,
+   "agents": 1991,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148333_2127",
+   "type": 14,
+   "agents": 2027,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148349_2128",
+   "type": 14,
+   "agents": 1915,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148350_2129",
+   "type": 14,
+   "agents": 1934,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148352_2130",
+   "type": 14,
+   "agents": 1938,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148362_2131",
+   "type": 14,
+   "agents": 1974,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148364_2132",
+   "type": 14,
+   "agents": 2069,
+   "wards": 69,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148375_2133",
+   "type": 14,
+   "agents": 1995,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148377_2134",
+   "type": 14,
+   "agents": 1965,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148380_2135",
+   "type": 14,
+   "agents": 1933,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148386_2136",
+   "type": 14,
+   "agents": 1981,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148504_2137",
+   "type": 14,
+   "agents": 1964,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148506_2138",
+   "type": 14,
+   "agents": 1902,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148510_2139",
+   "type": 14,
+   "agents": 1902,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148522_2140",
+   "type": 14,
+   "agents": 2046,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148524_2141",
+   "type": 14,
+   "agents": 2017,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148530_2142",
+   "type": 14,
+   "agents": 2033,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148534_2143",
+   "type": 14,
+   "agents": 1973,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148536_2144",
+   "type": 14,
+   "agents": 1955,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148540_2145",
+   "type": 14,
+   "agents": 2034,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148551_2146",
+   "type": 14,
+   "agents": 1959,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148557_2147",
+   "type": 14,
+   "agents": 2014,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148560_2148",
+   "type": 14,
+   "agents": 1940,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "148570_2149",
+   "type": 14,
+   "agents": 1987,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148574_2150",
+   "type": 14,
+   "agents": 1985,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "148575_2151",
+   "type": 14,
+   "agents": 1993,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "170119_2152",
+   "type": 14,
+   "agents": 1970,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "174704_2153",
+   "type": 14,
+   "agents": 2001,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "178777_2154",
+   "type": 14,
+   "agents": 2062,
+   "wards": 69,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "178779_2155",
+   "type": 14,
+   "agents": 1920,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "178792_2156",
+   "type": 14,
+   "agents": 2008,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "178799_2157",
+   "type": 14,
+   "agents": 1994,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "216742_2158",
+   "type": 14,
+   "agents": 1884,
+   "wards": 63,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "219905_2159",
+   "type": 14,
+   "agents": 1990,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "219910_2160",
+   "type": 14,
+   "agents": 2009,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221323_2161",
+   "type": 14,
+   "agents": 1956,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "221632_2162",
+   "type": 14,
+   "agents": 2023,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "221633_2163",
+   "type": 14,
+   "agents": 2026,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221635_2164",
+   "type": 14,
+   "agents": 2043,
+   "wards": 68,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "221636_2165",
+   "type": 14,
+   "agents": 1945,
+   "wards": 65,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221637_2166",
+   "type": 14,
+   "agents": 1921,
+   "wards": 64,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  },
+  {
+   "id": "221638_2167",
+   "type": 14,
+   "agents": 1966,
+   "wards": 66,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221640_2168",
+   "type": 14,
+   "agents": 2003,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 29,
+   "ward_agents_max": 30
+  },
+  {
+   "id": "221641_2169",
+   "type": 14,
+   "agents": 2011,
+   "wards": 67,
+   "capacity": 1000,
+   "ward_agents_min": 30,
+   "ward_agents_max": 31
+  }
+ ]
+}

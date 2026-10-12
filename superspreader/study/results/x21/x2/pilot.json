@@ -1,0 +1,55 @@
+{
+ "pilot": [
+  {
+   "label": "venue_s3",
+   "k": 0.00012308117188342813,
+   "household_share": 0.2476434353372456
+  },
+  {
+   "label": "venue_s1.5",
+   "k": 0.00018,
+   "household_share": 0.32650189883939473
+  },
+  {
+   "label": "venue_s1",
+   "k": 0.00023767844789665876,
+   "household_share": 0.3682997260401483
+  },
+  {
+   "label": "shape0.5",
+   "k": 0.00042731168933229956,
+   "household_share": 0.38932441863234674
+  },
+  {
+   "label": "shape0.3",
+   "k": 0.00042873785923417415,
+   "household_share": 0.3567312465644201
+  },
+  {
+   "label": "shape1_venue1",
+   "k": 0.00025,
+   "household_share": 0.3299179619701962
+  }
+ ],
+ "chosen": [
+  {
+   "label": "venue_s3",
+   "k": 0.00012308117188342813,
+   "household_share": 0.2476434353372456,
+   "target_share": 0.25
+  },
+  {
+   "label": "venue_s1",
+   "k": 0.00023767844789665876,
+   "household_share": 0.3682997260401483,
+   "target_share": 0.37
+  },
+  {
+   "label": "shape0.5",
+   "k": 0.00042731168933229956,
+   "household_share": 0.38932441863234674,
+   "target_share": 0.45
+  }
+ ],
+ "sign_prediction": "venue closure reduces more than household isolation when household share is below 0.37; household isolation reduces more above 0.37"
+}

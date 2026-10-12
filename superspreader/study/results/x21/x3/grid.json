@@ -1,0 +1,60 @@
+{
+ "grid": [
+  {
+   "shape": 0.04,
+   "k_coeff": 9.971664310212813e-05,
+   "mean": 0.2944862613270973,
+   "dispersion_k": 0.04315393447738045,
+   "zero_share": 0.9138044431452792,
+   "source": "existing 40-replicate flat_shed0.04"
+  },
+  {
+   "shape": 0.02,
+   "k_coeff": 0.00015991410376767692,
+   "mean": 0.3427398649570783,
+   "dispersion_k": 0.024975922420957884,
+   "zero_share": 0.9369074370983828,
+   "source": "two probe runs"
+  },
+  {
+   "shape": 0.025,
+   "k_coeff": 0.00015008648145145627,
+   "mean": 0.3357055132849346,
+   "dispersion_k": 0.03143366791781882,
+   "zero_share": 0.9307674515880681,
+   "source": "two probe runs"
+  },
+  {
+   "shape": 0.03,
+   "k_coeff": 0.00013293333333333336,
+   "mean": 0.31820059192203753,
+   "dispersion_k": 0.037396651231774464,
+   "zero_share": 0.9236353694326243,
+   "source": "two probe runs"
+  },
+  {
+   "shape": 0.035,
+   "k_coeff": 0.00013726951405915332,
+   "mean": 0.3204639325281946,
+   "dispersion_k": 0.04220174462362046,
+   "zero_share": 0.9149696316956443,
+   "source": "two probe runs"
+  }
+ ],
+ "dispersion_arm": {
+  "shape": 0.03,
+  "k_coeff": 0.00013293333333333336,
+  "mean": 0.31820059192203753,
+  "dispersion_k": 0.037396651231774464,
+  "zero_share": 0.9236353694326243,
+  "source": "two probe runs"
+ },
+ "zero_arm": {
+  "shape": 0.03,
+  "k_coeff": 0.00013293333333333336,
+  "mean": 0.31820059192203753,
+  "dispersion_k": 0.037396651231774464,
+  "zero_share": 0.9236353694326243,
+  "source": "two probe runs"
+ }
+}
