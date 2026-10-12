@@ -1,0 +1,7 @@
+panel,label,k,R,target_share,top_fraction
+transmission,Adam central,0.43,0.58,0.8,0.191465
+transmission,Adam low corner,0.29,0.45,0.8,0.148255
+transmission,Adam high corner,0.67,0.72,0.8,0.24148
+transmission,"withdrawn Lorenz mapping, not plotted on this axis",0.228,,0.8,0.1899825
+emission,Edwards exhaled aerosol,0.212,,0.8,0.1792175
+emission,Yang circulating virions,0.012,,0.9,0.0208375

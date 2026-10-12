@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Figures F2, F5 and F7 for the ACT-049 report.
+"""Figures for the ACT-049 report.
 
 The figure-style skill named in the instructions is not on this machine, so
 apply_figure_style() below is the local stand-in: one style, applied before
@@ -15,6 +15,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 HERE = Path(__file__).resolve().parent
 INPUTS = HERE / "inputs"
@@ -60,20 +61,30 @@ def read_csv(path):
         return list(csv.DictReader(handle))
 
 
+def _quartile(values, q):
+    values = sorted(values)
+    pos = q * (len(values) - 1)
+    lo = int(pos)
+    hi = min(lo + 1, len(values) - 1)
+    return values[lo] + (values[hi] - values[lo]) * (pos - lo)
+
+
 def f2():
     apply_figure_style()
     studies = read_csv(INPUTS / "published_k_from_R7.csv")
-    settings = [r for r in read_csv(INPUTS / "published_k_by_setting_R6.csv") if r["estimator"] == "cluster_ascertainment" and r["setting"] != "All settings"]
-    ks = []
-    for row in studies:
-        if row["k"]:
-            ks.append(float(row["k"]))
+    settings = [r for r in read_csv(INPUTS / "published_k_by_setting_R6.csv") if r["estimator"] == "individual_offspring_sensitivity"]
+    assert settings and all(r["estimator"] == "individual_offspring_sensitivity" for r in settings)
+    ks = [float(row["k"]) for row in studies if row["k"]]
     below = sum(k < 1 for k in ks)
-    claim = f"{below} of {len(ks)} study-level SARS-CoV-2 k estimates are below 1"
-    assert below == sum(k < 1 for k in ks) and below > len(ks) / 2, claim
+    q1, med, q3 = _quartile(ks, 0.25), _quartile(ks, 0.5), _quartile(ks, 0.75)
+    claim = f"Median study-level k is {med:.2f} (IQR {q1:.2f} to {q3:.2f}); {below} of {len(ks)} are below 1"
+    assert len(ks) == 28 and below == 26, claim
+    assert round(med, 2) == 0.32 and round(q1, 2) == 0.20 and round(q3, 2) == 0.51, claim
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 6.2))
+    fig, axes = plt.subplots(1, 2, figsize=(11.4, 8.2))
     ax = axes[0]
+    ax.axvspan(q1, q3, color="#d6eaf8", zorder=0)
+    ax.axvline(med, color="#1b4f72", lw=0.8, zorder=0)
     for i, row in enumerate(studies):
         if not row["k"]:
             continue
@@ -83,15 +94,17 @@ def f2():
         ax.errorbar(k, i, xerr=[[max(k - lo, 0)], [max(hi - k, 0)]], fmt="o", color="#1b4f72", ms=3.5, lw=0.8)
         ax.text(-0.02, i, f"{row['author']} {row['year']}", ha="right", va="center", fontsize=6, transform=ax.get_yaxis_transform())
     for j, row in enumerate(settings):
-        y = len(studies) + 1 + j
+        y = len(studies) + 1.4 + j
         k, lo, hi = float(row["k"]), float(row["k_lo"]), float(row["k_hi"])
-        ax.errorbar(k, y, xerr=[[k - lo], [hi - k]], fmt="D", color="#b86e00", ms=3.5, lw=0.8)
+        ax.errorbar(k, y, xerr=[[max(k - lo, 0)], [max(hi - k, 0)]], fmt="D", color="#b86e00", ms=3.5, lw=0.8)
         ax.text(-0.02, y, row["setting"], ha="right", va="center", fontsize=6, transform=ax.get_yaxis_transform())
     ax.axvline(1, color="#888", lw=0.6)
     ax.set_xscale("log")
     ax.set_xlabel("dispersion k")
     ax.set_yticks([])
     ax.set_title(claim, fontsize=8)
+    ax.text(0.0, -0.08, "Diamonds are Chen 2025 individual offspring, the quantity PanSim measures. The band is the study-level IQR.",
+            transform=ax.transAxes, fontsize=6, color="#444")
 
     ax = axes[1]
     # Verified reproduction numbers only. Unverified abstract values are not drawn.
@@ -225,12 +238,16 @@ def f3():
     # Uncoupled ladder from the phase 2 grid, confirmed against summaries/p2_grid.json.
     ladder = [(1.0, 0.884), (0.3, by["E"]["early_k"]), (0.1, 0.127)]
     comp = composition_k(0.3)
-    claim = "Uncoupled early k at shape 0.3 sits inside the 20 to 50 percent band above the composition rule"
-    assert 1.2 * comp <= by["E"]["early_k"] <= 1.5 * comp, claim
+    band_lo, band_hi = 1.2 * comp, 1.5 * comp
+    claim = "The 20 to 50 percent band fits the uncoupled arms and not the coupled arms"
+    assert band_lo <= by["E"]["early_k"] <= band_hi, claim
+    assert band_lo <= by["P0"]["early_k"] <= band_hi, claim
+    for arm in ("P25", "P50", "P100"):
+        assert by[arm]["early_k"] > band_hi, claim
     fig, ax = plt.subplots(figsize=(6.4, 4.2))
     shapes = [s / 50 for s in range(2, 150)]
     ax.plot(shapes, [composition_k(s) for s in shapes], color="#888", lw=1, label="composition rule")
-    ax.fill_between(shapes, [1.2 * composition_k(s) for s in shapes], [1.5 * composition_k(s) for s in shapes], color="#bbbbbb", alpha=0.4, label="20 to 50 percent above")
+    ax.fill_between(shapes, [1.2 * composition_k(s) for s in shapes], [1.5 * composition_k(s) for s in shapes], color="#bbbbbb", alpha=0.4, label="20 to 50 percent band")
     ax.plot([s for s, _ in ladder], [k for _, k in ladder], "o", color="#1b4f72", label="uncoupled")
     for arm in ("P0", "P25", "P50", "P100", "P100ln"):
         ax.plot([0.3], [by[arm]["early_k"]], "D", color=ARM_COLOUR[arm], label=arm)
@@ -296,10 +313,149 @@ def f6():
             ])
 
 
+def _top_fraction(values, share):
+    ordered = np.sort(np.asarray(values, dtype=float))[::-1]
+    cumulative = np.cumsum(ordered)
+    index = int(np.searchsorted(cumulative, share * cumulative[-1], side="left"))
+    return (min(index, len(ordered) - 1) + 1) / len(ordered)
+
+
+def _top_curve(values, points=250):
+    ordered = np.sort(np.asarray(values, dtype=float))[::-1]
+    cumulative = np.cumsum(ordered) / ordered.sum()
+    fraction = np.arange(1, len(ordered) + 1) / len(ordered)
+    index = np.linspace(0, len(ordered) - 1, points).astype(int)
+    return fraction[index], cumulative[index]
+
+
+def _nb_offspring(rng, k, reproduction, n):
+    lam = rng.gamma(k, reproduction / k, size=n)
+    return rng.poisson(lam)
+
+
+def f4():
+    """Transmission shares and emission shares on separate axes.
+
+    The left axis is realised offspring. The right axis is a continuous emission.
+    Adam's 19 percent share is a realised count, so it is compared with his own
+    k of 0.43, not with the withdrawn Lorenz k of 0.228.
+    """
+    apply_figure_style()
+    evidence = {row["row_id"]: row for row in read_csv(INPUTS / "published_evidence_verified.csv")}
+    assert evidence["E03"]["derived_equiv_gamma_k"] == ""
+    assert evidence["E04"]["derived_equiv_gamma_k"] == ""
+    assert evidence["E03"]["value"] == "19.0"
+    edwards_k = float(evidence["E17"]["derived_equiv_gamma_k"])
+    yang_k = float(evidence["E18"]["derived_equiv_gamma_k"])
+    rng = np.random.default_rng(18)
+    n = 400000
+    corners = ((0.43, 0.58, "k 0.43, R 0.58"), (0.29, 0.45, "k 0.29, R 0.45"), (0.67, 0.72, "k 0.67, R 0.72"))
+    realised = {}
+    for k, reproduction, label in corners:
+        realised[(k, reproduction)] = _nb_offspring(rng, k, reproduction, n)
+    fractions = {key: _top_fraction(sample, 0.80) for key, sample in realised.items()}
+    assert 0.175 <= fractions[(0.43, 0.58)] <= 0.210
+    assert 0.130 <= fractions[(0.29, 0.45)] <= 0.175
+    assert 0.215 <= fractions[(0.67, 0.72)] <= 0.275
+    lorenz_k = 0.228
+    lorenz_share = _top_fraction(rng.gamma(lorenz_k, 1.0 / lorenz_k, size=n), 0.80)
+    assert 0.16 <= lorenz_share <= 0.22
+    assert 0.43 / lorenz_k > 1.7
+    edwards = rng.gamma(edwards_k, 1.0 / edwards_k, size=n)
+    yang = rng.gamma(yang_k, 1.0 / yang_k, size=n)
+    edwards_fraction = _top_fraction(edwards, 0.80)
+    yang_fraction = _top_fraction(yang, 0.90)
+    assert abs(edwards_fraction - 0.18) < 0.03
+    assert abs(yang_fraction - 0.02) < 0.015
+    claim = "Adam's realised 19 percent share is his k of 0.43, not the Lorenz k of 0.23"
+    fig, axes = plt.subplots(1, 2, figsize=(10.6, 4.4))
+    ax = axes[0]
+    colours = ["#1b4f72", "#7f8c8d", "#7f8c8d"]
+    for (k, reproduction, label), colour in zip(corners, colours):
+        xs, ys = _top_curve(realised[(k, reproduction)])
+        ax.plot(xs, ys, color=colour, lw=1.4 if k == 0.43 else 0.8, label=label)
+    ax.errorbar([0.19], [0.80], xerr=[[0.04], [0.05]], fmt="o", color="#c0392b", ms=5, label="Adam 19% (15 to 24)")
+    ax.axhline(0.80, color="#cccccc", lw=0.6)
+    ax.set_xlim(0, 0.6)
+    ax.set_ylim(0, 1.02)
+    ax.set_xlabel("top fraction of cases")
+    ax.set_ylabel("share of realised offspring")
+    ax.set_title(claim, fontsize=8)
+    ax.legend(fontsize=6, frameon=False, loc="lower right")
+    ax = axes[1]
+    xs, ys = _top_curve(edwards)
+    ax.plot(xs, ys, color="#1a7a4c", lw=1.4, label=f"Edwards aerosol, k {edwards_k:.2f}")
+    xs, ys = _top_curve(yang)
+    ax.plot(xs, ys, color="#6c3483", lw=1.4, label=f"Yang virions, k {yang_k:.3f}")
+    ax.plot([0.18], [0.80], "o", color="#1a7a4c")
+    ax.plot([0.02], [0.90], "o", color="#6c3483")
+    ax.set_xlim(0, 0.6)
+    ax.set_ylim(0, 1.02)
+    ax.set_xlabel("top fraction of people")
+    ax.set_ylabel("share of emission")
+    emission_claim = "Emission shares stay on their own axis"
+    ax.set_title(emission_claim, fontsize=8)
+    ax.legend(fontsize=6, frameon=False, loc="lower right")
+    fig.suptitle("Transmission shares and emission shares are different quantities", fontsize=11)
+    save(fig, "F4_concentration")
+    with open(OUT / "F4_concentration.csv", "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["panel", "label", "k", "R", "target_share", "top_fraction"])
+        writer.writerow(["transmission", "Adam central", 0.43, 0.58, 0.80, fractions[(0.43, 0.58)]])
+        writer.writerow(["transmission", "Adam low corner", 0.29, 0.45, 0.80, fractions[(0.29, 0.45)]])
+        writer.writerow(["transmission", "Adam high corner", 0.67, 0.72, 0.80, fractions[(0.67, 0.72)]])
+        writer.writerow(["transmission", "withdrawn Lorenz mapping, not plotted on this axis", lorenz_k, "", 0.80, lorenz_share])
+        writer.writerow(["emission", "Edwards exhaled aerosol", edwards_k, "", 0.80, edwards_fraction])
+        writer.writerow(["emission", "Yang circulating virions", yang_k, "", 0.90, yang_fraction])
+
+
+def f8():
+    apply_figure_style()
+    payload = json.loads((SUMMARY.parent / "d1_absorption.json").read_text())
+    bins = [row for row in read_csv(SUMMARY.parent / "d1_bins.csv") if row["bin_type"] == "decile"]
+    assert payload["decision"]["verdict"] == "not_confirmed"
+    claim = "Mean offspring in each decile rises with the multiplier"
+    plotted = ("E", "P0", "P25", "P50", "P100", "P25k")
+    by = {item["arm"]: item for item in payload["arms"]}
+    for arm in plotted:
+        deciles = sorted((row for row in bins if row["arm"] == arm), key=lambda row: float(row["mean_shed"]))
+        assert float(deciles[-1]["mean_offspring"]) > float(deciles[4]["mean_offspring"]), claim
+    fig, axes = plt.subplots(1, 2, figsize=(10.4, 4.3))
+    for arm in plotted:
+        deciles = sorted((row for row in bins if row["arm"] == arm), key=lambda row: float(row["mean_shed"]))
+        xs = [float(row["mean_shed"]) for row in deciles]
+        axes[0].plot(xs, [float(row["mean_offspring"]) for row in deciles], "-o", ms=3, lw=1, color=ARM_COLOUR[arm], label=arm)
+        axes[1].plot(xs, [float(row["mean_locations"]) for row in deciles], "-o", ms=3, lw=1, color=ARM_COLOUR[arm], label=arm)
+        top = by[arm].get("top1") or {}
+        if top.get("mean_shed") and top.get("proportional_mean"):
+            slope = top["proportional_mean"] / top["mean_shed"]
+            line = np.linspace(0, top["mean_shed"], 30)
+            axes[0].plot(line, slope * line, color=ARM_COLOUR[arm], lw=0.6, ls="--", alpha=0.7)
+            axes[0].plot([top["mean_shed"]], [top["observed"]["mean"]], marker="*", ms=7, color=ARM_COLOUR[arm])
+    axes[0].set_xlabel("mean multiplier (stars: top 1 percent; dashed: lower-half slope)")
+    axes[0].set_ylabel("mean offspring within 14 days")
+    axes[0].set_title(claim, fontsize=8)
+    axes[0].legend(fontsize=6, frameon=False)
+    axes[1].set_xlabel("mean multiplier in the decile")
+    axes[1].set_ylabel("distinct transmission locations")
+    axes[1].set_title("Locations among offspring, not contacts", fontsize=8)
+    axes[1].legend(fontsize=6, frameon=False)
+    fig.suptitle("Early-window offspring against the infector's multiplier", fontsize=11)
+    save(fig, "F8_offspring_multiplier")
+    with open(OUT / "F8_offspring_multiplier.csv", "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["arm", "decile", "mean_shed", "mean_offspring", "mean_locations", "n"])
+        for arm in plotted:
+            for row in sorted((item for item in bins if item["arm"] == arm), key=lambda item: float(item["mean_shed"])):
+                writer.writerow([arm, row["label"], row["mean_shed"], row["mean_offspring"], row["mean_locations"], row["n"]])
+
+
 if __name__ == "__main__":
     f2()
     f3()
+    f4()
     f5()
     f6()
     f7()
+    f8()
     print("wrote", OUT)

@@ -1,0 +1,1575 @@
+{
+ "question": "Does a contact ceiling truncate offspring at high multipliers, absorbing the model's own heterogeneity?",
+ "window": {
+  "first_day": 1,
+  "last_day": 10,
+  "horizon_days": 14
+ },
+ "a0_k": 4.661862094720034,
+ "a0_residual_cv2": 0.2145065597570094,
+ "decision": {
+  "verdict": "not_confirmed",
+  "figure_claim": "Mean offspring keeps rising with the multiplier, so a contact ceiling is not confirmed",
+  "section3_multiplier_matches": true,
+  "section3_arms": [
+   "E",
+   "P0",
+   "P25",
+   "P50",
+   "P100",
+   "P25k"
+  ],
+  "mean_ceiling_on_every_wide_arm": false,
+  "arms_below_expected_cv2": [
+   "P100ln"
+  ],
+  "arms_above_expected_cv2": [
+   "P50a005",
+   "P100a005"
+  ],
+  "rule": {
+   "cv2_relative_tolerance": 0.2,
+   "top1_ratio_below": 0.6,
+   "top1_bootstrap_high_below": 0.8,
+   "elasticity_below": 0.6,
+   "ceiling_required_on_arms_with_expected_cv2_at_least": 1.0,
+   "multiplier_claim_uses": "the six arms in note 18 section 3; other arms are reported beside that claim"
+  }
+ },
+ "early_k_mismatches_against_ps1_summary": [],
+ "arms": [
+  {
+   "arm": "A0",
+   "family": "none",
+   "shape": null,
+   "rho": 0.0,
+   "dist": null,
+   "replicates": 12,
+   "infectors": 12566,
+   "reinfected_share": 0.003262772560878561,
+   "drawn_cv2": 0.0,
+   "expected_cv2": 0.0,
+   "expected_mean_shed": 1.0,
+   "mean_shed": 1.0,
+   "cv2_pooled": 0.0,
+   "cv2_replicate_t": {
+    "mean": 0.0,
+    "low": 0.0,
+    "high": 0.0,
+    "n": 12,
+    "sd": 0.0
+   },
+   "cv2_among_those_with_offspring": 0.0,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3826993474454878,
+   "early_k": 4.661862094720034,
+   "total_cv2": 0.2145065597570094,
+   "residual_vs_expected_trait": 0.2145065597570094,
+   "residual_vs_realised_shed": 0.2145065597570094,
+   "pearson_shed_offspring": null,
+   "spearman_shed_offspring": null,
+   "pearson_shed_locations": null,
+   "spearman_shed_locations": null,
+   "mean_offspring": 1.3826993474454878,
+   "mean_locations": 1.1008276301130033,
+   "p90_offspring": 3.0,
+   "p90_locations": 2.0,
+   "p99_shed": 1.0,
+   "max_shed": 1.0,
+   "top1_threshold_shed": 1.0,
+   "top1_ratio": null,
+   "top_decile_ratio": null,
+   "elasticity": null,
+   "elasticity_definition": "no_multiplier_variation",
+   "elasticity_n_low": 0,
+   "elasticity_n_high": 0,
+   "saturation_fit": null,
+   "population_trait": null,
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": null,
+   "top1": null,
+   "cv2_direction": "none",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "E",
+   "family": "episode",
+   "shape": 0.3,
+   "rho": 0.0,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 11201,
+   "reinfected_share": 0.002053388090349076,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 3.3333333333333335,
+   "expected_mean_shed": 1.0,
+   "mean_shed": 0.9932706861438698,
+   "cv2_pooled": 3.3475562044639364,
+   "cv2_replicate_t": {
+    "mean": 3.3269927609536967,
+    "low": 3.1207730924382044,
+    "high": 3.533212429469189,
+    "n": 12,
+    "sd": 0.32456423751825975
+   },
+   "cv2_among_those_with_offspring": 1.2524137225650684,
+   "multiplier_matches_draw": true,
+   "early_R": 1.332738148379609,
+   "early_k": 0.31136752412039265,
+   "total_cv2": 3.211638730869512,
+   "residual_vs_expected_trait": -0.028083369799343463,
+   "residual_vs_realised_shed": -0.03126295951156854,
+   "pearson_shed_offspring": 0.7511457877081964,
+   "spearman_shed_offspring": 0.7529773124604051,
+   "pearson_shed_locations": 0.7168485814006689,
+   "spearman_shed_locations": 0.7462121504297198,
+   "mean_offspring": 1.332738148379609,
+   "mean_locations": 0.846085170966878,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 8.60704,
+   "max_shed": 23.8236,
+   "top1_threshold_shed": 8.60704,
+   "top1_ratio": {
+    "point": 0.493847595764829,
+    "low": 0.4120412924165773,
+    "high": 0.5944816523822267,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.5619987133985922,
+    "low": 0.5137859266695135,
+    "high": 0.6260047428959701,
+    "n": 1000
+   },
+   "elasticity": 0.6123200882866119,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 1345,
+   "elasticity_n_high": 144,
+   "saturation_fit": {
+    "linear_slope": 1.1528890527125726,
+    "linear_sse": 34858.83706387664,
+    "saturating_a": 17.69163385643501,
+    "saturating_b": 0.08697490026177834,
+    "saturating_sse": 33077.866337861386,
+    "sse_ratio_saturating_over_linear": 0.9489090607712547,
+    "half_saturation_shed": 7.9695081968901444
+   },
+   "population_trait": null,
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.29872538022408973,
+     "k_if_a0_noise_given_shed": 0.23364096099407586,
+     "cv2_of_conditional_mean": 3.3475562044639364
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.4611469472663913,
+     "k_if_a0_noise_given_shed": 0.35110756899208,
+     "cv2_of_conditional_mean": 2.168506169080913
+    },
+    "observed_k": 0.31136752412039265
+   },
+   "top1": {
+    "observed": {
+     "mean": 11.831858407079647,
+     "var": 57.85540455120101,
+     "zero": 0.0,
+     "p90": 20.0,
+     "n": 113
+    },
+    "mean_shed": 11.57771796460177,
+    "proportional_mean": 23.958521836591053,
+    "mean_ratio_vs_proportional": 0.493847595764829,
+    "poisson_null": {
+     "mean": {
+      "mean": 23.943230088495575,
+      "low": 22.97278761061947,
+      "high": 24.796902654867257
+     },
+     "var": {
+      "mean": 61.02411069848293,
+      "low": 46.87483407079646,
+      "high": 77.32697534766118
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 33.659000000000006,
+      "low": 31.0,
+      "high": 36.8
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 23.986725663716815,
+      "low": 21.725221238938055,
+      "high": 26.407300884955752
+     },
+     "var": {
+      "mean": 191.40977639064477,
+      "low": 123.94706068268016,
+      "high": 282.22649731352715
+     },
+     "zero": {
+      "mean": 0.000575221238938053,
+      "low": 0.0,
+      "high": 0.008849557522123894
+     },
+     "p90": {
+      "mean": 41.42450000000001,
+      "low": 36.0,
+      "high": 48.40499999999999
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 23.816017699115047,
+      "low": 16.670575221238938,
+      "high": 32.00066371681415
+     },
+     "var": {
+      "mean": 1799.64610658976,
+      "low": 760.5619113463971,
+      "high": 3430.901793615674
+     },
+     "zero": {
+      "mean": 0.25787610619469026,
+      "low": 0.18584070796460178,
+      "high": 0.336283185840708
+     },
+     "p90": {
+      "mean": 68.95999999999998,
+      "low": 45.18999999999999,
+      "high": 97.60999999999999
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P0",
+   "family": "persistent",
+   "shape": 0.3,
+   "rho": 0.0,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 12214,
+   "reinfected_share": 0.001555591943671197,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 3.3333333333333335,
+   "expected_mean_shed": 1.0,
+   "mean_shed": 0.9955065909418308,
+   "cv2_pooled": 3.305819965882381,
+   "cv2_replicate_t": {
+    "mean": 3.295197163767782,
+    "low": 3.1077940266467383,
+    "high": 3.4826003008888256,
+    "n": 12,
+    "sd": 0.29494934574415715
+   },
+   "cv2_among_those_with_offspring": 1.242627359829216,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3307679711806124,
+   "early_k": 0.2950645059393642,
+   "total_cv2": 3.389089435940154,
+   "residual_vs_expected_trait": 0.01286679290926627,
+   "residual_vs_realised_shed": 0.01933881832439991,
+   "pearson_shed_offspring": 0.7714515977466093,
+   "spearman_shed_offspring": 0.7540746290168683,
+   "pearson_shed_locations": 0.7258548485529036,
+   "spearman_shed_locations": 0.7455040686160034,
+   "mean_offspring": 1.3307679711806124,
+   "mean_locations": 0.8413296217455379,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 8.668723500000029,
+   "max_shed": 19.15,
+   "top1_threshold_shed": 8.668723500000029,
+   "top1_ratio": {
+    "point": 0.6150695630449335,
+    "low": 0.544802294961389,
+    "high": 0.6799940473957565,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.6378557549905794,
+    "low": 0.5835192390208411,
+    "high": 0.6986697542731372,
+    "n": 1000
+   },
+   "elasticity": 0.6967341696528541,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 1428,
+   "elasticity_n_high": 163,
+   "saturation_fit": {
+    "linear_slope": 1.1965523776913363,
+    "linear_sse": 36566.93018514689,
+    "saturating_a": 36.19034572385949,
+    "saturating_b": 0.037649358067924694,
+    "saturating_sse": 36214.1073105116,
+    "sse_ratio_saturating_over_linear": 0.9903513127066214,
+    "half_saturation_shed": 18.41059758069211
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 1.0006213747781691,
+    "cv2": 3.3438797958676636,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.30249681178057813,
+     "k_if_a0_noise_given_shed": 0.23644079789623224,
+     "cv2_of_conditional_mean": 3.305819965882382
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.44855515442281824,
+     "k_if_a0_noise_given_shed": 0.34222381312301714,
+     "cv2_of_conditional_mean": 2.2293802448592026
+    },
+    "observed_k": 0.2950645059393642
+   },
+   "top1": {
+    "observed": {
+     "mean": 13.05691056910569,
+     "var": 63.49673463947754,
+     "zero": 0.008130081300813009,
+     "p90": 22.0,
+     "n": 123
+    },
+    "mean_shed": 11.49861544715447,
+    "proportional_mean": 21.22834774080965,
+    "mean_ratio_vs_proportional": 0.6150695630449334,
+    "poisson_null": {
+     "mean": {
+      "mean": 21.29447154471545,
+      "low": 20.51158536585366,
+      "high": 22.1390243902439
+     },
+     "var": {
+      "mean": 40.01934926029588,
+      "low": 30.97107490337199,
+      "high": 49.60015993602559
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 29.589499999999997,
+      "low": 27.799999999999997,
+      "high": 32.0
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 21.22569105691057,
+      "low": 19.227439024390243,
+      "high": 23.29410569105691
+     },
+     "var": {
+      "mean": 140.79375816340132,
+      "low": 97.30597760895643,
+      "high": 203.2249433559909
+     },
+     "zero": {
+      "mean": 0.0004471544715447155,
+      "low": 0.0,
+      "high": 0.008130081300813009
+     },
+     "p90": {
+      "mean": 36.599000000000004,
+      "low": 32.0,
+      "high": 42.40499999999999
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 21.283556910569104,
+      "low": 14.560365853658537,
+      "high": 28.125203252032517
+     },
+     "var": {
+      "mean": 1528.7739077702252,
+      "low": 655.4390077302414,
+      "high": 2885.2935025989586
+     },
+     "zero": {
+      "mean": 0.2783943089430894,
+      "low": 0.1951219512195122,
+      "high": 0.35772357723577236
+     },
+     "p90": {
+      "mean": 62.34149999999999,
+      "low": 40.79,
+      "high": 89.61999999999998
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P25",
+   "family": "persistent",
+   "shape": 0.3,
+   "rho": 0.25,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 8163,
+   "reinfected_share": 0.002205071664829107,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 1.8181818181818181,
+   "expected_mean_shed": 1.8333333333333335,
+   "mean_shed": 1.6485468728464125,
+   "cv2_pooled": 2.028293161644606,
+   "cv2_replicate_t": {
+    "mean": 2.0217325052012467,
+    "low": 1.8753442319351084,
+    "high": 2.1681207784673853,
+    "n": 12,
+    "sd": 0.23039702583301083
+   },
+   "cv2_among_those_with_offspring": 0.9798120110341242,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3659193923802524,
+   "early_k": 0.4707107608326534,
+   "total_cv2": 2.124446864633118,
+   "residual_vs_expected_trait": 0.10867469390207408,
+   "residual_vs_realised_shed": 0.031751781566713586,
+   "pearson_shed_offspring": 0.7223970220672913,
+   "spearman_shed_offspring": 0.7149241319339307,
+   "pearson_shed_locations": 0.666834312981061,
+   "spearman_shed_locations": 0.7006043349379732,
+   "mean_offspring": 1.3659193923802524,
+   "mean_locations": 0.9278451549675364,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 11.098032000000002,
+   "max_shed": 28.0915,
+   "top1_threshold_shed": 11.098032000000002,
+   "top1_ratio": {
+    "point": 0.6539886213566454,
+    "low": 0.5433117764842036,
+    "high": 0.7145490758388904,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.6744302227010287,
+    "low": 0.6214698684666856,
+    "high": 0.7228146621564897,
+    "n": 1000
+   },
+   "elasticity": 0.6709137465391207,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 1183,
+   "elasticity_n_high": 229,
+   "saturation_fit": {
+    "linear_slope": 0.7493698974870928,
+    "linear_sse": 21006.918401477502,
+    "saturating_a": 23.045557840290627,
+    "saturating_b": 0.037649358067924694,
+    "saturating_sse": 20752.482836288,
+    "sse_ratio_saturating_over_linear": 0.9878880109720611,
+    "half_saturation_shed": 18.41059758069211
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 1.0006213747781691,
+    "cv2": 3.3438797958676636,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.4930253766616102,
+     "k_if_a0_noise_given_shed": 0.3734368944009676,
+     "cv2_of_conditional_mean": 2.028293161644606
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.7153372879304595,
+     "k_if_a0_noise_given_shed": 0.5229361117940307,
+     "cv2_of_conditional_mean": 1.3979419455304747
+    },
+    "observed_k": 0.4707107608326534
+   },
+   "top1": {
+    "observed": {
+     "mean": 9.78048780487805,
+     "var": 40.46973803071364,
+     "zero": 0.024390243902439025,
+     "p90": 17.900000000000006,
+     "n": 82
+    },
+    "mean_shed": 13.943545121951221,
+    "proportional_mean": 14.95513451685021,
+    "mean_ratio_vs_proportional": 0.6539886213566454,
+    "poisson_null": {
+     "mean": {
+      "mean": 14.975243902439024,
+      "low": 14.194817073170732,
+      "high": 15.805182926829268
+     },
+     "var": {
+      "mean": 26.89958145137007,
+      "low": 19.46857497741644,
+      "high": 37.71086645588677
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 21.032000000000004,
+      "low": 19.0,
+      "high": 23.0
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 14.877012195121951,
+      "low": 13.28018292682927,
+      "high": 16.76859756097561
+     },
+     "var": {
+      "mean": 76.10793209876543,
+      "low": 46.11205585666967,
+      "high": 129.28915612767233
+     },
+     "zero": {
+      "mean": 0.001402439024390244,
+      "low": 0.0,
+      "high": 0.012195121951219513
+     },
+     "p90": {
+      "mean": 25.704500000000007,
+      "low": 21.780000000000012,
+      "high": 30.0
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 15.07060975609756,
+      "low": 10.789939024390245,
+      "high": 20.01219512195122
+     },
+     "var": {
+      "mean": 489.7547794339054,
+      "low": 210.73873456790122,
+      "high": 968.5968044263772
+     },
+     "zero": {
+      "mean": 0.1910060975609756,
+      "low": 0.10975609756097561,
+      "high": 0.2804878048780488
+     },
+     "p90": {
+      "mean": 40.41150000000002,
+      "low": 26.0,
+      "high": 58.410000000000025
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P50",
+   "family": "persistent",
+   "shape": 0.3,
+   "rho": 0.5,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 5338,
+   "reinfected_share": 0.0043087298613713005,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 1.25,
+   "expected_mean_shed": 2.666666666666667,
+   "mean_shed": 2.3149306069476023,
+   "cv2_pooled": 1.4048200514062748,
+   "cv2_replicate_t": {
+    "mean": 1.412586275289657,
+    "low": 1.3000275381671513,
+    "high": 1.5251450124121626,
+    "n": 12,
+    "sd": 0.17715352251882685
+   },
+   "cv2_among_those_with_offspring": 0.7719999615937483,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3360809291869613,
+   "early_k": 0.6320078887166353,
+   "total_cv2": 1.5822587310272582,
+   "residual_vs_expected_trait": 0.1476705471232259,
+   "residual_vs_realised_shed": 0.07378459752829408,
+   "pearson_shed_offspring": 0.6801418207523998,
+   "spearman_shed_offspring": 0.664284998990394,
+   "pearson_shed_locations": 0.6304967477414357,
+   "spearman_shed_locations": 0.6519000487592197,
+   "mean_offspring": 1.3360809291869613,
+   "mean_locations": 0.9584113900337204,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 12.913714000000006,
+   "max_shed": 28.0915,
+   "top1_threshold_shed": 12.913714000000006,
+   "top1_ratio": {
+    "point": 0.6736152347931347,
+    "low": 0.5557063629939862,
+    "high": 0.8159236241216703,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.6809074579396058,
+    "low": 0.6104646610808605,
+    "high": 0.7651418240416494,
+    "n": 1000
+   },
+   "elasticity": 0.6820272766374721,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 768,
+   "elasticity_n_high": 255,
+   "saturation_fit": {
+    "linear_slope": 0.5353740346232964,
+    "linear_sse": 12018.663840341313,
+    "saturating_a": 32.281197061046726,
+    "saturating_b": 0.01788649529057435,
+    "saturating_sse": 11990.070193501226,
+    "sse_ratio_saturating_over_linear": 0.9976208963641939,
+    "half_saturation_shed": 38.752543150541804
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 1.0006213747781691,
+    "cv2": 3.3438797958676636,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.7118349421329546,
+     "k_if_a0_noise_given_shed": 0.5206670249556323,
+     "cv2_of_conditional_mean": 1.404820051406275
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 1.0003480687551203,
+     "k_if_a0_noise_given_shed": 0.7000103218019076,
+     "cv2_of_conditional_mean": 0.9996520523545834
+    },
+    "observed_k": 0.6320078887166353
+   },
+   "top1": {
+    "observed": {
+     "mean": 7.7407407407407405,
+     "var": 30.195667365478688,
+     "zero": 0.018518518518518517,
+     "p90": 14.0,
+     "n": 54
+    },
+    "mean_shed": 15.448874074074071,
+    "proportional_mean": 11.49133858755125,
+    "mean_ratio_vs_proportional": 0.6736152347931345,
+    "poisson_null": {
+     "mean": {
+      "mean": 11.502083333333333,
+      "low": 10.626851851851852,
+      "high": 12.518981481481482
+     },
+     "var": {
+      "mean": 17.102949860237594,
+      "low": 10.732669461914746,
+      "high": 25.606070929419978
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 16.463,
+      "low": 14.700000000000003,
+      "high": 18.700000000000003
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 11.464814814814813,
+      "low": 9.833333333333334,
+      "high": 13.259722222222223
+     },
+     "var": {
+      "mean": 46.59106918238993,
+      "low": 26.29242662473794,
+      "high": 78.93109713487071
+     },
+     "zero": {
+      "mean": 0.004074074074074074,
+      "low": 0.0,
+      "high": 0.018518518518518517
+     },
+     "p90": {
+      "mean": 19.9825,
+      "low": 16.0,
+      "high": 24.7025
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 11.448611111111113,
+      "low": 8.51388888888889,
+      "high": 15.636574074074067
+     },
+     "var": {
+      "mean": 217.0679140461216,
+      "low": 87.17462438853948,
+      "high": 491.63950908455604
+     },
+     "zero": {
+      "mean": 0.15657407407407406,
+      "low": 0.07407407407407407,
+      "high": 0.25925925925925924
+     },
+     "p90": {
+      "mean": 28.938000000000006,
+      "low": 18.995,
+      "high": 42.102500000000006
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P100",
+   "family": "persistent",
+   "shape": 0.3,
+   "rho": 1.0,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 3603,
+   "reinfected_share": 0.00527338329170136,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 0.7692307692307692,
+   "expected_mean_shed": 4.333333333333334,
+   "mean_shed": 3.6714486694560087,
+   "cv2_pooled": 0.8371138053446986,
+   "cv2_replicate_t": {
+    "mean": 0.8402680302998347,
+    "low": 0.7753637978173169,
+    "high": 0.9051722627823524,
+    "n": 12,
+    "sd": 0.10215122970102959
+   },
+   "cv2_among_those_with_offspring": 0.5328164816299691,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3369414376908133,
+   "early_k": 0.9541993094294637,
+   "total_cv2": 1.047999081657187,
+   "residual_vs_expected_trait": 0.15756469832797526,
+   "residual_vs_realised_shed": 0.11479162352324701,
+   "pearson_shed_offspring": 0.6169120224118502,
+   "spearman_shed_offspring": 0.5996013910240111,
+   "pearson_shed_locations": 0.5704278299873013,
+   "spearman_shed_locations": 0.5786043326763899,
+   "mean_offspring": 1.3369414376908133,
+   "mean_locations": 1.0180405217873993,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 15.04738,
+   "max_shed": 26.6601,
+   "top1_threshold_shed": 15.04738,
+   "top1_ratio": {
+    "point": 0.8341836801804459,
+    "low": 0.700655477792905,
+    "high": 0.945282795500057,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.7984974881698718,
+    "low": 0.7301751339525876,
+    "high": 0.8726168655314618,
+    "n": 1000
+   },
+   "elasticity": 0.7980626159782603,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 386,
+   "elasticity_n_high": 400,
+   "saturation_fit": {
+    "linear_slope": 0.3481539942005947,
+    "linear_sse": 7189.579790004397,
+    "saturating_a": 25.111396105610794,
+    "saturating_b": 0.01484968262254465,
+    "saturating_sse": 7179.792305259543,
+    "sse_ratio_saturating_over_linear": 0.9986386569130978,
+    "half_saturation_shed": 46.67757541885883
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 1.0006213747781691,
+    "cv2": 3.3438797958676636,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 1.194580705293983,
+     "k_if_a0_noise_given_shed": 0.812257333825312,
+     "cv2_of_conditional_mean": 0.8371138053446985
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 1.51373526916473,
+     "k_if_a0_noise_given_shed": 0.9834857891144352,
+     "cv2_of_conditional_mean": 0.6606174939372286
+    },
+    "observed_k": 0.9541993094294637
+   },
+   "top1": {
+    "observed": {
+     "mean": 5.972972972972973,
+     "var": 13.915915915915917,
+     "zero": 0.02702702702702703,
+     "p90": 9.399999999999999,
+     "n": 37
+    },
+    "mean_shed": 17.22914054054054,
+    "proportional_mean": 7.1602611210050675,
+    "mean_ratio_vs_proportional": 0.834183680180446,
+    "poisson_null": {
+     "mean": {
+      "mean": 7.165743243243242,
+      "low": 6.216216216216216,
+      "high": 7.9736486486486475
+     },
+     "var": {
+      "mean": 8.256888138138137,
+      "low": 4.618243243243242,
+      "high": 12.52492492492492
+     },
+     "zero": {
+      "mean": 0.0007432432432432432,
+      "low": 0.0,
+      "high": 0.0006756756756750612
+     },
+     "p90": {
+      "mean": 10.689499999999999,
+      "low": 9.0,
+      "high": 12.399999999999999
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 7.157229729729729,
+      "low": 5.72972972972973,
+      "high": 8.703378378378378
+     },
+     "var": {
+      "mean": 19.66777777777778,
+      "low": 10.613438438438438,
+      "high": 34.4697072072072
+     },
+     "zero": {
+      "mean": 0.014797297297297299,
+      "low": 0.0,
+      "high": 0.05405405405405406
+     },
+     "p90": {
+      "mean": 12.7865,
+      "low": 10.0,
+      "high": 16.4
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 7.1975,
+      "low": 4.917567567567568,
+      "high": 9.837837837837839
+     },
+     "var": {
+      "mean": 61.70049924924925,
+      "low": 23.19455705705706,
+      "high": 128.04249249249244
+     },
+     "zero": {
+      "mean": 0.1302027027027027,
+      "low": 0.02702702702702703,
+      "high": 0.24324324324324326
+     },
+     "p90": {
+      "mean": 16.807,
+      "low": 11.0,
+      "high": 23.999999999999986
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P100ln",
+   "family": "persistent",
+   "shape": 0.3,
+   "rho": 1.0,
+   "dist": "lognormal",
+   "replicates": 12,
+   "infectors": 6308,
+   "reinfected_share": 0.0033291058972733036,
+   "drawn_cv2": 3.3333333333333335,
+   "expected_cv2": 3.3333333333333335,
+   "expected_mean_shed": 4.333333333333334,
+   "mean_shed": 3.0975581297717185,
+   "cv2_pooled": 2.41387097290156,
+   "cv2_replicate_t": {
+    "mean": 2.3454051235831646,
+    "low": 2.026616807901154,
+    "high": 2.664193439265175,
+    "n": 12,
+    "sd": 0.5017333572199436
+   },
+   "cv2_among_those_with_offspring": 1.7061887086924574,
+   "multiplier_matches_draw": false,
+   "early_R": 1.5412175015852885,
+   "early_k": 0.46384985222520425,
+   "total_cv2": 2.1558700411410046,
+   "residual_vs_expected_trait": -0.27172229819822974,
+   "residual_vs_realised_shed": -0.07557430664735171,
+   "pearson_shed_offspring": 0.7639773267840267,
+   "spearman_shed_offspring": 0.6352656351056688,
+   "pearson_shed_locations": 0.6383946509842308,
+   "spearman_shed_locations": 0.6173153402213191,
+   "mean_offspring": 1.5412175015852885,
+   "mean_locations": 1.0600824350031706,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 22.957755000000034,
+   "max_shed": 124.173,
+   "top1_threshold_shed": 22.957755000000034,
+   "top1_ratio": {
+    "point": 0.6499831097200806,
+    "low": 0.598711151498573,
+    "high": 0.710127671016921,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.7241396389876442,
+    "low": 0.6846005549353125,
+    "high": 0.7659754255957237,
+    "n": 1000
+   },
+   "elasticity": 0.7460699322317739,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 1149,
+   "elasticity_n_high": 535,
+   "saturation_fit": {
+    "linear_slope": 0.435469251241457,
+    "linear_sse": 17823.841077880432,
+    "saturating_a": 52.4762765360414,
+    "saturating_b": 0.0093260334688322,
+    "saturating_sse": 17399.321948131495,
+    "sse_ratio_saturating_over_linear": 0.9761825115083769,
+    "half_saturation_shed": 74.32390017433003
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 1.001100237662996,
+    "cv2": 3.614554553963786,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.41427234977599653,
+     "k_if_a0_noise_given_shed": 0.3178552040239101,
+     "cv2_of_conditional_mean": 2.41387097290156
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.7166738044559958,
+     "k_if_a0_noise_given_shed": 0.5238063302458079,
+     "cv2_of_conditional_mean": 1.395334940083471
+    },
+    "observed_k": 0.46384985222520425
+   },
+   "top1": {
+    "observed": {
+     "mean": 13.1875,
+     "var": 67.10714285714286,
+     "zero": 0.015625,
+     "p90": 22.700000000000003,
+     "n": 64
+    },
+    "mean_shed": 33.4823578125,
+    "proportional_mean": 20.28898874876808,
+    "mean_ratio_vs_proportional": 0.6499831097200804,
+    "poisson_null": {
+     "mean": {
+      "mean": 20.28765625,
+      "low": 19.21875,
+      "high": 21.375390625
+     },
+     "var": {
+      "mean": 90.1305146329365,
+      "low": 61.09912574404762,
+      "high": 127.18586309523808
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 28.66925,
+      "low": 25.700000000000003,
+      "high": 31.700000000000003
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 20.3144921875,
+      "low": 17.79296875,
+      "high": 23.312890625
+     },
+     "var": {
+      "mean": 192.43058717757935,
+      "low": 90.72509300595239,
+      "high": 397.98072916666666
+     },
+     "zero": {
+      "mean": 0.0009375,
+      "low": 0.0,
+      "high": 0.015625
+     },
+     "p90": {
+      "mean": 34.8755,
+      "low": 28.700000000000003,
+      "high": 42.80000000000001
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 20.159765625,
+      "low": 13.65390625,
+      "high": 28.6734375
+     },
+     "var": {
+      "mean": 914.8367745535714,
+      "low": 358.11434151785716,
+      "high": 2002.0787202380932
+     },
+     "zero": {
+      "mean": 0.1734765625,
+      "low": 0.09375,
+      "high": 0.265625
+     },
+     "p90": {
+      "mean": 54.489750000000015,
+      "low": 34.29750000000003,
+      "high": 80.10000000000001
+     }
+    }
+   },
+   "cv2_direction": "below",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P25k",
+   "family": "persistent",
+   "shape": 0.08,
+   "rho": 0.25,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 3751,
+   "reinfected_share": 0.003732338043188483,
+   "drawn_cv2": 12.5,
+   "expected_cv2": 3.0303030303030303,
+   "expected_mean_shed": 4.125,
+   "mean_shed": 3.4377033168289386,
+   "cv2_pooled": 3.544178852522026,
+   "cv2_replicate_t": {
+    "mean": 3.4994407498074995,
+    "low": 3.1937537743234192,
+    "high": 3.80512772529158,
+    "n": 12,
+    "sd": 0.48111346910539643
+   },
+   "cv2_among_those_with_offspring": 1.2879718856751046,
+   "multiplier_matches_draw": true,
+   "early_R": 1.3772327379365503,
+   "early_k": 0.26950317381887273,
+   "total_cv2": 3.7105314413554122,
+   "residual_vs_expected_trait": 0.16877847793029027,
+   "residual_vs_realised_shed": 0.03660784362416994,
+   "pearson_shed_offspring": 0.7810454125564067,
+   "spearman_shed_offspring": 0.7547485476882844,
+   "pearson_shed_locations": 0.7290066192673693,
+   "spearman_shed_locations": 0.7485796177536892,
+   "mean_offspring": 1.3772327379365503,
+   "mean_locations": 0.881364969341509,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 30.961100000000002,
+   "max_shed": 79.9466,
+   "top1_threshold_shed": 30.961100000000002,
+   "top1_ratio": {
+    "point": 0.6146036809909396,
+    "low": 0.5077815469545789,
+    "high": 0.7755058819053149,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.6515014619067439,
+    "low": 0.5729426734194545,
+    "high": 0.7555204287384547,
+    "n": 1000
+   },
+   "elasticity": 0.62493118814881,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 348,
+   "elasticity_n_high": 499,
+   "saturation_fit": {
+    "linear_slope": 0.36121587944544065,
+    "linear_sse": 12394.585989460573,
+    "saturating_a": 40.453237726958086,
+    "saturating_b": 0.010235310218990263,
+    "saturating_sse": 12189.986053468754,
+    "sse_ratio_saturating_over_linear": 0.9834927978904826,
+    "half_saturation_shed": 67.72116972809505
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 0.9967325780488845,
+    "cv2": 12.527133402202441,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.28215280368495044,
+     "k_if_a0_noise_given_shed": 0.22130100290274196,
+     "cv2_of_conditional_mean": 3.5441788525220255
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.4122446348398797,
+     "k_if_a0_noise_given_shed": 0.3164106388244226,
+     "cv2_of_conditional_mean": 2.4257441225121363
+    },
+    "observed_k": 0.26950317381887273
+   },
+   "top1": {
+    "observed": {
+     "mean": 14.105263157894736,
+     "var": 75.01564722617354,
+     "zero": 0.0,
+     "p90": 26.300000000000004,
+     "n": 38
+    },
+    "mean_shed": 41.89803157894737,
+    "proportional_mean": 22.9501768280211,
+    "mean_ratio_vs_proportional": 0.6146036809909396,
+    "poisson_null": {
+     "mean": {
+      "mean": 23.012039473684208,
+      "low": 21.420394736842105,
+      "high": 24.31710526315789
+     },
+     "var": {
+      "mean": 66.55671230440967,
+      "low": 43.35204480796586,
+      "high": 97.85071123755334
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 33.08075000000001,
+      "low": 29.0,
+      "high": 37.0
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 23.001118421052634,
+      "low": 19.576315789473682,
+      "high": 27.000657894736843
+     },
+     "var": {
+      "mean": 191.0202862731152,
+      "low": 92.53854907539117,
+      "high": 353.17354196301545
+     },
+     "zero": {
+      "mean": 0.00039473684210526315,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 39.29375000000002,
+      "low": 31.59250000000001,
+      "high": 49.51250000000001
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 23.838092105263158,
+      "low": 11.128947368421054,
+      "high": 40.296710526315785
+     },
+     "var": {
+      "mean": 2091.970136913229,
+      "low": 304.4152204836416,
+      "high": 6472.720128022751
+     },
+     "zero": {
+      "mean": 0.29046052631578945,
+      "low": 0.13157894736842105,
+      "high": 0.42105263157894735
+     },
+     "p90": {
+      "mean": 68.64625000000007,
+      "low": 30.800000000000026,
+      "high": 131.8175
+     }
+    }
+   },
+   "cv2_direction": "match",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P50a005",
+   "family": "persistent",
+   "shape": 0.05,
+   "rho": 0.5,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 1516,
+   "reinfected_share": 0.00395778364116095,
+   "drawn_cv2": 20.0,
+   "expected_cv2": 1.8181818181818181,
+   "expected_mean_shed": 11.0,
+   "mean_shed": 8.33986827885607,
+   "cv2_pooled": 2.3295488741548733,
+   "cv2_replicate_t": {
+    "mean": 2.1941980706441604,
+    "low": 1.933320250430629,
+    "high": 2.4550758908576915,
+    "n": 12,
+    "sd": 0.4105894040687462
+   },
+   "cv2_among_those_with_offspring": 1.1304836174673456,
+   "multiplier_matches_draw": false,
+   "early_R": 1.312664907651715,
+   "early_k": 0.45517528090224396,
+   "total_cv2": 2.196955858450419,
+   "residual_vs_expected_trait": 0.13440369170821329,
+   "residual_vs_realised_shed": -0.03982311739998402,
+   "pearson_shed_offspring": 0.6967971661934841,
+   "spearman_shed_offspring": 0.7111107946412326,
+   "pearson_shed_locations": 0.6563582187383551,
+   "spearman_shed_locations": 0.7048505096980228,
+   "mean_offspring": 1.312664907651715,
+   "mean_locations": 0.9307387862796834,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 62.437294999999914,
+   "max_shed": 114.215,
+   "top1_threshold_shed": 62.437294999999914,
+   "top1_ratio": {
+    "point": 0.5047290673620501,
+    "low": 0.3490560099996298,
+    "high": 0.6469978842771642,
+    "n": 1000
+   },
+   "top_decile_ratio": {
+    "point": 0.6986293136627091,
+    "low": 0.567847062425848,
+    "high": 0.8671285505571668,
+    "n": 1000
+   },
+   "elasticity": 0.8530937349247536,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 119,
+   "elasticity_n_high": 465,
+   "saturation_fit": {
+    "linear_slope": 0.1337554980569534,
+    "linear_sse": 4057.935349574476,
+    "saturating_a": 10.876827112750824,
+    "saturating_b": 0.01788649529057435,
+    "saturating_sse": 3739.5095857083297,
+    "sse_ratio_saturating_over_linear": 0.9215301042438893,
+    "half_saturation_shed": 38.752543150541804
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 0.9936219613872677,
+    "cv2": 20.176943358061983,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.4292676625480911,
+     "k_if_a0_noise_given_shed": 0.3285767113053795,
+     "cv2_of_conditional_mean": 2.3295488741548738
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 0.6824643983570855,
+     "k_if_a0_noise_given_shed": 0.5015324698904341,
+     "cv2_of_conditional_mean": 1.465277899341455
+    },
+    "observed_k": 0.45517528090224396
+   },
+   "top1": {
+    "observed": {
+     "mean": 7.75,
+     "var": 12.6,
+     "zero": 0.0,
+     "p90": 11.5,
+     "n": 16
+    },
+    "mean_shed": 81.22571875,
+    "proportional_mean": 15.354772493102328,
+    "mean_ratio_vs_proportional": 0.5047290673620501,
+    "poisson_null": {
+     "mean": {
+      "mean": 15.35625,
+      "low": 13.5,
+      "high": 17.125
+     },
+     "var": {
+      "mean": 26.201916666666662,
+      "low": 11.397916666666667,
+      "high": 45.936562499999994
+     },
+     "zero": {
+      "mean": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 21.515,
+      "low": 18.0,
+      "high": 25.5
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 15.3384375,
+      "low": 11.875,
+      "high": 19.567187499999996
+     },
+     "var": {
+      "mean": 78.60527083333332,
+      "low": 24.77041666666667,
+      "high": 181.12510416666657
+     },
+     "zero": {
+      "mean": 0.00046875,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 25.60375,
+      "low": 18.0,
+      "high": 36.01249999999999
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 16.17125,
+      "low": 6.5609375,
+      "high": 29.440624999999997
+     },
+     "var": {
+      "mean": 594.7851458333333,
+      "low": 76.36625000000001,
+      "high": 1836.485312499997
+     },
+     "zero": {
+      "mean": 0.1928125,
+      "low": 0.0,
+      "high": 0.3765624999999986
+     },
+     "p90": {
+      "mean": 40.86,
+      "low": 16.0,
+      "high": 85.59999999999991
+     }
+    }
+   },
+   "cv2_direction": "above",
+   "mean_ceiling": false
+  },
+  {
+   "arm": "P100a005",
+   "family": "persistent",
+   "shape": 0.05,
+   "rho": 1.0,
+   "dist": "gamma",
+   "replicates": 12,
+   "infectors": 924,
+   "reinfected_share": 0.008658008658008658,
+   "drawn_cv2": 20.0,
+   "expected_cv2": 0.9523809523809523,
+   "expected_mean_shed": 21.0,
+   "mean_shed": 15.194481679978356,
+   "cv2_pooled": 1.2810925474789912,
+   "cv2_replicate_t": {
+    "mean": 1.2143329658717499,
+    "low": 1.0762856120847581,
+    "high": 1.3523803196587416,
+    "n": 12,
+    "sd": 0.21726945080373058
+   },
+   "cv2_among_those_with_offspring": 0.7849403816060593,
+   "multiplier_matches_draw": false,
+   "early_R": 1.2878787878787878,
+   "early_k": 0.8335095675163156,
+   "total_cv2": 1.199746276434224,
+   "residual_vs_expected_trait": 0.1266993123199684,
+   "residual_vs_realised_shed": -0.03566110070135873,
+   "pearson_shed_offspring": 0.6437649397018729,
+   "spearman_shed_offspring": 0.6280694994614895,
+   "pearson_shed_locations": 0.5830243505105253,
+   "spearman_shed_locations": 0.6155802228587112,
+   "mean_offspring": 1.2878787878787878,
+   "mean_locations": 1.0183982683982684,
+   "p90_offspring": 4.0,
+   "p90_locations": 3.0,
+   "p99_shed": 82.431054,
+   "max_shed": 123.697,
+   "top1_threshold_shed": 82.431054,
+   "top1_ratio": {
+    "point": 0.604629874107905,
+    "low": 0.42174166533431046,
+    "high": 0.932469064298182,
+    "n": 991
+   },
+   "top_decile_ratio": {
+    "point": 0.6860175030037682,
+    "low": 0.552053066825212,
+    "high": 0.836929787341673,
+    "n": 1000
+   },
+   "elasticity": 0.46120284058721506,
+   "elasticity_definition": "absolute_0.5_1_vs_ge_8",
+   "elasticity_n_low": 45,
+   "elasticity_n_high": 504,
+   "saturation_fit": {
+    "linear_slope": 0.07522308108167902,
+    "linear_sse": 1806.1494459838032,
+    "saturating_a": 9.462503528913732,
+    "saturating_b": 0.010235310218990263,
+    "saturating_sse": 1757.1778904454768,
+    "sse_ratio_saturating_over_linear": 0.9728862106913574,
+    "half_saturation_shed": 67.72116972809505
+   },
+   "population_trait": {
+    "n": 178746,
+    "mean": 0.9936219613872677,
+    "cv2": 20.176943358061983,
+    "replicate": "rep1101"
+   },
+   "contact_limitation": "trace.tsv records infected agents only, so uninfected contacts are absent. mean_locations is the number of distinct places among 14-day offspring and cannot exceed offspring.",
+   "marginal_models": {
+    "proportional_lower_half": {
+     "k_if_poisson_given_shed": 0.7805837306351195,
+     "k_if_a0_noise_given_shed": 0.5649384115092094,
+     "cv2_of_conditional_mean": 1.2810925474789914
+    },
+    "empirical_ventile_mean": {
+     "k_if_poisson_given_shed": 1.251344053016611,
+     "k_if_a0_noise_given_shed": 0.843965399844041,
+     "cv2_of_conditional_mean": 0.7991407299929251
+    },
+    "observed_k": 0.8335095675163156
+   },
+   "top1": {
+    "observed": {
+     "mean": 6.1,
+     "var": 19.211111111111112,
+     "zero": 0.0,
+     "p90": 8.899999999999997,
+     "n": 10
+    },
+    "mean_shed": 99.04884000000001,
+    "proportional_mean": 10.088816747601467,
+    "mean_ratio_vs_proportional": 0.6046298741079051,
+    "poisson_null": {
+     "mean": {
+      "mean": 10.129249999999999,
+      "low": 8.3,
+      "high": 11.902499999999998
+     },
+     "var": {
+      "mean": 12.668583333333334,
+      "low": 3.6541666666666677,
+      "high": 26.859166666666653
+     },
+     "zero": {
+      "mean": 0.00025,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "p90": {
+      "mean": 13.980749999999999,
+      "low": 11.0975,
+      "high": 17.302499999999995
+     }
+    },
+    "nb_a0_null": {
+     "mean": {
+      "mean": 10.2035,
+      "low": 7.1,
+      "high": 13.904999999999996
+     },
+     "var": {
+      "mean": 35.71194444444444,
+      "low": 7.955555555555555,
+      "high": 89.84999999999998
+     },
+     "zero": {
+      "mean": 0.004750000000000001,
+      "low": 0.0,
+      "high": 0.1
+     },
+     "p90": {
+      "mean": 16.56125,
+      "low": 10.495,
+      "high": 24.104999999999997
+     }
+    },
+    "nb_arm_k_at_proportional_mean": {
+     "mean": {
+      "mean": 10.19125,
+      "low": 4.2,
+      "high": 18.804999999999996
+     },
+     "var": {
+      "mean": 133.36391666666665,
+      "low": 14.47138888888889,
+      "high": 440.5308333333331
+     },
+     "zero": {
+      "mean": 0.12525,
+      "low": 0.0,
+      "high": 0.3
+     },
+     "p90": {
+      "mean": 22.080499999999997,
+      "low": 9.1,
+      "high": 41.40999999999999
+     }
+    }
+   },
+   "cv2_direction": "above",
+   "mean_ceiling": false
+  }
+ ]
+}
