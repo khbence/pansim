@@ -15,7 +15,7 @@ Hospital (type 12), health-centre (type 14) and nursing-home (type 22) locations
 | flat, shape 0.04, original aggregate | 38,630 | 0.294 | 0.043 | 416 | 437 | 17 | 14 | 101 |
 | caregiving, shape 0.09, original aggregate | 38,658 | 0.320 | 0.083 | 236 | 423 | 19 | 4.4 | 249 |
 
-The flat arm still follows its negative binomial. The caregiving arm's heavy extreme does not. On the aggregated map it produced 19 chains above 50 against 4 expected, and a maximum of 249. On the ward map it produced none above 50, against 1 expected, and a maximum of 42. The thin middle is smaller than it was but has not gone: 195 chains above 10 against 301 expected, where the aggregate arm was 236 against 423.
+The flat arm still follows its negative binomial. The caregiving arm's heavy extreme does not. On the aggregated map it produced 19 chains above 50 against 4 expected, and a maximum of 249. On the ward map it produced none above 50, against 1 expected, and a maximum of 42. The thin middle is smaller than it was but has not gone: 195 chains above 10 against 301 expected, where the aggregate arm was 235 against 423.
 
 The hospital-to-hospital correlation that carried the original claim collapses with the aggregation. In the aggregate caregiving arm, a case infected in hospital had mean offspring 0.68 and 70% of its children were infected in a hospital (3,813 such cases). In the ward arm those figures are 0.33, 16%, and 527 cases. Same-location transmission among all child links is 19% in the flat ward arm and 39% in the caregiving ward arm, so caregiving still concentrates some transmission inside a place, without producing the extreme chains.
 
