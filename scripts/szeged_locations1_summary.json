@@ -1,0 +1,118 @@
+{
+  "locations_in": {
+    "2": 73036,
+    "22": 8,
+    "33": 775,
+    "3": 181,
+    "44": 19,
+    "7": 1074,
+    "4": 119,
+    "10": 15,
+    "8": 1280,
+    "11": 8,
+    "9": 22,
+    "1": 4103,
+    "13": 92,
+    "5": 8,
+    "6": 20,
+    "12": 17,
+    "14": 95,
+    "15": 5
+  },
+  "locations_out": {
+    "2": 73036,
+    "22": 8,
+    "33": 775,
+    "3": 181,
+    "44": 19,
+    "7": 1074,
+    "4": 119,
+    "10": 167,
+    "8": 1280,
+    "11": 8,
+    "9": 52,
+    "1": 4103,
+    "13": 92,
+    "5": 420,
+    "6": 20,
+    "12": 17,
+    "14": 95,
+    "15": 5
+  },
+  "skipped_already_represented": {
+    "5": 21,
+    "9": 15,
+    "10": 2
+  },
+  "types": {
+    "5": {
+      "locations": 420,
+      "added": 412,
+      "slots": 461240,
+      "nearest_median_m": 102,
+      "nearest_p90_m": 378,
+      "assigned_median_m": 156,
+      "assigned_p90_m": 553,
+      "assignment_min": 5,
+      "assignment_median": 944,
+      "assignment_max": 4022,
+      "locations_with_no_slot": 7,
+      "slots_on_new_locations": 452696,
+      "added_kinds": {
+        "fast_food": 105,
+        "pub": 81,
+        "cafe": 85,
+        "restaurant": 124,
+        "food_court": 3,
+        "bar": 9,
+        "biergarten": 5
+      }
+    },
+    "9": {
+      "locations": 52,
+      "added": 30,
+      "slots": 489330,
+      "nearest_median_m": 361,
+      "nearest_p90_m": 914,
+      "assigned_median_m": 541,
+      "assigned_p90_m": 1368,
+      "assignment_min": 1268,
+      "assignment_median": 7783,
+      "assignment_max": 22522,
+      "locations_with_no_slot": 0,
+      "slots_on_new_locations": 361566,
+      "added_kinds": {
+        "place_of_worship": 30
+      }
+    },
+    "10": {
+      "locations": 167,
+      "added": 152,
+      "slots": 501167,
+      "nearest_median_m": 160,
+      "nearest_p90_m": 509,
+      "assigned_median_m": 235,
+      "assigned_p90_m": 736,
+      "assignment_min": 340,
+      "assignment_median": 2715,
+      "assignment_max": 8121,
+      "locations_with_no_slot": 1,
+      "slots_on_new_locations": 469371,
+      "added_kinds": {
+        "park": 152
+      }
+    }
+  },
+  "dangling_loc_ids": 0,
+  "rules": {
+    "type_5": "amenity restaurant, cafe, pub, bar, biergarten, fast_food, food_court",
+    "type_9": "amenity place_of_worship",
+    "type_10": "leisure park",
+    "match_radius_m": {
+      "5": 80.0,
+      "9": 80.0,
+      "10": 120.0
+    },
+    "anchor": "minimum distance to real home and real work; school if both are the commuter box"
+  }
+}
