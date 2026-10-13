@@ -1,0 +1,20 @@
+{
+ "solver": "greedy nearest venue with quota remaining",
+ "seed": 20261013,
+ "chosen_phi": 1.2,
+ "reports": [
+  {
+   "phi": 1.2,
+   "feasible": true,
+   "failed_agents": 0,
+   "quota": 481077,
+   "needed": 461130,
+   "unused_quota": 19947,
+   "displacement_median_m": 32.935096109373134,
+   "displacement_p95_m": 2002.2491292837053,
+   "agents_whose_venues_changed": 88361,
+   "share_changed": 0.5748552468935008
+  }
+ ],
+ "note": "Fill 1.10 and 1.15 fail the 2 percent slack test on measured per-venue presence rates, so they are not solved. locations3.json is a copy of locations1.json."
+}

@@ -1,0 +1,44 @@
+{
+ "pilot": [
+  {
+   "label": "venue_s3",
+   "k": 0.00011985333257182021,
+   "household_share": 0.24451244604563044
+  },
+  {
+   "label": "venue_s1",
+   "k": 0.00022565727690428649,
+   "household_share": 0.3620338876850936
+  },
+  {
+   "label": "shape0.5",
+   "k": 0.0004606204262856089,
+   "household_share": 0.38563198534798915
+  },
+  {
+   "label": "shape1",
+   "k": 0.0004,
+   "household_share": 0.4197604467423688
+  }
+ ],
+ "chosen": [
+  {
+   "label": "venue_s3",
+   "k": 0.00011985333257182021,
+   "household_share": 0.24451244604563044,
+   "target_share": 0.25
+  },
+  {
+   "label": "venue_s1",
+   "k": 0.00022565727690428649,
+   "household_share": 0.3620338876850936,
+   "target_share": 0.37
+  },
+  {
+   "label": "shape1",
+   "k": 0.0004,
+   "household_share": 0.4197604467423688,
+   "target_share": 0.45
+  }
+ ]
+}

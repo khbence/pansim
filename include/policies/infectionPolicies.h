@@ -58,6 +58,12 @@ private:
     thrust::device_vector<unsigned> occupancyMax;
     std::vector<std::vector<unsigned>> occupancyDailyHistory;
     int occupancyCurrentDay = -1;
+    std::string eventLogPath = "";
+    std::ofstream eventLogStream;
+    int eventLogDay = -1;
+    thrust::device_vector<unsigned> eventPresentMax;
+    thrust::device_vector<unsigned> eventInfectiousMax;
+    std::vector<unsigned> eventTypeByLocation;
     bool initialSheddingDone = false;
     thrust::device_vector<unsigned> newInfectionsAtLocationsAccumulator;
     thrust::device_vector<bool> infectionFlagAtLocations;
@@ -210,7 +216,16 @@ public:
             cxxopts::value<double>()->default_value("0"))
             ("eventFactor",
             "Infectiousness multiplier while a social-venue event is active",
-            cxxopts::value<double>()->default_value("20"));
+            cxxopts::value<double>()->default_value("20"))
+            ("eventTypes",
+            "Comma-separated location types eligible for events. Default 5,6,8,9",
+            cxxopts::value<std::string>()->default_value("5,6,8,9"))
+            ("eventLog",
+            "Write one row per amplification event (day, location, type, peak presence)",
+            cxxopts::value<std::string>()->default_value(""))
+            ("homeVenueFactor",
+            "If non-negative, replace the venue-profile base factor of type 2 (home)",
+            cxxopts::value<double>()->default_value("-1"));
     }
 
     [[nodiscard]] double getSheddingShape() const { return sheddingShape; }
@@ -220,6 +235,7 @@ public:
     [[nodiscard]] bool getPeakMode() const { return peakMode; }
 
     void finalize() {
+        flushEventLog();
         writeInfectionTrace();
         writeOccupancyStats();
         writeProfile();
@@ -282,6 +298,7 @@ protected:
         densityExponent = result["densityExponent"].as<double>();
         infectionTracePath = result["infectionTrace"].as<std::string>();
         occupancyStatsPath = result["occupancyStats"].as<std::string>();
+        eventLogPath = result["eventLog"].as<std::string>();
         volumeModelMode = result["volumeModel"].as<std::string>();
         volumeTypeFactors = result["volumeTypeFactors"].as<std::string>();
         volumeHomeType = result["volumeHomeType"].as<unsigned>();
@@ -871,6 +888,53 @@ public:
         volumeActive = true;
     }
 
+    void noteEventExposure() {
+        if (eventLogPath.empty()) return;
+        auto realThis = static_cast<SimulationType*>(this);
+        unsigned n = static_cast<unsigned>(fullInfectedCounts.size());
+        if (eventPresentMax.size() != n) {
+            eventPresentMax.assign(n, 0u);
+            eventInfectiousMax.assign(n, 0u);
+        }
+        float* boost = thrust::raw_pointer_cast(realThis->locs->eventBoost.data());
+        unsigned* offsets = thrust::raw_pointer_cast(realThis->locs->locationListOffsets.data());
+        float* infectious = thrust::raw_pointer_cast(fullInfectedCounts.data());
+        unsigned* presentMax = thrust::raw_pointer_cast(eventPresentMax.data());
+        unsigned* infectiousMax = thrust::raw_pointer_cast(eventInfectiousMax.data());
+        thrust::for_each(thrust::make_counting_iterator<unsigned>(0), thrust::make_counting_iterator<unsigned>(n),
+            [=] HD(unsigned loc) {
+                if (!(boost[loc] > 1.0f)) return;
+                unsigned present = offsets[loc + 1] - offsets[loc];
+                unsigned infectors = static_cast<unsigned>(infectious[loc]);
+                if (present > presentMax[loc]) presentMax[loc] = present;
+                if (infectors > infectiousMax[loc]) infectiousMax[loc] = infectors;
+            });
+    }
+
+    void flushEventLog() {
+        if (eventLogPath.empty() || eventLogDay < 0 || eventPresentMax.empty()) return;
+        auto realThis = static_cast<SimulationType*>(this);
+        thrust::host_vector<float> boost = realThis->locs->eventBoost;
+        thrust::host_vector<unsigned> present = eventPresentMax;
+        thrust::host_vector<unsigned> infectious = eventInfectiousMax;
+        if (eventTypeByLocation.empty()) {
+            thrust::host_vector<typename SimulationType::TypeOfLocation_t> types = realThis->locs->locType;
+            eventTypeByLocation.assign(types.begin(), types.end());
+        }
+        if (!eventLogStream.is_open()) {
+            eventLogStream.open(eventLogPath.c_str());
+            eventLogStream << "day\tlocation_index\tlocType\tmax_present\tmax_infectious\n";
+        }
+        for (unsigned loc = 0; loc < boost.size(); ++loc) {
+            if (!(boost[loc] > 1.0f)) continue;
+            unsigned type = loc < eventTypeByLocation.size() ? eventTypeByLocation[loc] : 0u;
+            eventLogStream << eventLogDay << '\t' << loc << '\t' << type << '\t'
+                           << (loc < present.size() ? present[loc] : 0u) << '\t'
+                           << (loc < infectious.size() ? infectious[loc] : 0u) << '\n';
+        }
+        eventLogStream.flush();
+    }
+
     void trackOccupancy(Timehandler& simTime) {
         if (occupancyStatsPath.empty()) return;
         auto realThis = static_cast<SimulationType*>(this);
@@ -959,7 +1023,16 @@ public:
         applyPeakWindow(simTime);
         accumulateProfile(simTime);
         if (realThis->locs->eventRate > 0.0) {
-            realThis->locs->updateDailyEvents(simTime.getTimestamp() / simTime.getStepsPerDay());
+            unsigned day = simTime.getTimestamp() / simTime.getStepsPerDay();
+            if (!eventLogPath.empty() && eventLogDay >= 0 && static_cast<int>(day) != eventLogDay) flushEventLog();
+            realThis->locs->updateDailyEvents(day);
+            if (!eventLogPath.empty() && static_cast<int>(day) != eventLogDay) {
+                if (eventPresentMax.size() == realThis->locs->eventBoost.size()) {
+                    thrust::fill(eventPresentMax.begin(), eventPresentMax.end(), 0u);
+                    thrust::fill(eventInfectiousMax.begin(), eventInfectiousMax.end(), 0u);
+                }
+                eventLogDay = static_cast<int>(day);
+            }
         }
         thrust::device_vector<unsigned>& locationListOffsets =
             realThis->locs->locationListOffsets;// offsets into locationAgentList and locationIdsOfAgents
@@ -994,6 +1067,7 @@ public:
             [variant] HD(const typename SimulationType::PPState_t& ppstate) -> float { return ppstate.isInfectious(variant); });
 
         dumpToFileStep1(locationListOffsets, locationAgentList, ppstates, fullInfectedCounts, agentLocations, simTime, variant);
+        if (!eventLogPath.empty() && realThis->locs->eventRate > 0.0) noteEventExposure();
 
         //
         // Step 2 - calculate infection ratios, based on density of infected people

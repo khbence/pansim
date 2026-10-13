@@ -1,0 +1,4 @@
+type,assignments,locations_now,total_design_capacity,mean_design_capacity,capacity_mix,presence_rate_at_peak,absorbable_at_fill_1,share_of_assignments_absorbable,smallest_feasible_fill,extra_capacity100_venues_for_fill_1,rebalancing_alone_sufficient
+5 restaurant,461130,420,30680,73,"190 at 40, 210 at 100, 14 at 80, 3 at 120, 3 at 200",0.073,420274,91.1%,1.1,30.0,"decided: run at fill 1.10 (99.7% utilisation, 0.3% slack); 1.15 is the first fill with real slack"
+9 church,489084,52,7800,150,added churches 150 (per note 26),0.0686,113703,23.2%,4.3,,no; needs about 172 more locations at capacity 150
+10 park,500574,167,50100,300,added parks 300 (per note 26),0.0439,1141230,228%,0.44,0.0,"yes, already ample"

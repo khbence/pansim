@@ -2,6 +2,7 @@
 
 #include "simulation.h"
 #include "configTypes.h"
+#include <sstream>
 
 template<typename SimulationType>
 void LocationsList<SimulationType>::initLocationTypes(const parser::LocationTypes& inputData) {
@@ -28,12 +29,24 @@ void LocationsList<SimulationType>::initializeArgs(const cxxopts::ParseResult& r
         communityScale = result["communityScale"].as<double>();
         eventRate = result["eventRate"].as<double>();
         eventFactor = result["eventFactor"].as<double>();
+        homeVenueFactor = result["homeVenueFactor"].as<double>();
+        eventTypeAllowed.assign(64, 0);
+        std::stringstream types(result["eventTypes"].as<std::string>());
+        std::string item;
+        while (std::getline(types, item, ',')) {
+            if (item.empty()) continue;
+            unsigned type = static_cast<unsigned>(std::stoul(item));
+            if (type < eventTypeAllowed.size()) eventTypeAllowed[type] = 1;
+        }
     } catch (std::exception&) {
         venueProfile = 0;
         venueStrength = 1.0;
         communityScale = 1.0;
         eventRate = 0.0;
         eventFactor = 20.0;
+        homeVenueFactor = -1.0;
+        eventTypeAllowed.assign(64, 0);
+        eventTypeAllowed[5] = eventTypeAllowed[6] = eventTypeAllowed[8] = eventTypeAllowed[9] = 1;
     }
 }
 
@@ -209,6 +222,7 @@ void LocationsList<SimulationType>::applyVenueAmplification() {
             float base = 1.0f;
             if (venueProfile == 1) base = covidVenueFactor(type);
             else if (venueProfile == 2) base = caregivingVenueFactor(type);
+            if (homeVenueFactor >= 0.0 && type == 2) base = static_cast<float>(homeVenueFactor);
             float factor = 1.0f + static_cast<float>(venueStrength) * (base - 1.0f);
             bool community = !(type == 1 || type == 2 || type == 12 || type == 22);
             if (community) factor *= static_cast<float>(communityScale);
@@ -226,17 +240,31 @@ template<typename SimulationType>
 void LocationsList<SimulationType>::updateDailyEvents(unsigned day) {
     if (!(eventRate > 0.0) || lastEventDay == static_cast<int>(day)) return;
     lastEventDay = static_cast<int>(day);
-    TypeOfLocation* types = thrust::raw_pointer_cast(locType.data());
+    bool anyEligible = false;
+    for (char allowed : eventTypeAllowed) anyEligible = anyEligible || allowed;
+    if (!anyEligible) {
+        eventTypeAllowed.assign(64, 0);
+        eventTypeAllowed[5] = eventTypeAllowed[6] = eventTypeAllowed[8] = eventTypeAllowed[9] = 1;
+    }
+    if (eventEligible.size() != locType.size()) {
+        thrust::host_vector<TypeOfLocation> typesHost = locType;
+        thrust::host_vector<uint8_t> eligibleHost(typesHost.size(), 0);
+        for (unsigned i = 0; i < typesHost.size(); ++i) {
+            unsigned type = typesHost[i];
+            eligibleHost[i] = (type < eventTypeAllowed.size() && eventTypeAllowed[type]) ? 1 : 0;
+        }
+        eventEligible = eligibleHost;
+    }
+    uint8_t* eligible = thrust::raw_pointer_cast(eventEligible.data());
     float* boost = thrust::raw_pointer_cast(eventBoost.data());
     double rate = eventRate;
     double factor = eventFactor;
     unsigned n = static_cast<unsigned>(locType.size());
     thrust::for_each(thrust::make_counting_iterator<unsigned>(0),
         thrust::make_counting_iterator<unsigned>(n),
-        [types, boost, rate, factor] HD(unsigned i) {
-            unsigned type = types[i];
-            bool social = type == 5 || type == 6 || type == 8 || type == 9;
-            if (social && RandomGenerator::randomUnit() < rate) boost[i] = static_cast<float>(factor);
+        [eligible, boost, rate, factor] HD(unsigned i) {
+            // Same draw order as the previous hardcoded types 5, 6, 8 and 9 when those are the eligible set.
+            if (eligible[i] && RandomGenerator::randomUnit() < rate) boost[i] = static_cast<float>(factor);
             else boost[i] = 1.0f;
         });
 }

@@ -1,0 +1,233 @@
+{
+ "v4_shape0.03": {
+  "arm": "v4_shape0.03",
+  "nodes": 64057,
+  "chains": 38613,
+  "mean_offspring": 0.39720873596952716,
+  "k": 0.030348354191300733,
+  "zero_share": 0.9156844685202242,
+  "observed": {
+   "above_10": 642,
+   "above_50": 71,
+   "above_100": 15,
+   "above_200": 4,
+   "above_500": 1,
+   "longest": 585,
+   "chains": 38613
+  },
+  "poisson_band_95": {
+   "above_10": {
+    "low": 593.2928149505622,
+    "high": 693.6399458579117
+   },
+   "above_50": {
+    "low": 55.45158905449915,
+    "high": 89.55683910710061
+   },
+   "above_100": {
+    "low": 8.395386132783322,
+    "high": 24.740218871485844
+   },
+   "above_200": {
+    "low": 1.0898653736263242,
+    "high": 10.241588675403698
+   },
+   "above_500": {
+    "low": 0.025317807984289842,
+    "high": 5.571643390938899
+   }
+  },
+  "negative_binomial": {
+   "above_10": 668.8975243219811,
+   "above_50": 84.46426572438705,
+   "above_100": 17.114329491504808,
+   "above_200": 1.3601841244757367,
+   "above_500": 0.0024639242632108482
+  },
+  "empirical_iid": {
+   "above_10": 657.3366666666667,
+   "above_50": 75.33,
+   "above_100": 18.31,
+   "above_200": 1.8266666666666667,
+   "above_500": 0.016666666666666666,
+   "longest_in_one_study_max_seen": 665,
+   "blocks": 300,
+   "block_size": 38613,
+   "share_blocks_with_chain_at_least_585": 0.0033333333333333335,
+   "chains_simulated": 11583900,
+   "hit_cap_5000": 0
+  },
+  "nb_p_any_chain_at_least_585": 0.00047572257184858024
+ },
+ "v5_flat": {
+  "arm": "v5_flat",
+  "nodes": 56801,
+  "chains": 38557,
+  "mean_offspring": 0.3211915283181634,
+  "k": 0.04919892473756978,
+  "zero_share": 0.9055298322212637,
+  "observed": {
+   "above_10": 485,
+   "above_50": 19,
+   "above_100": 0,
+   "above_200": 0,
+   "above_500": 0,
+   "longest": 99,
+   "chains": 38557
+  },
+  "poisson_band_95": {
+   "above_10": {
+    "low": 442.7910882723803,
+    "high": 530.1474206707478
+   },
+   "above_50": {
+    "low": 11.43924116436673,
+    "high": 29.670853571585603
+   },
+   "above_100": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_200": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_500": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   }
+  },
+  "negative_binomial": {
+   "above_10": 495.9581566724747,
+   "above_50": 16.953016870670815,
+   "above_100": 0.8314489570923325,
+   "above_200": 0.0043804596898494585,
+   "above_500": 2.791007869262785e-09
+  },
+  "empirical_iid": {
+   "above_10": 486.97491,
+   "above_50": 17.35065,
+   "above_100": 0.38557,
+   "above_200": 0.0,
+   "above_500": 0.0,
+   "longest_among_simulated": 119,
+   "chains_simulated": 100000,
+   "hit_cap_5000": 0
+  },
+  "nb_p_any_chain_at_least_585": null
+ },
+ "v5_caregiving": {
+  "arm": "v5_caregiving",
+  "nodes": 56567,
+  "chains": 38531,
+  "mean_offspring": 0.31884314176109746,
+  "k": 0.14516590166476992,
+  "zero_share": 0.8502483780295932,
+  "observed": {
+   "above_10": 220,
+   "above_50": 0,
+   "above_100": 0,
+   "above_200": 0,
+   "above_500": 0,
+   "longest": 44,
+   "chains": 38531
+  },
+  "poisson_band_95": {
+   "above_10": {
+    "low": 191.8874621092155,
+    "high": 251.07224673163233
+   },
+   "above_50": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_100": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_200": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_500": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   }
+  },
+  "negative_binomial": {
+   "above_10": 314.78579682990164,
+   "above_50": 0.6025295112294364,
+   "above_100": 0.0010376584472857608,
+   "above_200": 7.537484192354782e-09,
+   "above_500": 0.0
+  },
+  "empirical_iid": {
+   "above_10": 293.22091,
+   "above_50": 0.0,
+   "above_100": 0.0,
+   "above_200": 0.0,
+   "above_500": 0.0,
+   "longest_among_simulated": 50,
+   "chains_simulated": 100000,
+   "hit_cap_5000": 0
+  },
+  "nb_p_any_chain_at_least_585": null
+ },
+ "x1_caregiving": {
+  "arm": "x1_caregiving",
+  "nodes": 56391,
+  "chains": 38520,
+  "mean_offspring": 0.3169122732350907,
+  "k": 0.15090118436374708,
+  "zero_share": 0.850401659839336,
+  "observed": {
+   "above_10": 195,
+   "above_50": 0,
+   "above_100": 0,
+   "above_200": 0,
+   "above_500": 0,
+   "longest": 42,
+   "chains": 38520
+  },
+  "poisson_band_95": {
+   "above_10": {
+    "low": 168.58969728054484,
+    "high": 224.3740302312599
+   },
+   "above_50": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_100": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_200": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   },
+   "above_500": {
+    "low": 0.0,
+    "high": 3.688879454113936
+   }
+  },
+  "negative_binomial": {
+   "above_10": 300.97656874946523,
+   "above_50": 0.47535312955914844,
+   "above_100": 0.0006503978389060805,
+   "above_200": 2.997881942690128e-09,
+   "above_500": 4.276579090856103e-12
+  },
+  "empirical_iid": {
+   "above_10": 290.826,
+   "above_50": 0.7704,
+   "above_100": 0.0,
+   "above_200": 0.0,
+   "above_500": 0.0,
+   "longest_among_simulated": 56,
+   "chains_simulated": 100000,
+   "hit_cap_5000": 0
+  },
+  "nb_p_any_chain_at_least_585": null
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "k": 0.0005193560749898141,
+ "points": [
+  {
+   "k": 0.0005193560749898141,
+   "measured": 1.408,
+   "source": "prior"
+  }
+ ],
+ "rounds": 1,
+ "converged": true,
+ "measured": 1.408
+}

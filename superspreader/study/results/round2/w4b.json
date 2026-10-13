@@ -1,0 +1,32 @@
+{
+ "0.08": {
+  "n": 8721,
+  "early_R": 1.423919275312464,
+  "top_n": 87,
+  "top_shed": 25.542114942528734,
+  "top_offspring": 28.528735632183906,
+  "reference_free_ratio": 0.7844049047665336,
+  "lower_half_slope": 36.82117838226208,
+  "lower_half_ratio": 0.030333881549124045,
+  "moderate_bin_n": 397,
+  "moderate_bin_slope": 2.2199177121040576,
+  "moderate_bin_ratio": 0.5031399395827467,
+  "reference_free_low": 0.700397053483642,
+  "reference_free_high": 0.9052056443226708
+ },
+ "0.03": {
+  "n": 8709,
+  "early_R": 1.4124468940176829,
+  "top_n": 87,
+  "top_shed": 42.75650114942528,
+  "top_offspring": 54.7816091954023,
+  "reference_free_ratio": 0.9071111362609227,
+  "lower_half_slope": 54383663.778921865,
+  "lower_half_ratio": 2.3559396662737894e-08,
+  "moderate_bin_n": 147,
+  "moderate_bin_slope": 2.421510296532915,
+  "moderate_bin_ratio": 0.5291104104636938,
+  "reference_free_low": 0.7978601541835874,
+  "reference_free_high": 1.0356704554611045
+ }
+}

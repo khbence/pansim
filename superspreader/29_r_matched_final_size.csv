@@ -1,0 +1,4 @@
+arm,coefficient,early_R,early_R_sd,early_k,final_size_mean,final_size_sd,source
+A0,0.00041,1.382,,5.23,58613,,"v2 twelve replicates, already within 0.03"
+E,0.000497841,1.3765,0.073,0.291,55739,3450,corrected round
+P0,0.000510872,1.3876,0.077,0.317,63832,4652,corrected round

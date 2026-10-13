@@ -1,0 +1,393 @@
+{
+ "cinema_target_peak": 150,
+ "church_target_peak": 300,
+ "split": [
+  {
+   "id": "115953_149",
+   "type": 9,
+   "peak": 940.0,
+   "wards": 3,
+   "agents": 17848
+  },
+  {
+   "id": "9704_541",
+   "type": 6,
+   "peak": 1395.0,
+   "wards": 9,
+   "agents": 24479
+  },
+  {
+   "id": "106921_542",
+   "type": 6,
+   "peak": 1376.0,
+   "wards": 9,
+   "agents": 24301
+  },
+  {
+   "id": "168083_543",
+   "type": 6,
+   "peak": 1366.0,
+   "wards": 9,
+   "agents": 24540
+  },
+  {
+   "id": "115953_943",
+   "type": 6,
+   "peak": 1407.0,
+   "wards": 9,
+   "agents": 24558
+  },
+  {
+   "id": "224243_1666",
+   "type": 9,
+   "peak": 1033.0,
+   "wards": 3,
+   "agents": 14357
+  },
+  {
+   "id": "224251_1667",
+   "type": 9,
+   "peak": 1588.0,
+   "wards": 5,
+   "agents": 22522
+  },
+  {
+   "id": "7203_1724",
+   "type": 6,
+   "peak": 1402.0,
+   "wards": 9,
+   "agents": 24362
+  },
+  {
+   "id": "7204_1725",
+   "type": 6,
+   "peak": 1387.0,
+   "wards": 9,
+   "agents": 24405
+  },
+  {
+   "id": "7205_1726",
+   "type": 6,
+   "peak": 1423.0,
+   "wards": 9,
+   "agents": 24725
+  },
+  {
+   "id": "2285_1760",
+   "type": 6,
+   "peak": 1407.0,
+   "wards": 9,
+   "agents": 24391
+  },
+  {
+   "id": "7098_2322",
+   "type": 6,
+   "peak": 1419.0,
+   "wards": 9,
+   "agents": 24589
+  },
+  {
+   "id": "7099_2323",
+   "type": 6,
+   "peak": 1431.0,
+   "wards": 10,
+   "agents": 24892
+  },
+  {
+   "id": "7715_2324",
+   "type": 6,
+   "peak": 1381.0,
+   "wards": 9,
+   "agents": 24377
+  },
+  {
+   "id": "7795_2325",
+   "type": 6,
+   "peak": 1476.0,
+   "wards": 10,
+   "agents": 24580
+  },
+  {
+   "id": "98568_2326",
+   "type": 6,
+   "peak": 1406.0,
+   "wards": 9,
+   "agents": 24564
+  },
+  {
+   "id": "98569_2327",
+   "type": 6,
+   "peak": 1435.0,
+   "wards": 10,
+   "agents": 24380
+  },
+  {
+   "id": "114851_2328",
+   "type": 6,
+   "peak": 1440.0,
+   "wards": 10,
+   "agents": 24647
+  },
+  {
+   "id": "128485_2386",
+   "type": 9,
+   "peak": 483.0,
+   "wards": 2,
+   "agents": 5587
+  },
+  {
+   "id": "130446_2387",
+   "type": 9,
+   "peak": 502.0,
+   "wards": 2,
+   "agents": 6222
+  },
+  {
+   "id": "131016_2388",
+   "type": 9,
+   "peak": 589.0,
+   "wards": 2,
+   "agents": 6997
+  },
+  {
+   "id": "132419_2390",
+   "type": 9,
+   "peak": 559.0,
+   "wards": 2,
+   "agents": 6767
+  },
+  {
+   "id": "129386_2397",
+   "type": 9,
+   "peak": 490.0,
+   "wards": 2,
+   "agents": 5963
+  },
+  {
+   "id": "9936_3042",
+   "type": 6,
+   "peak": 1402.0,
+   "wards": 9,
+   "agents": 24617
+  },
+  {
+   "id": "188436_3043",
+   "type": 6,
+   "peak": 1397.0,
+   "wards": 9,
+   "agents": 24764
+  },
+  {
+   "id": "189108_3044",
+   "type": 6,
+   "peak": 1350.0,
+   "wards": 9,
+   "agents": 24373
+  },
+  {
+   "id": "190253_3045",
+   "type": 6,
+   "peak": 1399.0,
+   "wards": 9,
+   "agents": 24540
+  },
+  {
+   "id": "208001_3046",
+   "type": 6,
+   "peak": 1379.0,
+   "wards": 9,
+   "agents": 24361
+  },
+  {
+   "id": "osm9_way300577027",
+   "type": 9,
+   "peak": 469.0,
+   "wards": 2,
+   "agents": 6200
+  },
+  {
+   "id": "osm9_way532960446",
+   "type": 9,
+   "peak": 526.0,
+   "wards": 2,
+   "agents": 8571
+  },
+  {
+   "id": "osm9_way97121426",
+   "type": 9,
+   "peak": 1000.0,
+   "wards": 3,
+   "agents": 18584
+  },
+  {
+   "id": "osm9_way456586097",
+   "type": 9,
+   "peak": 534.0,
+   "wards": 2,
+   "agents": 7221
+  },
+  {
+   "id": "osm9_node12042946638",
+   "type": 9,
+   "peak": 1388.0,
+   "wards": 5,
+   "agents": 21460
+  },
+  {
+   "id": "osm9_way82422813",
+   "type": 9,
+   "peak": 569.0,
+   "wards": 2,
+   "agents": 9859
+  },
+  {
+   "id": "osm9_way485963596",
+   "type": 9,
+   "peak": 995.0,
+   "wards": 3,
+   "agents": 14215
+  },
+  {
+   "id": "osm9_way396791512",
+   "type": 9,
+   "peak": 1135.0,
+   "wards": 4,
+   "agents": 21600
+  },
+  {
+   "id": "osm9_way371483535",
+   "type": 9,
+   "peak": 901.0,
+   "wards": 3,
+   "agents": 12947
+  },
+  {
+   "id": "osm9_way76701916",
+   "type": 9,
+   "peak": 548.0,
+   "wards": 2,
+   "agents": 7783
+  },
+  {
+   "id": "osm9_node7540498984",
+   "type": 9,
+   "peak": 654.0,
+   "wards": 2,
+   "agents": 9671
+  },
+  {
+   "id": "osm9_node7084909812",
+   "type": 9,
+   "peak": 473.0,
+   "wards": 2,
+   "agents": 6658
+  },
+  {
+   "id": "osm9_way622818815",
+   "type": 9,
+   "peak": 456.0,
+   "wards": 2,
+   "agents": 5883
+  },
+  {
+   "id": "osm9_way362767150",
+   "type": 9,
+   "peak": 963.0,
+   "wards": 3,
+   "agents": 16895
+  },
+  {
+   "id": "osm9_way481639086",
+   "type": 9,
+   "peak": 617.0,
+   "wards": 2,
+   "agents": 10270
+  },
+  {
+   "id": "osm9_way606820472",
+   "type": 9,
+   "peak": 1248.0,
+   "wards": 4,
+   "agents": 18062
+  },
+  {
+   "id": "osm9_way362278701",
+   "type": 9,
+   "peak": 667.0,
+   "wards": 2,
+   "agents": 12165
+  },
+  {
+   "id": "osm9_way371963263",
+   "type": 9,
+   "peak": 1516.0,
+   "wards": 5,
+   "agents": 22457
+  },
+  {
+   "id": "osm9_way97121420",
+   "type": 9,
+   "peak": 1073.0,
+   "wards": 4,
+   "agents": 19571
+  },
+  {
+   "id": "osm9_way1418288454",
+   "type": 9,
+   "peak": 865.0,
+   "wards": 3,
+   "agents": 17280
+  },
+  {
+   "id": "osm9_way372184565",
+   "type": 9,
+   "peak": 621.0,
+   "wards": 2,
+   "agents": 10683
+  },
+  {
+   "id": "osm9_node8543247138",
+   "type": 9,
+   "peak": 591.0,
+   "wards": 2,
+   "agents": 9964
+  },
+  {
+   "id": "osm9_way102663531",
+   "type": 9,
+   "peak": 947.0,
+   "wards": 3,
+   "agents": 15107
+  },
+  {
+   "id": "osm9_way96699267",
+   "type": 9,
+   "peak": 518.0,
+   "wards": 2,
+   "agents": 7966
+  },
+  {
+   "id": "osm9_node9204864545",
+   "type": 9,
+   "peak": 513.0,
+   "wards": 2,
+   "agents": 9284
+  },
+  {
+   "id": "osm9_relation8089905",
+   "type": 9,
+   "peak": 1043.0,
+   "wards": 3,
+   "agents": 16386
+  },
+  {
+   "id": "osm9_node13353002546",
+   "type": 9,
+   "peak": 711.0,
+   "wards": 2,
+   "agents": 12238
+  }
+ ],
+ "left_whole": 17,
+ "wards": 278
+}

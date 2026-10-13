@@ -1,0 +1,16 @@
+{
+ "v4_shape0.03_new": {
+  "chains": 38613,
+  "above_100": 15,
+  "above_200": 4,
+  "above_500": 1,
+  "longest": 585
+ },
+ "x3_shape0.03_old": {
+  "chains": 38545,
+  "above_100": 14,
+  "above_200": 1,
+  "above_500": 0,
+  "longest": 254
+ }
+}
