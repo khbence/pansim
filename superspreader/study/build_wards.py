@@ -8,6 +8,7 @@ agents, and a location with 40 or fewer agents is left whole.
 """
 
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -38,9 +39,9 @@ def split_int(total, weights):
     return floors
 
 
-def main():
+def main(locations_path=LOCATIONS, agents_path=AGENTS, out_dir=OUT):
     print("load locations", flush=True)
-    locations = json.loads(LOCATIONS.read_text())
+    locations = json.loads(Path(locations_path).read_text())
     places = locations["places"]
     by_id = {}
     for place in places:
@@ -50,7 +51,7 @@ def main():
     print(f"locations {len(places)} split-candidates {len(targets)}", flush=True)
 
     print("load agents", flush=True)
-    agents = json.loads(AGENTS.read_text())
+    agents = json.loads(Path(agents_path).read_text())
     people = agents["people"]
     assigned = defaultdict(list)
     for index, person in enumerate(people):
@@ -114,7 +115,8 @@ def main():
                 slot["locID"] = new_id
                 reassigned_slots += 1
 
-    OUT.mkdir(parents=True, exist_ok=True)
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
     summary = {
         "split_types": sorted(SPLIT_TYPES),
         "target_agents_per_ward": TARGET,
@@ -129,18 +131,21 @@ def main():
         "places_after": len(locations["places"]),
         "by_location": rows,
     }
-    (OUT / "ward_summary.json").write_text(json.dumps(summary, indent=1) + "\n")
+    (out_dir / "ward_summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(
         f"split {summary['locations_split']} locations into {summary['wards_created']} wards, "
         f"reassigned {summary['agents_reassigned']} agents, capacity {summary['capacity_before']} -> {summary['capacity_after']}",
         flush=True,
     )
     print("write locations", flush=True)
-    (OUT / "locations_wards.json").write_text(json.dumps(locations, separators=(",", ":")))
+    (out_dir / "locations_wards.json").write_text(json.dumps(locations, separators=(",", ":")))
     print("write agents", flush=True)
-    (OUT / "agents_wards.json").write_text(json.dumps(agents, separators=(",", ":")))
-    print("wrote", OUT, flush=True)
+    (out_dir / "agents_wards.json").write_text(json.dumps(agents, separators=(",", ":")))
+    print("wrote", out_dir, flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 4:
+        main(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+        main()
