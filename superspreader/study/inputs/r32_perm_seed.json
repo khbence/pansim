@@ -1,0 +1,7 @@
+{
+ "seed": 20261014,
+ "slots": 461130,
+ "swaps_to_remove_duplicates": 1795,
+ "agents_with_duplicate_type5": 0,
+ "definition": "type-5 location ids shuffled across slots; each venue keeps its assigned count; duplicates within an agent were swapped away"
+}

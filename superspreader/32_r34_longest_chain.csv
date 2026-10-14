@@ -1,0 +1,11 @@
+arm,row_kind,rank,rep,size,generations,distinct_locations,largest_location_share,largest_location_index,share_restaurant,share_church,share_park,share_cinema,share_shop,share_work,share_school,share_hospital,share_home,share_other,largest_location_id,generation,generation_infections,type_2,type_3,type_33,type_6,type_7,type_10,type_9,type_4,type_8,type_44,type_5
+r34_hospital_only,longest_20,1,rep15,150,9,52,0.22666666666666666,75850,0.03333333333333333,0.02,0.03333333333333333,0.1,0.35333333333333333,0.07333333333333333,0.20666666666666667,0.0,0.18,0.0,40588_1996,,,,,,,,,,,,,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,0,1,1,,,,,,,,,,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,1,6,,2,4,,,,,,,,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,2,15,,11,1,1,1,1,,,,,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,3,13,2,3,6,1,,,1,,,,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,4,20,,,1,4,1,2,1,9,1,1,
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,5,19,8,1,,1,3,,,2,1,,3
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,6,52,11,,,7,4,2,1,,26,,1
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,7,23,5,1,,1,4,,,,11,,1
+r34_hospital_only,generation,1,rep15,150,,,,,,,,,,,,,,,,8,1,,,,,1,,,,,,
