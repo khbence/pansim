@@ -1,0 +1,48 @@
+{
+ "venue_trials": [
+  {
+   "strength": 0.25,
+   "k": 0.00032571538597801894,
+   "household_share": 0.44107719336541373,
+   "mech": "venue"
+  },
+  {
+   "strength": 0.5,
+   "k": 0.0003,
+   "household_share": 0.41431624461785066,
+   "mech": "venue"
+  }
+ ],
+ "shed_trials": [
+  {
+   "shape": 0.3,
+   "homeVenueFactor": 1.0,
+   "k": 0.00045,
+   "household_share": 0.3525791673303539
+  },
+  {
+   "shape": 0.3,
+   "homeVenueFactor": 0.35,
+   "k": 0.0005276210359706808,
+   "household_share": 0.22920487231332998
+  },
+  {
+   "shape": 0.3,
+   "homeVenueFactor": 0.15,
+   "k": 0.0005919715516962058,
+   "household_share": 0.13992861217692626
+  }
+ ],
+ "chosen_venue": {
+  "strength": 0.5,
+  "k": 0.0003,
+  "household_share": 0.41431624461785066,
+  "mech": "venue"
+ },
+ "chosen_shed": {
+  "shape": 0.3,
+  "homeVenueFactor": 0.42267991274112826,
+  "k": 0.0005276210359706808,
+  "household_share": 0.25092065930757945
+ }
+}

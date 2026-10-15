@@ -30,6 +30,7 @@ void LocationsList<SimulationType>::initializeArgs(const cxxopts::ParseResult& r
         eventRate = result["eventRate"].as<double>();
         eventFactor = result["eventFactor"].as<double>();
         homeVenueFactor = result["homeVenueFactor"].as<double>();
+        eventMaxCapacity = result["eventMaxCapacity"].as<double>();
         eventTypeAllowed.assign(64, 0);
         std::stringstream types(result["eventTypes"].as<std::string>());
         std::string item;
@@ -45,6 +46,7 @@ void LocationsList<SimulationType>::initializeArgs(const cxxopts::ParseResult& r
         eventRate = 0.0;
         eventFactor = 20.0;
         homeVenueFactor = -1.0;
+        eventMaxCapacity = 0.0;
         eventTypeAllowed.assign(64, 0);
         eventTypeAllowed[5] = eventTypeAllowed[6] = eventTypeAllowed[8] = eventTypeAllowed[9] = 1;
     }
@@ -213,7 +215,9 @@ std::pair<unsigned, std::map<std::string, unsigned>> LocationsList<SimulationTyp
 
 template<typename SimulationType>
 void LocationsList<SimulationType>::applyVenueAmplification() {
-    if (venueProfile != 0 || communityScale != 1.0) {
+    // homeVenueFactor is applied only inside this block. The default (-1) leaves the
+    // profile-off, community-scale-1 path unchanged, which is what older runs used.
+    if (venueProfile != 0 || communityScale != 1.0 || homeVenueFactor >= 0.0) {
         thrust::host_vector<float> infectiousnessHost = infectiousness;
         thrust::host_vector<TypeOfLocation> typesHost = locType;
         for (unsigned i = 0; i < infectiousnessHost.size(); ++i) {
@@ -248,10 +252,14 @@ void LocationsList<SimulationType>::updateDailyEvents(unsigned day) {
     }
     if (eventEligible.size() != locType.size()) {
         thrust::host_vector<TypeOfLocation> typesHost = locType;
+        thrust::host_vector<unsigned> capacityHost;
+        if (eventMaxCapacity > 0.0) capacityHost = capacity;
         thrust::host_vector<uint8_t> eligibleHost(typesHost.size(), 0);
         for (unsigned i = 0; i < typesHost.size(); ++i) {
             unsigned type = typesHost[i];
-            eligibleHost[i] = (type < eventTypeAllowed.size() && eventTypeAllowed[type]) ? 1 : 0;
+            bool typeOk = type < eventTypeAllowed.size() && eventTypeAllowed[type];
+            bool capOk = !(eventMaxCapacity > 0.0) || (i < capacityHost.size() && static_cast<double>(capacityHost[i]) <= eventMaxCapacity);
+            eligibleHost[i] = (typeOk && capOk) ? 1 : 0;
         }
         eventEligible = eligibleHost;
     }

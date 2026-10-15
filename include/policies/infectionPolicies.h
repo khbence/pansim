@@ -220,6 +220,9 @@ public:
             ("eventTypes",
             "Comma-separated location types eligible for events. Default 5,6,8,9",
             cxxopts::value<std::string>()->default_value("5,6,8,9"))
+            ("eventMaxCapacity",
+            "If positive, only locations with capacity at or below this value can host events. 0 keeps every eligible type",
+            cxxopts::value<double>()->default_value("0"))
             ("eventLog",
             "Write one row per amplification event (day, location, type, peak presence)",
             cxxopts::value<std::string>()->default_value(""))

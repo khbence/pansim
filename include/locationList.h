@@ -77,6 +77,7 @@ public:
     double eventRate = 0.0;
     double eventFactor = 20.0;
     double homeVenueFactor = -1.0;
+    double eventMaxCapacity = 0.0;
     int lastEventDay = -1;
     std::vector<char> eventTypeAllowed = std::vector<char>(64, 0);
     thrust::device_vector<uint8_t> eventEligible;
