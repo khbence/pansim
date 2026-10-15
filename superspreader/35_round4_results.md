@@ -19,7 +19,7 @@
 |---|---|---|
 | R4-1 (i) | P0/E final-size ratio, 90% interval inside 0.90–1.10 | met. Raw 0.993–1.019. Adjusted for day 28, 0.993–1.012 |
 | R4-1 (ii) | E and P0 end 2% to 8% below A0 at day 112 | met. Raw 7.1% and 6.6% below. Adjusted 6.7% and 6.5% below. Neither is more than 10% from A0 |
-| R4-1 (iii) | peak day of E and P0 within 3 days of A0 | met for the means (day 70, 69 and 68). One E replicate peaks on day 60 |
+| R4-1 (iii) | peak day of E and P0 within 3 days of A0 | met for the means (A0 68.7, E 69.8, P0 68.2). One E replicate peaks on day 60 |
 | R4-2 (i) | at capacity 100, early k 0.3 between factors 1,200 and 10,000 | the point estimate crosses 0.3 at factor 1,091. At 1,200, k is 0.266 and the replicate interval 0.22–0.34 still includes 0.3 |
 | R4-2 (ii) | at that factor, non-empty median at most 20, 90th percentile at most 60, and no cluster above the capacity | failed. Median 29, 90th percentile 104, maximum 1,428 at a type-8 location |
 | R4-3 | venue minus household positive for the venue-profile arm near share 0.424, and negative for the shedding-shape arm near 0.243 | the venue arm is positive, +10 points, interval 0.09–0.12. The shedding arm's point estimate is −0.8 points and its 90% interval, −0.03 to +0.02, includes zero |
