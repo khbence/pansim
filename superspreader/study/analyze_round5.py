@@ -941,10 +941,11 @@ def r54():
                     share_lo, share_hi = quantile_interval(boot_type / boot_total)
                     members = [key for key in loc_rep if key[1] == loc_type]
                     member_mat = np.vstack([loc_rep[key] for key in members])
+                    top_i = int(np.argmax(member_mat.sum(axis=1)))
                     boot_locs = weights @ member_mat.T
-                    boot_largest = boot_locs.max(axis=1)
                     positive = boot_type > 0
-                    large_lo, large_hi = quantile_interval(boot_largest[positive] / boot_type[positive])
+                    # Interval for the share of the location that is largest in the pooled sample.
+                    large_lo, large_hi = quantile_interval(boot_locs[positive, top_i] / boot_type[positive])
                 else:
                     share_lo = share_hi = large_lo = large_hi = None
                 type_rows.append({
