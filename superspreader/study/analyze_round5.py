@@ -97,7 +97,7 @@ def write_csv(path, rows):
                 seen.add(key)
                 keys.append(key)
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=keys)
+        writer = csv.DictWriter(handle, fieldnames=keys, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(f"wrote {path.name} ({path.stat().st_size} bytes)", flush=True)
