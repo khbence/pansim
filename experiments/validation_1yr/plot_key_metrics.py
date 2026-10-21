@@ -7,8 +7,10 @@ Hungarian hospitalized series (korona_hun.xlsx) overlaid for comparison.
 - HCI = % of healthcare workers currently infected or quarantined.
 - HCE = healthcare workers newly exposed/infected in the preceding 24h (count).
   (see src/runtime/simulationOrchestration.cpp)
-  korona_hun.xlsx has no healthcare-worker-specific series (checked all 8 sheets), so HCI/HCE
-  have no real-data overlay or validation metrics - only the hospitalized panel does.
+  korona_hun.xlsx has no healthcare-worker-specific series (checked all 8 sheets). HCE is
+  compared against the daily new confirmed health-worker infections (Surjan/EMMI, eg.dolg.csv,
+  column "1"; confidential, git-ignored), rescaled like the hospitalized series. That file starts
+  2021-09-01, so only the last days of the 1-year run overlap. HCI has no real-data series.
 
 Each panel shows the mean over runs with a 5-95% band; a run that ends early (crash/short run)
 drops out of the average for the days after it ends, shaded past that point since fewer runs
@@ -39,6 +41,7 @@ real_xlsx = Path(sys.argv[3]) if len(sys.argv) > 3 else here.parent.parent / "ko
 start_date = sys.argv[4] if len(sys.argv) > 4 else "2020-09-23"
 
 HUNGARY_POPULATION = 9_700_000  # config.yaml
+HCW_CSV = here / "data" / "hungarian_data" / "Gmail-Surjan" / "2022-01-18_eg.dolg_utf8.csv"
 
 df = pd.read_csv(in_csv, index_col=0, parse_dates=True)
 n_full = int(df["n_runs"].max())
@@ -54,9 +57,22 @@ m = compare(df[["hospitalized_covid_mean", "hospitalized_covid_q05", "hospitaliz
             .rename(columns=lambda c: c.replace("hospitalized_covid_", "")), real_rescaled)
 print("hospitalized vs. real (rescaled):", m)
 
+# Real new confirmed HCW infections (national, column "1" = health workers), same rescaling.
+hcw_real = None
+if HCW_CSV.exists():
+    raw = pd.read_csv(HCW_CSV, sep=";", index_col=0, parse_dates=True)
+    hcw_real = rescale_real(raw["1"].astype(float), sim_population, HUNGARY_POPULATION)
+    hcw_real = hcw_real.reindex(df.index)  # NaN outside the overlap
+    m_hce = compare(df[["HCE_mean", "HCE_q05", "HCE_q95"]].rename(columns=lambda c: c.replace("HCE_", "")),
+                    hcw_real)
+    print("HCE vs. real HCW infections (rescaled):", m_hce)
+else:
+    m_hce = None
+    print(f"no HCW data at {HCW_CSV}; HCE panel is simulation-only")
+
 metrics_json = out_png.with_name("validation_metrics.json")
 metrics_json.write_text(json.dumps(
-    {"hospitalized_covid": m, "sim_population": float(sim_population), "hungary_population": HUNGARY_POPULATION},
+    {"hospitalized_covid": m, "HCE": m_hce, "sim_population": float(sim_population), "hungary_population": HUNGARY_POPULATION},
     indent=2))
 
 # Validated categorical slots (dataviz skill palette): blue, orange, aqua.
@@ -84,6 +100,14 @@ for ax, (prefix, title, ylabel, color) in zip(axes, panels):
         ax.text(0.99, 0.97, f"RMSE={m['rmse']:.0f}  r={m['pearson_r']:.2f}  "
                 f"peak offset={m['peak_day_offset']:+d}d  5-95% coverage={m['coverage_real_in_5_95_band']:.0%}",
                 transform=ax.transAxes, ha="right", va="top", fontsize=8, color="0.3")
+    elif prefix == "HCE" and hcw_real is not None:
+        ax.plot(hcw_real.index, hcw_real, "k.", ms=4,
+                 label="real HCW infections, rescaled (Surjan/EMMI)")
+        if "rmse" in m_hce:
+            ax.text(0.99, 0.97, f"overlap {m_hce['n_days']}d  RMSE={m_hce['rmse']:.2f}  "
+                    f"mean sim/real={df['HCE_mean'][hcw_real.notna()].mean() / hcw_real.mean():.1f}x  "
+                    f"5-95% coverage={m_hce['coverage_real_in_5_95_band']:.0%}",
+                    transform=ax.transAxes, ha="right", va="top", fontsize=8, color="0.3")
     else:
         ax.text(0.5, 0.5, "no public Hungarian data for this metric - simulation only",
                 transform=ax.transAxes, ha="center", va="center", fontsize=9, color="0.5",

@@ -32,3 +32,6 @@ results_*/
 experiments/validation_1yr/results/
 experiments/validation_1yr/outputs/
 experiments/hcw_interventions/outputs/
+
+# Confidential Hungarian HCW data (NDA)
+experiments/validation_1yr/data/hungarian_data/
